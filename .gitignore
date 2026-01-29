@@ -1,0 +1,68 @@
+# Environment variables - NEVER commit API keys!
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Data files (too large for git)
+data/raw_satellite/**/*.tif
+data/raw_satellite/**/*.jp2
+data/cloud_masks/*.npy
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.gif
+
+
+
+# Cache files
+cache/
+# Generated reports (optional - uncomment if not tracking)
+# reports/generated_pdfs/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary or backup files
+src/sentinel_client2.py

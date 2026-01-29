@@ -1,0 +1,32 @@
+# EUDR Compliance AI - Requirements
+
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Satellite imagery
+sentinelhub>=3.9.0
+rasterio>=1.3.0
+
+# Geospatial processing
+geopandas>=0.14.0
+shapely>=2.0.0
+
+# Image processing
+scikit-image>=0.21.0
+opencv-python>=4.8.0
+
+# Visualization
+matplotlib>=3.7.0
+folium>=0.14.0
+
+# Report generation
+reportlab>=4.0.0
+jinja2>=3.1.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Optional: For cloud-based processing
+# google-cloud-storage>=2.0.0
+# boto3>=1.28.0
