@@ -50,6 +50,8 @@ data/cloud_masks/*.npy
 *.tiff
 *.gif
 
+#CSV files
+*.csv
 
 
 # Cache files
