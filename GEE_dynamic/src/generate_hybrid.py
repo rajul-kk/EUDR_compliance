@@ -83,7 +83,12 @@ def download_mask(lat, lon, farm_id, output_dir):
     region = point.buffer(2500).bounds()
     
     # Canopy height is static (2020 version most common), loading once
-    height_image = ee.Image(CANOPY_HEIGHT_ASSET_ID).select(['b1'], ['height']) 
+    # Try to select 'b1' band, but fall back to using image directly if it doesn't exist
+    try:
+        height_image = ee.Image(CANOPY_HEIGHT_ASSET_ID).select(['b1'], ['height'])
+    except:
+        # If 'b1' doesn't exist, use the first band or the image as-is
+        height_image = ee.Image(CANOPY_HEIGHT_ASSET_ID).rename('height')
 
     # If the asset is 'users/nlang/ETH_GlobalCanopyHeight_2020_10m_v1', it is often a mosaic. 
     # Let's try to select the first band if unknown, or just use the image if single band.
@@ -351,6 +356,9 @@ def main():
         farm_id = row['farm_id']
         lat = row['lat']
         lon = row['lon']
+        
+        # Normalize the farm_id to match filename convention
+        search_id = normalize_id(farm_id)
         
         # Respect file existence per year
         process_years = []
