@@ -39,7 +39,8 @@ class FarmSegmentationDataset(Dataset):
             match = re.match(r"(relation|way)_(\d+)_(\d{4})_.*\.tiff?", f)
             if match:
                 obj_type, obj_id, year = match.groups()
-                mask_name = f"osm_{obj_type}_{obj_id}_{year}_hybrid.tif"
+                # Masks were renamed to strip osm_ prefix, so pattern is now: {type}_{id}_{year}_hybrid.tif
+                mask_name = f"{obj_type}_{obj_id}_{year}_hybrid.tif"
                 mask_path = os.path.join(mask_dir, mask_name)
                 
                 if os.path.exists(mask_path):
@@ -98,7 +99,9 @@ class FarmSegmentationDataset(Dataset):
                   temp_path = mask_path.replace(".tif", "_temp_aligned.tif") # Risky in concurrency
                   # Better use random temp or just rely on caching (which is default True)
                   # For now, let's assume caching is used.
-                  pass
+                  aligned_mask_path = mask_path  # Fallback to prevent UnboundLocalError
+             else:
+                  aligned_mask_path = mask_path
 
         # 2. Load Image
         with rasterio.open(img_path) as src:
@@ -107,7 +110,9 @@ class FarmSegmentationDataset(Dataset):
             # Sentinel is uint16 usually?
             # SCL is Band 4 (0-indexed assuming 5 bands) if format is [R, G, B, NIR, SCL]
             # Verify band order: Sentinel-2 visual usually Red, Green, Blue. + NIR + SCL.
-            # Assuming 5 bands.
+            # Validate band count before accessing
+            if image.shape[0] < 5:
+                raise ValueError(f"Expected at least 5 bands, got {image.shape[0]} in {os.path.basename(img_path)}")
             scl = image[4, :, :]
             image = image.astype(np.float32)
 
