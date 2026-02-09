@@ -16,58 +16,58 @@ def align_mask_to_image(master_path, slave_path, output_path):
         slave_path (str): Path to the GEE Hybrid Mask (Slave).
         output_path (str): Output path for the aligned mask.
     """
-    # try:
-    with rasterio.open(master_path) as master:
-        master_transform = master.transform
-        master_width = master.width
-        master_height = master.height
-        master_crs = master.crs
-        master_profile = master.profile
+    try:
+        with rasterio.open(master_path) as master:
+            master_transform = master.transform
+            master_width = master.width
+            master_height = master.height
+            master_crs = master.crs
+            master_profile = master.profile
 
-    with rasterio.open(slave_path) as slave:
-        source_data = slave.read(1)
-        source_transform = slave.transform
-        source_crs = slave.crs
+        with rasterio.open(slave_path) as slave:
+            source_data = slave.read(1)
+            source_transform = slave.transform
+            source_crs = slave.crs
 
-        # Prepare output array
-        # We assume mask is single band (or we fuse/flatten before calling this, but here it's typically 1 band)
-        # Sentinel might be multi-band, but we just need spatial alignment so shape matches
-        destination_data = np.zeros((master_height, master_width), dtype=rasterio.uint8) # Class labels fit in uint8
+            # Prepare output array
+            # We assume mask is single band (or we fuse/flatten before calling this, but here it's typically 1 band)
+            # Sentinel might be multi-band, but we just need spatial alignment so shape matches
+            destination_data = np.zeros((master_height, master_width), dtype=rasterio.uint8) # Class labels fit in uint8
 
-        # Update output profile
-        output_profile = master_profile.copy()
-        output_profile.update({
-            'driver': 'GTiff',
-            'height': master_height,
-            'width': master_width,
-            'transform': master_transform,
-            'crs': master_crs,
-            'count': 1, # Mask is single band
-            'dtype': rasterio.uint8,
-            'nodata': 0 # Assuming 0 is Other or Nodata, or we keep what came in if compatible
-        })
-        
-        # Reproject
-        reproject(
-            source=rasterio.band(slave, 1),
-            destination=destination_data,
-            src_transform=source_transform,
-            src_crs=source_crs,
-            dst_transform=master_transform,
-            dst_crs=master_crs,
-            resampling=Resampling.nearest # Vital for categorical data
-        )
-        
-        # Save
-        with rasterio.open(output_path, 'w', **output_profile) as dst:
-            dst.write(destination_data, 1)
+            # Update output profile
+            output_profile = master_profile.copy()
+            output_profile.update({
+                'driver': 'GTiff',
+                'height': master_height,
+                'width': master_width,
+                'transform': master_transform,
+                'crs': master_crs,
+                'count': 1, # Mask is single band
+                'dtype': rasterio.uint8,
+                'nodata': 0 # Assuming 0 is Other or Nodata, or we keep what came in if compatible
+            })
             
-        print(f"Aligned: {os.path.basename(output_path)}")
-        return True
+            # Reproject
+            reproject(
+                source=rasterio.band(slave, 1),
+                destination=destination_data,
+                src_transform=source_transform,
+                src_crs=source_crs,
+                dst_transform=master_transform,
+                dst_crs=master_crs,
+                resampling=Resampling.nearest # Vital for categorical data
+            )
+            
+            # Save
+            with rasterio.open(output_path, 'w', **output_profile) as dst:
+                dst.write(destination_data, 1)
+                
+            print(f"Aligned: {os.path.basename(output_path)}")
+            return True
 
-    # except Exception as e:
-    #     print(f"Alignment failed for {os.path.basename(slave_path)} -> {os.path.basename(master_path)}: {e}")
-    #     return False
+    except Exception as e:
+        print(f"Alignment failed for {os.path.basename(slave_path)} -> {os.path.basename(master_path)}: {e}")
+        return False
 
 
 
@@ -120,7 +120,7 @@ def batch_align_masks(raw_dir, mask_dir, output_dir):
             
             if os.path.exists(mask_path):
                 # We align specifically to this image
-                output_filename = f"{filename[:-5]}_mask_aligned.tif" # remove extension
+                output_filename = f"{os.path.splitext(filename)[0]}_mask_aligned.tif"
                 output_path = os.path.join(output_dir, output_filename)
                 
                 # Check if already exists to save time? Or overwrite. 
