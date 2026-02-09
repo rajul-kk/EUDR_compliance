@@ -11,7 +11,7 @@ def initialize_gee():
     """
     try:
         # Try to initialize with the saved token
-        ee.Initialize(project="nomadic-rig-481616-d4")
+        ee.Initialize(project=MY_PROJECT_ID)
         print("✅ GEE Initialized successfully!")
     except Exception as e:
         print(f"⚠️ Initialization failed: {e}")
@@ -19,7 +19,7 @@ def initialize_gee():
         
         # If it fails, trigger the browser login popup
         ee.Authenticate()
-        ee.Initialize(project="nomadic-rig-481616-d4")
+        ee.Initialize(project=MY_PROJECT_ID)
         print("✅ Authentication complete & GEE Initialized!")
 
 if __name__ == "__main__":
