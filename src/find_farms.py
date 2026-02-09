@@ -14,20 +14,34 @@ TARGETS = {
         {"region": "Ji-Parana, Rondonia, Brazil", "tags": {"landuse": "meadow"}},
         {"region": "Amarillo, Texas, USA", "tags": {"landuse": "meadow"}}, 
         {"region": "Rockhampton, Queensland, Australia", "tags": {"landuse": "meadow"}},
-        {"region": "La Pampa, Argentina", "tags": {"landuse": "meadow"}}, # New Backup
-        {"region": "Cork, Ireland", "tags": {"landuse": "meadow"}} # New Backup
+        {"region": "La Pampa, Argentina", "tags": {"landuse": "meadow"}},
+        {"region": "Cork, Ireland", "tags": {"landuse": "meadow"}},
+        # New Regions
+        {"region": "Greeley, Colorado, USA", "tags": {"landuse": "farm"}}, # Feedlots often marked as farm/industrial
+        {"region": "Garden City, Kansas, USA", "tags": {"landuse": "meadow"}},
+        {"region": "Uberaba, Minas Gerais, Brazil", "tags": {"landuse": "meadow"}},
+        {"region": "Waikato, New Zealand", "tags": {"landuse": "meadow"}},
+        {"region": "Omaheke, Namibia", "tags": {"landuse": "meadow"}} 
     ],
     "Rubber": [
         {"region": "Surat Thani, Thailand", "tags": {"landuse": "farmland"}},
         {"region": "Binh Phuoc, Vietnam", "tags": {"landuse": "plantation"}},
         {"region": "Hat Yai, Thailand", "tags": {"landuse": "farmland"}},
         {"region": "Kottayam, India", "tags": {"landuse": "farmland"}},
-        {"region": "Bong County, Liberia", "tags": {"landuse": "plantation"}} # Firestone plantation
+        {"region": "Bong County, Liberia", "tags": {"landuse": "plantation"}},
+        # New Regions
+        {"region": "Xishuangbanna, China", "tags": {"landuse": "plantation"}},
+        {"region": "North Sumatra, Indonesia", "tags": {"landuse": "plantation"}},
+        {"region": "Phuket, Thailand", "tags": {"landuse": "farmland"}},
+        {"region": "Mon, Myanmar", "tags": {"landuse": "plantation"}},
+        {"region": "Edo State, Nigeria", "tags": {"landuse": "plantation"}}
     ],
     "Rice": [
+        # Keeping existing
         {"region": "Vercelli, Italy", "tags": {"landuse": "farmland"}}
     ],
     "Soy": [
+        # Keeping existing
         {"region": "Sorriso, Mato Grosso, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Rio Verde, Goias, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Venado Tuerto, Argentina", "tags": {"landuse": "farmland"}},
@@ -39,15 +53,23 @@ TARGETS = {
         {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}}, 
         {"region": "Buon Ma Thuot, Vietnam", "tags": {"landuse": "farm"}},
         {"region": "Chinchina, Caldas, Colombia", "tags": {"landuse": "farmland"}},
-        {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}}
+        {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
+        # New Regions
+        {"region": "Coorg, India", "tags": {"landuse": "plantation"}}, # Often plantation
+        {"region": "Boquete, Panama", "tags": {"landuse": "farmland"}},
+        {"region": "Alajuela, Costa Rica", "tags": {"landuse": "farmland"}},
+        {"region": "Nyeri, Kenya", "tags": {"landuse": "farmland"}},
+        {"region": "Aceh, Indonesia", "tags": {"landuse": "plantation"}}
     ],
     "Cocoa": [
+        # Keeping existing
         {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "orchard"}},
         {"region": "Soubré, Ivory Coast", "tags": {"landuse": "orchard"}},
         {"region": "Kumasi, Ghana", "tags": {"landuse": "farmland"}},
         {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
     ],
     "Oil Palm": [
+        # Keeping existing
         {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
         {"region": "Sandakan, Malaysia", "tags": {"landuse": "plantation"}},
         {"region": "Lahad Datu, Malaysia", "tags": {"landuse": "plantation"}},
