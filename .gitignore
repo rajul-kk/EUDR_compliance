@@ -49,6 +49,7 @@ data/cloud_masks/*.npy
 *.jpeg
 *.tiff
 *.gif
+*.tif
 
 #CSV files
 *.csv
