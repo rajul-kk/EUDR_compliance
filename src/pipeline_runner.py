@@ -13,7 +13,7 @@ train_script = os.path.join(current_dir, 'ML_farm_net.py')
 inference_script = os.path.join(current_dir, 'inference.py')
 detection_script = os.path.join(current_dir, 'detect_deforestation.py')
 
-def run_pipeline(skip_farm_discovery=False, skip_image_download=False, skip_inference=False):
+def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_inference=True):
     """
     Runs the end-to-end pipeline:
     1. Discover farm locations from OSM (find_farms.py) - Optional

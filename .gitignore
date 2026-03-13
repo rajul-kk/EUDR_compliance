@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Auth file
+auth.py
+
 # Python
 __pycache__/
 *.py[cod]
