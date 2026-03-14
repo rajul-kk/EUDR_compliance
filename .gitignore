@@ -4,7 +4,7 @@
 .env.*.local
 
 # Auth file
-auth.py
+GEE_dynamic/auth.py
 
 # Python
 __pycache__/

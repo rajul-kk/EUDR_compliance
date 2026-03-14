@@ -24,7 +24,7 @@ except ImportError:
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def get_deeplab_model(num_classes=4, in_channels=5):
+def get_deeplab_model(num_classes=4, in_channels=6):
     """
     Returns a DeepLabV3 model with ResNet50 backbone modified for N input channels.
     """

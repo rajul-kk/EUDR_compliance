@@ -106,15 +106,23 @@ class FarmSegmentationDataset(Dataset):
         # 2. Load Image
         with rasterio.open(img_path) as src:
             image = src.read() # (C, H, W)
-            # Normalize? Or return raw? Usually return tensor, maybe valid range.
-            # Sentinel is uint16 usually?
-            # SCL is Band 4 (0-indexed assuming 5 bands) if format is [R, G, B, NIR, SCL]
-            # Verify band order: Sentinel-2 visual usually Red, Green, Blue. + NIR + SCL.
-            # Validate band count before accessing
+            # Band order in downloaded TIFF: [Red, Green, Blue, NIR, SCL]
             if image.shape[0] < 5:
                 raise ValueError(f"Expected at least 5 bands, got {image.shape[0]} in {os.path.basename(img_path)}")
+            
             scl = image[4, :, :]
             image = image.astype(np.float32)
+            
+            # --- NDVI Calculation ---
+            # Red = Band 0 (B04), NIR = Band 3 (B08)
+            red = image[0, :, :]
+            nir = image[3, :, :]
+            ndvi = (nir - red) / (nir + red + 1e-8)
+            
+            # Append NDVI as 6th channel (B, 1, H, W) -> concatenate along channel dim
+            # ndvi is (H, W), we need (1, H, W)
+            ndvi = np.expand_dims(ndvi, axis=0)
+            image = np.concatenate([image, ndvi], axis=0) # Now 6 channels: [R, G, B, NIR, SCL, NDVI]
 
         # 3. Load Mask
         with rasterio.open(aligned_mask_path) as src:
@@ -130,12 +138,5 @@ class FarmSegmentationDataset(Dataset):
         # Convert to Tensor
         image = torch.from_numpy(image)
         mask = torch.from_numpy(mask)
-
-
-        if self.transform:
-            # Transform usually expects PIL or numpy. 
-            # If custom transform, handle tensors.
-            # For now, return tuple
-             pass
 
         return image, mask
