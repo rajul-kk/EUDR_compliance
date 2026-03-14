@@ -3,6 +3,9 @@ import os
 import glob
 import pandas as pd
 import requests
+import dask
+from dask import delayed
+from dask.distributed import Client as DaskClient
 from dotenv import load_dotenv
 from pystac_client import Client
 
@@ -189,131 +192,109 @@ def download_farm_image(lat, lon, date, farm_id):
 
 # --- MAIN WORKFLOW ---
 
-def download_all_farms(csv_path: str, skip_count: int = 0):
+def process_single_farm(row, skip_count, index):
+    """
+    Worker function to process a single farm.
+    """
+    try:
+        crop = row.get('crop_type', 'Unknown')
+        display_index = index + skip_count + 1
+        
+        farm_id = str(row['farm_id']).replace("osm_", "").replace("('", "").replace("', ", "_").replace(")", "")
+        lat = float(row['lat'])
+        lon = float(row['lon'])
+        
+        print(f"\n--- Farm {display_index} [{crop}]: ID {farm_id} ---")
+
+        # Check if already processed
+        path_2020 = f"data/raw_satellite/2020_baseline/{farm_id}_*.tiff"
+        path_2024 = f"data/raw_satellite/2024_current/{farm_id}_*.tiff"
+        
+        has_2020 = len(glob.glob(path_2020)) > 0
+        has_2024 = len(glob.glob(path_2024)) > 0
+        
+        if has_2020 and has_2024:
+            print(f"   ⏭️ Fully processed (2020 & 2024 found). Skipping.")
+            return True
+
+        file_2020 = None
+        
+        # 1. Process 2020
+        date_2020 = find_cleanest_date(lat, lon, "2020-06-01", "2020-06-30")
+        if date_2020:
+            file_2020 = download_farm_image(lat, lon, date_2020, f"{farm_id}_2020")
+        else:
+            print("   ⚠️ No clear 2020 image found. Skipping pair.")
+            return False
+
+        # 2. Process 2024
+        if file_2020 and os.path.exists(file_2020):
+            date_2024 = find_cleanest_date(lat, lon, "2024-06-01", "2024-06-30")
+            if date_2024:
+                file_2024 = download_farm_image(lat, lon, date_2024, f"{farm_id}_2024")
+                if file_2024:
+                    return True
+            else:
+                # Cleanup orphan 2020
+                try: os.remove(file_2020)
+                except: pass
+                return False
+        return False
+
+    except Exception as e:
+        print(f"Skipping row {index}: {e}")
+        return False
+
+def download_all_farms(csv_path: str, skip_count: int = 0, use_dask: bool = True):
     """
     Batch download satellite imagery for all farms in the CSV.
-    Limits to 100 per crop type and enforces rate limiting.
-    Allows skipping known completed rows.
+    Uses Dask for parallelism if use_dask is True.
     """
     if not os.path.exists(csv_path):
         print(f"❌ CSV file not found: {csv_path}")
         return
 
     print(f"📖 Reading farms from: {csv_path}")
-    try:
-        df = pd.read_csv(csv_path)
-    except Exception as e:
-        print(f"❌ Error reading CSV: {e}")
-        return
+    df = pd.read_csv(csv_path)
 
-    # Filter: Top 100 per crop type
     if 'crop_type' in df.columns:
-        print("   🔻 Filtering: Selecting top 100 farms per crop type...")
         df = df.groupby('crop_type').head(100).reset_index(drop=True)
     
-    # Explicit Skip
     if skip_count > 0:
-        print(f"   ⏭️ Skipping first {skip_count} farms as requested...")
         df = df.iloc[skip_count:].reset_index(drop=True)
 
-    print(f"🚜 Found {len(df)} total farms to process. Starting batch download (<60 req/min)...")
-    
-    # Statistics
-    success_count = 0
-    fail_count = 0
+    print(f"🚜 Found {len(df)} total farms to process.")
 
-    for index, row in df.iterrows():
-        try:
-            crop = row.get('crop_type', 'Unknown')
-            # Adjust index for display to match original count if possible, or just local
-            display_index = index + skip_count + 1
-            
-            farm_id = str(row['farm_id']).replace("osm_", "").replace("('", "").replace("', ", "_").replace(")", "")
-            lat = float(row['lat'])
-            lon = float(row['lon'])
-            
-            print(f"\n--- Farm {display_index} [{crop}]: ID {farm_id} ---")
-
-            # Check if already processed (both 2020 and 2024 exist)
-            # Pattern: {dir}/{farm_id}_{date}.tiff
-            # We don't know the date, so we glob.
-            path_2020 = f"data/raw_satellite/2020_baseline/{farm_id}_*.tiff"
-            path_2024 = f"data/raw_satellite/2024_current/{farm_id}_*.tiff"
-            
-            has_2020 = len(glob.glob(path_2020)) > 0
-            has_2024 = len(glob.glob(path_2024)) > 0
-            
-            if has_2020 and has_2024:
-                print(f"   ⏭️ Fully processed (2020 & 2024 found). Skipping.")
-                continue
-
-            file_2020 = None
-            
-            # 1. Process 2020 (Baseline)
-            try:
-                # Search for best date in June 2020
-                print("   🔎 Searching 2020...")
-                date_2020 = find_cleanest_date(lat, lon, "2020-06-01", "2020-06-30")
-                time.sleep(1) # Rate limit
-                
-                if date_2020:
-                    print(f"   ⬇️ Downloading 2020 ({date_2020})...")
-                    file_2020 = download_farm_image(lat, lon, date_2020, f"{farm_id}_2020")
-                    time.sleep(2) # Rate limit
-                else:
-                    print("   ⚠️ No clear 2020 image found. Skipping pair.")
-                    continue
-
-            except Exception as e:
-                print(f"   ❌ Failed 2020 Search/Download: {e}")
-                continue
-
-            # 2. Process 2024 (Current) - ONLY if 2020 succeeded
-            if file_2020 and os.path.exists(file_2020):
-                try:
-                    print("   🔎 Searching 2024...")
-                    date_2024 = find_cleanest_date(lat, lon, "2024-06-01", "2024-06-30")
-                    time.sleep(1) 
-                    
-                    if date_2024:
-                        print(f"   ⬇️ Downloading 2024 ({date_2024})...")
-                        file_2024 = download_farm_image(lat, lon, date_2024, f"{farm_id}_2024")
-                        time.sleep(2)
-                        
-                        if file_2024:
-                            success_count += 1
-                        else:
-                            raise Exception("Download 2024 returned None")
-                    else:
-                        raise Exception("No clear 2024 image found")
-
-                except Exception as e:
-                    print(f"   ❌ Failed 2024: {e}")
-                    print(f"   🧹 Parity Check: Removing orphan 2020 file: {file_2020}")
-                    try:
-                        os.remove(file_2020)
-                        print("      🗑️ Deleted.")
-                    except:
-                        pass
-                    fail_count += 1
+    if use_dask:
+        print("⚡ Using Dask for parallel downloads...")
+        tasks = []
+        for index, row in df.iterrows():
+            tasks.append(delayed(process_single_farm)(row, skip_count, index))
+        
+        # Run tasks with a limited number of workers to respect rate limits
+        results = dask.compute(*tasks, scheduler='threads', num_workers=4)
+        success_count = sum(results)
+        fail_count = len(results) - success_count
+    else:
+        print("🚶 Processing sequentially...")
+        success_count = 0
+        fail_count = 0
+        for index, row in df.iterrows():
+            if process_single_farm(row, skip_count, index):
+                success_count += 1
             else:
-                print("   ⚠️ 2020 download failed? Skipping 2024.")
-
-        except Exception as e:
-            print(f"Skipping row {index}: {e}")
+                fail_count += 1
 
     print(f"\n🎉 Batch processing complete!")
     print(f"✅ Successful PAIRS: {int(success_count)}")
     print(f"❌ Failed/Parity Removed: {int(fail_count)}")
-
 
 if __name__ == "__main__":
     # Path to your farms CSV
     csv_path = "inputs/farms_osm.csv"
     
     # Run the batch process
-    # Skipping 229 as requested
-    download_all_farms(csv_path, skip_count=229)
+    download_all_farms(csv_path, skip_count=229, use_dask=True)
     
     # Example Single Download (Commented out)
     # lat = 44.42  # Example: Genoa, Italy
