@@ -16,6 +16,9 @@ COUNTRY_BOUNDS = [
     (-3, 0, 25, 35, 'TZ'),     # Tanzania (Cocoa, Coffee)
     (-15, -5, 20, 35, 'ZM'),   # Zambia (Coffee)
     (8, 12, 2, 15, 'NG'),      # Nigeria
+    (0, 12, 30, 43, 'ET'),     # Ethiopia (Coffee)
+    (-5, 5, 33, 42, 'KE'),     # Kenya (Coffee)
+    (-2, 4, 29, 35, 'UG'),     # Uganda (Coffee)
     # Southeast Asia
     (-5, 5, 95, 115, 'ID'),    # Indonesia (Oil Palm)
     (0, 8, 95, 110, 'MY'),     # Malaysia (Oil Palm)
@@ -23,6 +26,12 @@ COUNTRY_BOUNDS = [
     (-25, -5, -75, -50, 'BR'),  # Brazil (Soy, Coffee, Cocoa)
     (-5, 0, -80, -65, 'CO'),    # Colombia (Coffee)
     (-10, -5, -70, -60, 'PE'),  # Peru (Coffee, Cocoa)
+    (-42, -20, -74, -53, 'AR'), # Argentina (Cattle)
+    # North America
+    (35, 50, -105, -66, 'US'),  # USA (Soy, Cattle)
+    (14, 33, -118, -86, 'MX'),  # Mexico (Cattle)
+    # Oceania
+    (-44, -10, 112, 154, 'AU'), # Australia (Cattle)
     # Europe
     (42, 46, 7, 12, 'IT'),      # Italy (Rice)
     (45, 50, 5, 8, 'FR'),       # France
@@ -55,13 +64,18 @@ def enrich_with_heuristic(df):
     """Use simple lat/lon-based country lookup."""
     try:
         print("🌍 Using lat/lon boundary lookup for country inference...")
-        iso2_codes = []
-        
-        for _, row in df.iterrows():
-            iso2 = infer_country_iso2(row['lat'], row['lon'])
-            iso2_codes.append(iso2)
-        
-        df['country_iso2'] = iso2_codes
+        df = df.copy()
+
+        if 'country_iso2' not in df.columns:
+            df['country_iso2'] = ''
+
+        # Fill only missing ISO2 values to preserve existing assignments.
+        for idx, row in df.iterrows():
+            raw_current = row.get('country_iso2', '')
+            if pd.notna(raw_current) and str(raw_current).strip() and str(raw_current).strip().lower() != 'nan':
+                continue
+            df.at[idx, 'country_iso2'] = infer_country_iso2(row['lat'], row['lon'])
+
         return df
         
     except Exception as e:
@@ -80,12 +94,12 @@ def main():
     print(f"📖 Loading {csv_path}...")
     df = pd.read_csv(csv_path)
     
-    # Check if already enriched
+    before_filled = 0
     if 'country_iso2' in df.columns:
-        print("✅ CSV already has country_iso2 column. Skipping enrichment.")
-        return
-    
-    print(f"🔄 Enriching {len(df)} farms with country ISO2 codes...")
+        before_filled = (df['country_iso2'].fillna('').astype(str).str.strip() != '').sum()
+        print(f"🔄 country_iso2 already exists. Filling missing values (currently {before_filled}/{len(df)} filled)...")
+    else:
+        print(f"🔄 Enriching {len(df)} farms with country ISO2 codes...")
     
     # Use heuristic boundary lookup
     result = enrich_with_heuristic(df)
@@ -95,13 +109,15 @@ def main():
         sys.exit(1)
     
     # Report results
-    filled = (result['country_iso2'] != '').sum()
+    filled = (result['country_iso2'].fillna('').astype(str).str.strip() != '').sum()
     print(f"\n✅ Enrichment complete: {filled}/{len(result)} farms with country_iso2")
+    if before_filled:
+        print(f"📈 Newly filled this run: {filled - before_filled}")
     
     # Show distribution
     if filled > 0:
         print("\nCountry distribution:")
-        print(result[result['country_iso2'] != '']['country_iso2'].value_counts().head(15))
+        print(result[result['country_iso2'].fillna('').astype(str).str.strip() != '']['country_iso2'].value_counts().head(15))
     
     # Save
     result.to_csv(output_path, index=False)
