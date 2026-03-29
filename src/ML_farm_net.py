@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.models.segmentation import deeplabv3_resnet50
+import argparse
 import os
 import sys
 import numpy as np
@@ -55,12 +56,18 @@ def get_deeplab_model(num_classes=4, in_channels=6):
     
     return model
 
-def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, learning_rate=1e-4):
+def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, learning_rate=1e-4,
+                exclude_crops=None, exclude_regions=None):
     """
     Trains the DeepLabV3 model.
     """
     print(f"Initializing Dataset from {raw_dir}...")
-    dataset = FarmSegmentationDataset(raw_dir, mask_dir, cache_aligned_masks=True)
+    dataset = FarmSegmentationDataset(
+        raw_dir, mask_dir, 
+        cache_aligned_masks=True,
+        exclude_crops=exclude_crops,
+        exclude_regions=exclude_regions
+    )
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0) # workers=0 for windows compat
     
     print(f"Dataset size: {len(dataset)}")
@@ -104,14 +111,41 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     torch.save(model.state_dict(), output_model_path)
     print(f"Model saved to {output_model_path}")
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train DeepLabV3 baseline model.")
+
+    default_raw_dir = os.path.join(project_root, 'data', 'raw_satellite', '2020_baseline')
+    default_mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+    default_model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
+
+    parser.add_argument('--raw-dir', default=default_raw_dir, help='Directory with baseline (2020) images')
+    parser.add_argument('--mask-dir', default=default_mask_dir, help='Directory with hybrid masks')
+    parser.add_argument('--output-model-path', default=default_model_path, help='Output model .pth path')
+    parser.add_argument('--epochs', type=int, default=2, help='Number of training epochs')
+    parser.add_argument('--batch-size', type=int, default=2, help='Batch size')
+    parser.add_argument('--learning-rate', type=float, default=1e-4, help='Adam learning rate')
+    parser.add_argument('--seed', type=int, default=42, help='Random seed')
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    # Example Usage
-    RAW_DIR = r'd:\Work\EUDR-compliance\data\raw_satellite\2020_baseline'
-    MASK_DIR = r'd:\Work\EUDR-compliance\data\hybrid_masks'
-    MODEL_PATH = r'd:\Work\EUDR-compliance\models\farm_deeplab.pth'
-    
-    # Ensure dirs exist before running (just a check)
-    if os.path.exists(RAW_DIR) and os.path.exists(MASK_DIR):
-        train_model(RAW_DIR, MASK_DIR, MODEL_PATH, epochs=2, batch_size=2)
-    else:
-        print("Data directories not found. Check paths.")
+    args = parse_args()
+
+    if not os.path.exists(args.raw_dir) or not os.path.exists(args.mask_dir):
+        raise FileNotFoundError(
+            f"Training inputs not found. raw_dir={args.raw_dir}, mask_dir={args.mask_dir}"
+        )
+
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+
+    train_model(
+        raw_dir=args.raw_dir,
+        mask_dir=args.mask_dir,
+        output_model_path=args.output_model_path,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        learning_rate=args.learning_rate,
+        exclude_crops=None,
+        exclude_regions=None,
+    )
