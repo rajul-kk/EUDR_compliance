@@ -2,6 +2,7 @@
 import subprocess
 import sys
 import os
+import argparse
 
 # Define paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -10,10 +11,17 @@ find_farms_script = os.path.join(current_dir, 'find_farms.py')
 sentinel_script = os.path.join(current_dir, 'sentinel_client.py')
 generate_script = os.path.join(project_root, 'GEE_dynamic', 'src', 'generate_hybrid.py')
 train_script = os.path.join(current_dir, 'ML_farm_net.py')
+tessera_train_script = os.path.join(current_dir, 'tessera_train.py')
 inference_script = os.path.join(current_dir, 'inference.py')
 detection_script = os.path.join(current_dir, 'detect_deforestation.py')
 
-def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_inference=True):
+def run_pipeline(
+    skip_farm_discovery=True,
+    skip_image_download=True,
+    skip_inference=True,
+    model_type='deeplab',
+    model_path=None,
+):
     """
     Runs the end-to-end pipeline:
     1. Discover farm locations from OSM (find_farms.py) - Optional
@@ -30,6 +38,7 @@ def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_infere
     """
     print("🚀 Starting End-to-End EUDR Compliance Pipeline")
     print(f"Project Root: {project_root}")
+    print(f"Model Type: {model_type}")
     
     # Use the current python executable
     python_exe = sys.executable
@@ -95,13 +104,34 @@ def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_infere
 
     # --- Step 4: Train Model ---
     print("\n" + "="*60)
-    print("[Step 4/6] Training DeepLabV3 Model...")
+    print(f"[Step 4/6] Training {model_type.upper()} Model...")
     print("="*60)
     try:
-         if not os.path.exists(train_script):
-            raise FileNotFoundError(f"Script not found: {train_script}")
+         training_script = train_script if model_type == 'deeplab' else tessera_train_script
+         if not os.path.exists(training_script):
+            raise FileNotFoundError(f"Script not found: {training_script}")
 
-         subprocess.check_call([python_exe, train_script], cwd=project_root)
+         if model_type == 'deeplab':
+            subprocess.check_call([python_exe, training_script], cwd=project_root)
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
+         else:
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_tessera.pth')
+
+            raw_dir = os.path.join(project_root, 'data', 'raw_satellite', '2020_baseline')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            subprocess.check_call(
+                [
+                    python_exe,
+                    training_script,
+                    '--raw-dir', raw_dir,
+                    '--mask-dir', mask_dir,
+                    '--output-model-path', model_path,
+                ],
+                cwd=project_root,
+            )
+
          print("✅ Training Complete.")
     except subprocess.CalledProcessError as e:
         print(f"❌ Training Failed with exit code {e.returncode}.")
@@ -118,8 +148,24 @@ def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_infere
         try:
             if not os.path.exists(inference_script):
                 raise FileNotFoundError(f"Script not found: {inference_script}")
-                
-            subprocess.check_call([python_exe, inference_script], cwd=project_root)
+
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
+
+            input_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
+            output_dir = os.path.join(project_root, 'data', f'predictions_2024_{model_type}')
+
+            subprocess.check_call(
+                [
+                    python_exe,
+                    inference_script,
+                    '--model-path', model_path,
+                    '--input-dir', input_dir,
+                    '--output-dir', output_dir,
+                    '--model-type', model_type,
+                ],
+                cwd=project_root,
+            )
             print("✅ Inference Complete.")
         except subprocess.CalledProcessError as e:
             print(f"❌ Inference Failed with exit code {e.returncode}.")
@@ -139,7 +185,9 @@ def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_infere
             if not os.path.exists(detection_script):
                 raise FileNotFoundError(f"Script not found: {detection_script}")
                 
-            subprocess.check_call([python_exe, detection_script], cwd=project_root)
+            env = os.environ.copy()
+            env['EUDR_PRED_DIR'] = os.path.join(project_root, 'data', f'predictions_2024_{model_type}')
+            subprocess.check_call([python_exe, detection_script], cwd=project_root, env=env)
             print("✅ Deforestation Detection Complete.")
         except subprocess.CalledProcessError as e:
             print(f"❌ Detection Failed with exit code {e.returncode}.")
@@ -152,17 +200,28 @@ def run_pipeline(skip_farm_discovery=True, skip_image_download=True, skip_infere
 
     print("\n🎉 Pipeline Finished Successfully!")
     print("📊 Outputs:")
-    print("   - Trained model: models/farm_deeplab.pth")
+    print(f"   - Trained model: {model_path}")
     if not skip_inference:
-        print("   - 2024 predictions: data/predictions_2024/")
+        print(f"   - 2024 predictions: data/predictions_2024_{model_type}/")
         print("   - Compliance report: reports/deforestation_report.csv")
         print("   - Summary stats: reports/summary_stats.json")
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run the EUDR pipeline with selectable model backend.')
+    parser.add_argument('--run-farm-discovery', action='store_true', help='Run farm discovery step.')
+    parser.add_argument('--run-image-download', action='store_true', help='Run Sentinel image download step.')
+    parser.add_argument('--skip-inference', action='store_true', help='Skip inference and deforestation detection steps.')
+    parser.add_argument('--model-type', choices=['deeplab', 'tessera'], default='deeplab')
+    parser.add_argument('--model-path', default=None, help='Optional explicit model checkpoint path.')
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    # Default: Skip farm discovery and image download (assumes data already exists)
-    # Enable inference and detection for full deforestation analysis
+    args = parse_args()
     run_pipeline(
-        skip_farm_discovery=True,  # Set to False to search OSM for new farms
-        skip_image_download=True,  # Set to False to download new satellite images
-        skip_inference=False       # Set to True to only train the model
+        skip_farm_discovery=not args.run_farm_discovery,
+        skip_image_download=not args.run_image_download,
+        skip_inference=args.skip_inference,
+        model_type=args.model_type,
+        model_path=args.model_path,
     )

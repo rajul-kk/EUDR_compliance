@@ -7,7 +7,7 @@ import numpy as np
 import os
 import sys
 import glob
-from pathlib import Path
+import argparse
 
 # Add parent directory and GEE_dynamic to path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -40,7 +40,7 @@ def get_deeplab_model(num_classes=4, in_channels=5):
     
     return model
 
-def load_model(model_path, num_classes=4, in_channels=5):
+def load_model(model_path, num_classes=4, in_channels=6):
     """
     Load a trained DeepLabV3 model from disk.
     
@@ -63,7 +63,24 @@ def load_model(model_path, num_classes=4, in_channels=5):
     print(f"✅ Model loaded from {model_path}")
     return model
 
-def load_image(image_path):
+
+def load_tessera_model(model_path):
+    """
+    Load a trained TESSERA wrapper model from disk.
+    """
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found: {model_path}")
+
+    from tessera_backbone import TesseraSegmentationModel
+
+    model = TesseraSegmentationModel.load_from_checkpoint(model_path, map_location=DEVICE)
+    model.to(DEVICE)
+    model.eval()
+
+    print(f"✅ TESSERA model loaded from {model_path}")
+    return model
+
+def load_image(image_path, expected_in_channels=6):
     """
     Load a Sentinel-2 GeoTIFF image and prepare for inference.
     
@@ -84,13 +101,27 @@ def load_image(image_path):
         
         # Convert to float32
         image = image.astype(np.float32)
+
+        # The training pipeline appends NDVI as an extra channel.
+        if expected_in_channels >= 6 and image.shape[0] == 5:
+            red = image[0, :, :]
+            nir = image[3, :, :]
+            ndvi = (nir - red) / (nir + red + 1e-8)
+            ndvi = np.expand_dims(ndvi, axis=0)
+            image = np.concatenate([image, ndvi], axis=0)
+
+        if image.shape[0] != expected_in_channels:
+            raise ValueError(
+                f"Expected {expected_in_channels} channels after preprocessing, "
+                f"got {image.shape[0]} in {os.path.basename(image_path)}"
+            )
         
         # Add batch dimension and convert to tensor
         image_tensor = torch.from_numpy(image).unsqueeze(0)  # (1, C, H, W)
         
     return image_tensor, profile
 
-def predict_single_image(model, image_path, output_path=None):
+def predict_single_image(model, image_path, output_path=None, expected_in_channels=6):
     """
     Run inference on a single image and optionally save the result.
     
@@ -103,7 +134,7 @@ def predict_single_image(model, image_path, output_path=None):
         prediction: Numpy array (H, W) with class labels
     """
     # Load image
-    image_tensor, profile = load_image(image_path)
+    image_tensor, profile = load_image(image_path, expected_in_channels=expected_in_channels)
     image_tensor = image_tensor.to(DEVICE)
     
     # Run inference
@@ -129,7 +160,7 @@ def predict_single_image(model, image_path, output_path=None):
     
     return prediction
 
-def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff"):
+def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", model_type="deeplab"):
     """
     Run inference on all images in a directory.
     
@@ -142,8 +173,12 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff"):
     Returns:
         results: Dictionary mapping input paths to output paths
     """
-    # Load model once
-    model = load_model(model_path)
+    if model_type == "deeplab":
+        model = load_model(model_path, num_classes=4, in_channels=6)
+    elif model_type == "tessera":
+        model = load_tessera_model(model_path)
+    else:
+        raise ValueError(f"Unsupported model_type: {model_type}")
     
     # Find all matching files
     image_files = glob.glob(os.path.join(input_dir, file_pattern))
@@ -163,7 +198,7 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff"):
             
             # Run inference
             print(f"[{i}/{len(image_files)}] Processing {base_name}...")
-            predict_single_image(model, image_path, output_path)
+            predict_single_image(model, image_path, output_path, expected_in_channels=6)
             
             results[image_path] = output_path
             
@@ -174,11 +209,22 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff"):
     print(f"\n✅ Inference complete. Processed {len(results)}/{len(image_files)} images.")
     return results
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run segmentation inference for DeepLab or TESSERA model.")
+    parser.add_argument("--model-path", required=True, help="Path to model checkpoint (.pth)")
+    parser.add_argument("--input-dir", required=True, help="Directory containing input GeoTIFF files")
+    parser.add_argument("--output-dir", required=True, help="Directory where predictions will be written")
+    parser.add_argument("--file-pattern", default="*.tiff", help="Glob pattern for input files")
+    parser.add_argument("--model-type", choices=["deeplab", "tessera"], default="deeplab")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    # Example usage
-    MODEL_PATH = r'd:\Work\EUDR-compliance\models\farm_deeplab.pth'
-    INPUT_DIR = r'd:\Work\EUDR-compliance\data\raw_satellite\2024_current'
-    OUTPUT_DIR = r'd:\Work\EUDR-compliance\data\predictions_2024'
-    
-    # Run batch inference
-    batch_inference(MODEL_PATH, INPUT_DIR, OUTPUT_DIR)
+    args = parse_args()
+    batch_inference(
+        model_path=args.model_path,
+        input_dir=args.input_dir,
+        output_dir=args.output_dir,
+        file_pattern=args.file_pattern,
+        model_type=args.model_type,
+    )
