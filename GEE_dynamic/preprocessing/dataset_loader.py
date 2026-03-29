@@ -5,6 +5,7 @@ import os
 import re
 import numpy as np
 import sys
+import pandas as pd
 
 # Add parent dir to path if needed to find preprocessing
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,19 +16,31 @@ if parent_dir not in sys.path:
 from preprocessing.aligner import align_mask_to_image, check_alignment
 
 class FarmSegmentationDataset(Dataset):
-    def __init__(self, raw_dir, mask_dir, transform=None, cache_aligned_masks=True):
+    def __init__(self, raw_dir, mask_dir, transform=None, cache_aligned_masks=True, 
+                 exclude_crops=None, exclude_regions=None):
         """
         Args:
             raw_dir (str): Directory with Sentinel-2 images.
             mask_dir (str): Directory with GEE Hybrid masks.
             transform (callable, optional): Optional transform to be applied on a sample.
-            cache_aligned_masks (bool): If True, saves aligned masks to disk (mask_dir/aligned) to speed up future loads.
+            cache_aligned_masks (bool): If True, saves aligned masks to disk.
+            exclude_crops (list, optional): List of crop types to exclude (e.g. ['Sugarcane']).
+            exclude_regions (dict, optional): Dict with 'lat_range' or 'lon_range' to exclude.
         """
         self.raw_dir = raw_dir
         self.mask_dir = mask_dir
         self.transform = transform
         self.cache_aligned_masks = cache_aligned_masks
         
+        # Load metadata for filtering
+        project_root = os.path.dirname(parent_dir)
+        csv_path = os.path.join(project_root, 'inputs', 'farms_osm.csv')
+        if os.path.exists(csv_path):
+            self.metadata = pd.read_csv(csv_path)
+        else:
+            print(f"Warning: Metadata CSV not found at {csv_path}. Filtering will be disabled.")
+            self.metadata = None
+
         # Find valid pairs
         self.image_paths = []
         self.mask_map = {} # Map valid raw filename to mask path
@@ -39,6 +52,34 @@ class FarmSegmentationDataset(Dataset):
             match = re.match(r"(relation|way)_(\d+)_(\d{4})_.*\.tiff?", f)
             if match:
                 obj_type, obj_id, year = match.groups()
+                
+                # --- Metadata Filtering ---
+                if self.metadata is not None:
+                    # Match ID in CSV (e.g. osm_relation_3936516)
+                    full_id = f"osm_{obj_type}_{obj_id}"
+                    row = self.metadata[self.metadata['farm_id'] == full_id]
+                    
+                    if not row.empty:
+                        crop = row.iloc[0]['crop_type']
+                        lat = row.iloc[0]['lat']
+                        lon = row.iloc[0]['lon']
+                        
+                        # Filter by crop
+                        if exclude_crops and crop in exclude_crops:
+                            # print(f"Skipping {f} (Crop: {crop})")
+                            continue
+                            
+                        # Filter by region (example: Brazil approx lat < 5)
+                        if exclude_regions:
+                            if 'lat_range' in exclude_regions:
+                                l_min, l_max = exclude_regions['lat_range']
+                                if l_min <= lat <= l_max:
+                                    continue
+                            if 'lon_range' in exclude_regions:
+                                ln_min, ln_max = exclude_regions['lon_range']
+                                if ln_min <= lon <= ln_max:
+                                    continue
+
                 # Masks were renamed to strip osm_ prefix, so pattern is now: {type}_{id}_{year}_hybrid.tif
                 mask_name = f"{obj_type}_{obj_id}_{year}_hybrid.tif"
                 mask_path = os.path.join(mask_dir, mask_name)
