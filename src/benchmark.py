@@ -1,17 +1,30 @@
 import argparse
 import csv
+from collections import defaultdict
 import glob
 import os
-import time
-from typing import Dict, List, Optional
+import re
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 import rasterio
 
 
 def load_mask(path: str) -> np.ndarray:
     with rasterio.open(path) as src:
         return src.read(1)
+
+
+def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
+    candidates = [
+        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tif"),
+        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tiff"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
 
 
 def compute_segmentation_metrics(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int = 4, ignore_index: int = 255) -> Dict[str, float]:
@@ -55,6 +68,210 @@ def compute_change_f1(mask_2020: np.ndarray, mask_2024_true: np.ndarray, mask_20
     precision = tp / (tp + fp + 1e-8)
     recall = tp / (tp + fn + 1e-8)
     return 2.0 * precision * recall / (precision + recall + 1e-8)
+
+
+def precision_recall_f1(tp: float, fp: float, fn: float) -> Tuple[float, float, float]:
+    precision = tp / (tp + fp + 1e-8)
+    recall = tp / (tp + fn + 1e-8)
+    f1 = 2.0 * precision * recall / (precision + recall + 1e-8)
+    return precision, recall, f1
+
+
+def extract_farm_key_from_prediction_name(filename: str) -> str:
+    match = re.match(r"^(relation|way)_\d+", filename)
+    if not match:
+        return ""
+    return match.group(0)
+
+
+def load_crop_map(farms_csv: str) -> Dict[str, str]:
+    if not farms_csv or not os.path.exists(farms_csv):
+        return {}
+
+    farms_df = pd.read_csv(farms_csv)
+    if "farm_id" not in farms_df.columns or "crop_type" not in farms_df.columns:
+        return {}
+
+    return {str(row["farm_id"]): str(row["crop_type"]) for _, row in farms_df.iterrows()}
+
+
+def compute_forest_stats(y_true: np.ndarray, y_pred: np.ndarray, forest_class: int = 1, ignore_index: int = 255) -> Dict[str, float]:
+    valid = y_true != ignore_index
+    y_true = y_true[valid]
+    y_pred = y_pred[valid]
+
+    tp = float(np.sum((y_true == forest_class) & (y_pred == forest_class)))
+    fp = float(np.sum((y_true != forest_class) & (y_pred == forest_class)))
+    fn = float(np.sum((y_true == forest_class) & (y_pred != forest_class)))
+    return {"tp": tp, "fp": fp, "fn": fn}
+
+
+def compute_change_stats(mask_2020: np.ndarray, mask_2024_true: np.ndarray, mask_2024_pred: np.ndarray, forest_class: int = 1) -> Dict[str, float]:
+    true_change = (mask_2020 == forest_class) & (mask_2024_true != forest_class)
+    pred_change = (mask_2020 == forest_class) & (mask_2024_pred != forest_class)
+
+    tp = float(np.sum(true_change & pred_change))
+    fp = float(np.sum((~true_change) & pred_change))
+    fn = float(np.sum(true_change & (~pred_change)))
+    return {"tp": tp, "fp": fp, "fn": fn}
+
+
+def align_shapes(mask_a: np.ndarray, mask_b: np.ndarray, mask_c: Optional[np.ndarray] = None):
+    h = min(mask_a.shape[0], mask_b.shape[0])
+    w = min(mask_a.shape[1], mask_b.shape[1])
+    if mask_c is not None:
+        h = min(h, mask_c.shape[0])
+        w = min(w, mask_c.shape[1])
+        return mask_a[:h, :w], mask_b[:h, :w], mask_c[:h, :w]
+    return mask_a[:h, :w], mask_b[:h, :w]
+
+
+def run_baseline_metrics(
+    prediction_dir: str,
+    mask_dir: str,
+    farms_csv: str,
+    output_csv: str,
+    model_name: str = "deeplab",
+    train_seconds: Optional[float] = None,
+    inference_seconds: Optional[float] = None,
+) -> None:
+    pred_files = sorted(glob.glob(os.path.join(prediction_dir, "*_predicted.tif")))
+    if not pred_files:
+        raise FileNotFoundError(f"No predictions found in {prediction_dir}")
+
+    crop_map = load_crop_map(farms_csv)
+    overall = {
+        "samples": 0,
+        "miou_sum": 0.0,
+        "forest_tp": 0.0,
+        "forest_fp": 0.0,
+        "forest_fn": 0.0,
+        "change_tp": 0.0,
+        "change_fp": 0.0,
+        "change_fn": 0.0,
+    }
+    by_crop = defaultdict(lambda: {
+        "samples": 0,
+        "miou_sum": 0.0,
+        "forest_tp": 0.0,
+        "forest_fp": 0.0,
+        "forest_fn": 0.0,
+        "change_tp": 0.0,
+        "change_fp": 0.0,
+        "change_fn": 0.0,
+    })
+
+    for pred_path in pred_files:
+        filename = os.path.basename(pred_path)
+        farm_key = extract_farm_key_from_prediction_name(filename)
+        if not farm_key:
+            continue
+
+        mask_2024_path = find_mask(mask_dir, farm_key, "2024")
+        mask_2020_path = find_mask(mask_dir, farm_key, "2020")
+        if mask_2024_path is None or mask_2020_path is None:
+            continue
+
+        y_pred = load_mask(pred_path)
+        y_true = load_mask(mask_2024_path)
+        y_2020 = load_mask(mask_2020_path)
+        y_pred, y_true, y_2020 = align_shapes(y_pred, y_true, y_2020)
+
+        seg_metrics = compute_segmentation_metrics(y_true, y_pred)
+        forest = compute_forest_stats(y_true, y_pred)
+        change = compute_change_stats(y_2020, y_true, y_pred)
+
+        overall["samples"] += 1
+        overall["miou_sum"] += seg_metrics["miou"]
+        overall["forest_tp"] += forest["tp"]
+        overall["forest_fp"] += forest["fp"]
+        overall["forest_fn"] += forest["fn"]
+        overall["change_tp"] += change["tp"]
+        overall["change_fp"] += change["fp"]
+        overall["change_fn"] += change["fn"]
+
+        crop = crop_map.get(f"osm_{farm_key}", "UNKNOWN")
+        crop_acc = by_crop[crop]
+        crop_acc["samples"] += 1
+        crop_acc["miou_sum"] += seg_metrics["miou"]
+        crop_acc["forest_tp"] += forest["tp"]
+        crop_acc["forest_fp"] += forest["fp"]
+        crop_acc["forest_fn"] += forest["fn"]
+        crop_acc["change_tp"] += change["tp"]
+        crop_acc["change_fp"] += change["fp"]
+        crop_acc["change_fn"] += change["fn"]
+
+    if overall["samples"] == 0:
+        raise RuntimeError("No valid prediction/mask pairs found for baseline metrics.")
+
+    rows: List[Dict[str, object]] = []
+    forest_precision, forest_recall, forest_f1 = precision_recall_f1(overall["forest_tp"], overall["forest_fp"], overall["forest_fn"])
+    change_precision, change_recall, change_f1 = precision_recall_f1(overall["change_tp"], overall["change_fp"], overall["change_fn"])
+    rows.append(
+        {
+            "scope": "overall",
+            "model": model_name,
+            "crop_type": "ALL",
+            "samples": overall["samples"],
+            "miou": overall["miou_sum"] / overall["samples"],
+            "forest_precision": forest_precision,
+            "forest_recall": forest_recall,
+            "forest_f1": forest_f1,
+            "change_precision": change_precision,
+            "change_recall": change_recall,
+            "change_f1": change_f1,
+            "train_seconds": train_seconds if train_seconds is not None else "",
+            "inference_seconds": inference_seconds if inference_seconds is not None else "",
+        }
+    )
+
+    for crop, acc in sorted(by_crop.items(), key=lambda x: x[0]):
+        if acc["samples"] == 0:
+            continue
+        crop_forest_precision, crop_forest_recall, crop_forest_f1 = precision_recall_f1(acc["forest_tp"], acc["forest_fp"], acc["forest_fn"])
+        crop_change_precision, crop_change_recall, crop_change_f1 = precision_recall_f1(acc["change_tp"], acc["change_fp"], acc["change_fn"])
+        rows.append(
+            {
+                "scope": "crop",
+                "model": model_name,
+                "crop_type": crop,
+                "samples": acc["samples"],
+                "miou": acc["miou_sum"] / acc["samples"],
+                "forest_precision": crop_forest_precision,
+                "forest_recall": crop_forest_recall,
+                "forest_f1": crop_forest_f1,
+                "change_precision": crop_change_precision,
+                "change_recall": crop_change_recall,
+                "change_f1": crop_change_f1,
+                "train_seconds": "",
+                "inference_seconds": "",
+            }
+        )
+
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    with open(output_csv, "w", newline="") as fp:
+        writer = csv.DictWriter(
+            fp,
+            fieldnames=[
+                "scope",
+                "model",
+                "crop_type",
+                "samples",
+                "miou",
+                "forest_precision",
+                "forest_recall",
+                "forest_f1",
+                "change_precision",
+                "change_recall",
+                "change_f1",
+                "train_seconds",
+                "inference_seconds",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Baseline metrics report saved to {output_csv}")
 
 
 def infer_runtime_seconds(num_files: int, elapsed_seconds: float) -> float:
@@ -131,27 +348,73 @@ def run_benchmark(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Benchmark DeepLab vs TESSERA predictions.")
-    parser.add_argument("--baseline-2020-dir", required=True)
-    parser.add_argument("--masks-2024-dir", required=True)
-    parser.add_argument("--deeplab-pred-dir", required=True)
-    parser.add_argument("--tessera-pred-dir", required=True)
+    parser = argparse.ArgumentParser(description="Benchmark utilities for segmentation outputs.")
+    parser.add_argument("--mode", choices=["compare", "baseline"], default="compare")
     parser.add_argument("--output-csv", required=True)
+
+    parser.add_argument("--baseline-2020-dir", default=None)
+    parser.add_argument("--masks-2024-dir", default=None)
+    parser.add_argument("--deeplab-pred-dir", default=None)
+    parser.add_argument("--tessera-pred-dir", default=None)
     parser.add_argument("--deeplab-elapsed-seconds", type=float, default=None)
     parser.add_argument("--tessera-elapsed-seconds", type=float, default=None)
+
+    parser.add_argument("--prediction-dir", default=None)
+    parser.add_argument("--mask-dir", default=None)
+    parser.add_argument("--farms-csv", default=None)
+    parser.add_argument("--model-name", default="deeplab")
+    parser.add_argument("--train-seconds", type=float, default=None)
+    parser.add_argument("--inference-seconds", type=float, default=None)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    run_benchmark(
-        baseline_2020_dir=args.baseline_2020_dir,
-        masks_2024_dir=args.masks_2024_dir,
-        deeplab_pred_dir=args.deeplab_pred_dir,
-        tessera_pred_dir=args.tessera_pred_dir,
+    if args.mode == "compare":
+        missing = [
+            name
+            for name, value in [
+                ("--baseline-2020-dir", args.baseline_2020_dir),
+                ("--masks-2024-dir", args.masks_2024_dir),
+                ("--deeplab-pred-dir", args.deeplab_pred_dir),
+                ("--tessera-pred-dir", args.tessera_pred_dir),
+            ]
+            if not value
+        ]
+        if missing:
+            raise ValueError(f"Missing required arguments for compare mode: {', '.join(missing)}")
+
+        run_benchmark(
+            baseline_2020_dir=args.baseline_2020_dir,
+            masks_2024_dir=args.masks_2024_dir,
+            deeplab_pred_dir=args.deeplab_pred_dir,
+            tessera_pred_dir=args.tessera_pred_dir,
+            output_csv=args.output_csv,
+            deeplab_elapsed_seconds=args.deeplab_elapsed_seconds,
+            tessera_elapsed_seconds=args.tessera_elapsed_seconds,
+        )
+        return
+
+    missing = [
+        name
+        for name, value in [
+            ("--prediction-dir", args.prediction_dir),
+            ("--mask-dir", args.mask_dir),
+            ("--farms-csv", args.farms_csv),
+        ]
+        if not value
+    ]
+    if missing:
+        raise ValueError(f"Missing required arguments for baseline mode: {', '.join(missing)}")
+
+    run_baseline_metrics(
+        prediction_dir=args.prediction_dir,
+        mask_dir=args.mask_dir,
+        farms_csv=args.farms_csv,
         output_csv=args.output_csv,
-        deeplab_elapsed_seconds=args.deeplab_elapsed_seconds,
-        tessera_elapsed_seconds=args.tessera_elapsed_seconds,
+        model_name=args.model_name,
+        train_seconds=args.train_seconds,
+        inference_seconds=args.inference_seconds,
     )
 
 

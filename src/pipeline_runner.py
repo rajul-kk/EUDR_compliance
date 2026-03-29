@@ -3,6 +3,7 @@ import subprocess
 import sys
 import os
 import argparse
+import time
 
 # Define paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,11 +15,13 @@ train_script = os.path.join(current_dir, 'ML_farm_net.py')
 tessera_train_script = os.path.join(current_dir, 'tessera_train.py')
 inference_script = os.path.join(current_dir, 'inference.py')
 detection_script = os.path.join(current_dir, 'detect_deforestation.py')
+benchmark_script = os.path.join(current_dir, 'benchmark.py')
 
 def run_pipeline(
     skip_farm_discovery=True,
     skip_image_download=True,
     skip_inference=True,
+    skip_baseline_metrics=False,
     model_type='deeplab',
     model_path=None,
 ):
@@ -29,7 +32,8 @@ def run_pipeline(
     3. Generate Hybrid Masks using GEE (generate_hybrid.py)
     4. Train DeepLabV3 Model (ML_farm_net.py)
     5. Run Inference on 2024 images (inference.py) - Optional
-    6. Detect Deforestation (detect_deforestation.py) - Optional
+    6. Export baseline metrics (benchmark.py baseline mode) - Optional
+    7. Detect Deforestation (detect_deforestation.py) - Optional
     
     Args:
         skip_farm_discovery: Skip Step 1 if farms CSV already exists
@@ -140,6 +144,8 @@ def run_pipeline(
         print(f"❌ An error occurred during training: {e}")
         return
 
+    inference_seconds = None
+
     # --- Step 5: Run Inference on 2024 Images ---
     if not skip_inference:
         print("\n" + "="*60)
@@ -155,6 +161,7 @@ def run_pipeline(
             input_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
             output_dir = os.path.join(project_root, 'data', f'predictions_2024_{model_type}')
 
+            inference_start = time.time()
             subprocess.check_call(
                 [
                     python_exe,
@@ -166,6 +173,7 @@ def run_pipeline(
                 ],
                 cwd=project_root,
             )
+            inference_seconds = time.time() - inference_start
             print("✅ Inference Complete.")
         except subprocess.CalledProcessError as e:
             print(f"❌ Inference Failed with exit code {e.returncode}.")
@@ -176,10 +184,52 @@ def run_pipeline(
     else:
         print("\n[Step 5/6] ⏭️  Skipping Inference")
 
-    # --- Step 6: Detect Deforestation ---
+    # --- Step 6: Export Baseline Metrics ---
+    if not skip_inference and not skip_baseline_metrics and model_type == 'deeplab':
+        print("\n" + "="*60)
+        print("[Step 6/7] Exporting DeepLab Baseline Metrics...")
+        print("="*60)
+        try:
+            if not os.path.exists(benchmark_script):
+                raise FileNotFoundError(f"Script not found: {benchmark_script}")
+
+            prediction_dir = os.path.join(project_root, 'data', f'predictions_2024_{model_type}')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            farms_csv = os.path.join(project_root, 'inputs', 'farms_osm.csv')
+            metrics_csv = os.path.join(project_root, 'reports', 'deeplab_baseline_metrics.csv')
+
+            cmd = [
+                python_exe,
+                benchmark_script,
+                '--mode', 'baseline',
+                '--prediction-dir', prediction_dir,
+                '--mask-dir', mask_dir,
+                '--farms-csv', farms_csv,
+                '--output-csv', metrics_csv,
+                '--model-name', 'deeplab',
+            ]
+            if inference_seconds is not None:
+                cmd.extend(['--inference-seconds', str(inference_seconds)])
+
+            subprocess.check_call(cmd, cwd=project_root)
+            print(f"✅ Baseline metrics exported to {metrics_csv}")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Baseline metric export failed with exit code {e.returncode}.")
+            return
+        except Exception as e:
+            print(f"❌ An error occurred during baseline metric export: {e}")
+            return
+    elif model_type != 'deeplab':
+        print("\n[Step 6/7] ⏭️  Skipping baseline metrics (DeepLab-only step)")
+    elif skip_baseline_metrics:
+        print("\n[Step 6/7] ⏭️  Skipping baseline metrics")
+    else:
+        print("\n[Step 6/7] ⏭️  Skipping baseline metrics")
+
+    # --- Step 7: Detect Deforestation ---
     if not skip_inference:
         print("\n" + "="*60)
-        print("[Step 6/6] Detecting Deforestation (2020 vs 2024)...")
+        print("[Step 7/7] Detecting Deforestation (2020 vs 2024)...")
         print("="*60)
         try:
             if not os.path.exists(detection_script):
@@ -196,13 +246,15 @@ def run_pipeline(
             print(f"❌ An error occurred during detection: {e}")
             return
     else:
-        print("\n[Step 6/6] ⏭️  Skipping Deforestation Detection")
+        print("\n[Step 7/7] ⏭️  Skipping Deforestation Detection")
 
     print("\n🎉 Pipeline Finished Successfully!")
     print("📊 Outputs:")
     print(f"   - Trained model: {model_path}")
     if not skip_inference:
         print(f"   - 2024 predictions: data/predictions_2024_{model_type}/")
+        if model_type == 'deeplab' and not skip_baseline_metrics:
+            print("   - Baseline metrics: reports/deeplab_baseline_metrics.csv")
         print("   - Compliance report: reports/deforestation_report.csv")
         print("   - Summary stats: reports/summary_stats.json")
 
@@ -212,6 +264,7 @@ def parse_args():
     parser.add_argument('--run-farm-discovery', action='store_true', help='Run farm discovery step.')
     parser.add_argument('--run-image-download', action='store_true', help='Run Sentinel image download step.')
     parser.add_argument('--skip-inference', action='store_true', help='Skip inference and deforestation detection steps.')
+    parser.add_argument('--skip-baseline-metrics', action='store_true', help='Skip baseline metric export step (DeepLab only).')
     parser.add_argument('--model-type', choices=['deeplab', 'tessera'], default='deeplab')
     parser.add_argument('--model-path', default=None, help='Optional explicit model checkpoint path.')
     return parser.parse_args()
@@ -222,6 +275,7 @@ if __name__ == "__main__":
         skip_farm_discovery=not args.run_farm_discovery,
         skip_image_download=not args.run_image_download,
         skip_inference=args.skip_inference,
+        skip_baseline_metrics=args.skip_baseline_metrics,
         model_type=args.model_type,
         model_path=args.model_path,
     )
