@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Auth file
+GEE_dynamic/auth.py
+
 # Python
 __pycache__/
 *.py[cod]
@@ -49,7 +52,10 @@ data/cloud_masks/*.npy
 *.jpeg
 *.tiff
 *.gif
+*.tif
 
+#CSV files
+*.csv
 
 
 # Cache files
@@ -59,6 +65,8 @@ cache/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
+notebooks/
+*.ipynb
 
 # OS files
 .DS_Store
