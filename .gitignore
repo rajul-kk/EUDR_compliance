@@ -62,6 +62,8 @@ data/cloud_masks/*.npy
 cache/
 # Generated reports (optional - uncomment if not tracking)
 # reports/generated_pdfs/
+reports/scraper_upgrade_spec.md
+TESSERA_mitigation_spec.md
 
 # Jupyter Notebook
 .ipynb_checkpoints/
