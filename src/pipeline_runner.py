@@ -14,6 +14,8 @@ generate_script = os.path.join(project_root, 'GEE_dynamic', 'src', 'generate_hyb
 train_script = os.path.join(current_dir, 'ML_farm_net.py')
 tessera_train_script = os.path.join(current_dir, 'tessera_train.py')
 inference_script = os.path.join(current_dir, 'inference.py')
+tessera_embed_train_script = os.path.join(current_dir, 'tessera_embed_train.py')
+tessera_embed_infer_script = os.path.join(current_dir, 'tessera_embed_infer.py')
 detection_script = os.path.join(current_dir, 'detect_deforestation.py')
 benchmark_script = os.path.join(current_dir, 'benchmark.py')
 
@@ -111,15 +113,23 @@ def run_pipeline(
     print(f"[Step 4/6] Training {model_type.upper()} Model...")
     print("="*60)
     try:
-         training_script = train_script if model_type == 'deeplab' else tessera_train_script
-         if not os.path.exists(training_script):
+        if model_type == 'deeplab':
+            training_script = train_script
+        elif model_type == 'tessera':
+            training_script = tessera_train_script
+        elif model_type == 'tessera-embed':
+            training_script = tessera_embed_train_script
+        else:
+            raise ValueError(f"Unsupported model_type: {model_type}")
+
+        if not os.path.exists(training_script):
             raise FileNotFoundError(f"Script not found: {training_script}")
 
-         if model_type == 'deeplab':
+        if model_type == 'deeplab':
             subprocess.check_call([python_exe, training_script], cwd=project_root)
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
-         else:
+        elif model_type == 'tessera':
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_tessera.pth')
 
@@ -135,8 +145,25 @@ def run_pipeline(
                 ],
                 cwd=project_root,
             )
+        else:
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_tessera_embed_head.pth')
 
-         print("✅ Training Complete.")
+            embeddings_dir = os.path.join(project_root, 'data', 'tessera_embeddings', '2020_baseline')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            subprocess.check_call(
+                [
+                    python_exe,
+                    training_script,
+                    '--embeddings-dir', embeddings_dir,
+                    '--mask-dir', mask_dir,
+                    '--output-model-path', model_path,
+                    '--year', '2020',
+                ],
+                cwd=project_root,
+            )
+
+            print("✅ Training Complete.")
     except subprocess.CalledProcessError as e:
         print(f"❌ Training Failed with exit code {e.returncode}.")
         return
@@ -152,27 +179,45 @@ def run_pipeline(
         print("[Step 5/6] Running Inference on 2024 Satellite Images...")
         print("="*60)
         try:
-            if not os.path.exists(inference_script):
-                raise FileNotFoundError(f"Script not found: {inference_script}")
-
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
-
-            input_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
             output_dir = os.path.join(project_root, 'data', f'predictions_2024_{model_type}')
 
             inference_start = time.time()
-            subprocess.check_call(
-                [
-                    python_exe,
-                    inference_script,
-                    '--model-path', model_path,
-                    '--input-dir', input_dir,
-                    '--output-dir', output_dir,
-                    '--model-type', model_type,
-                ],
-                cwd=project_root,
-            )
+            if model_type == 'tessera-embed':
+                if not os.path.exists(tessera_embed_infer_script):
+                    raise FileNotFoundError(f"Script not found: {tessera_embed_infer_script}")
+
+                embeddings_dir_2024 = os.path.join(project_root, 'data', 'tessera_embeddings', '2024_current')
+                reference_image_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
+                subprocess.check_call(
+                    [
+                        python_exe,
+                        tessera_embed_infer_script,
+                        '--model-path', model_path,
+                        '--embeddings-dir', embeddings_dir_2024,
+                        '--output-dir', output_dir,
+                        '--year', '2024',
+                        '--reference-image-dir', reference_image_dir,
+                    ],
+                    cwd=project_root,
+                )
+            else:
+                if not os.path.exists(inference_script):
+                    raise FileNotFoundError(f"Script not found: {inference_script}")
+
+                input_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
+                subprocess.check_call(
+                    [
+                        python_exe,
+                        inference_script,
+                        '--model-path', model_path,
+                        '--input-dir', input_dir,
+                        '--output-dir', output_dir,
+                        '--model-type', model_type,
+                    ],
+                    cwd=project_root,
+                )
             inference_seconds = time.time() - inference_start
             print("✅ Inference Complete.")
         except subprocess.CalledProcessError as e:
@@ -265,7 +310,7 @@ def parse_args():
     parser.add_argument('--run-image-download', action='store_true', help='Run Sentinel image download step.')
     parser.add_argument('--skip-inference', action='store_true', help='Skip inference and deforestation detection steps.')
     parser.add_argument('--skip-baseline-metrics', action='store_true', help='Skip baseline metric export step (DeepLab only).')
-    parser.add_argument('--model-type', choices=['deeplab', 'tessera'], default='deeplab')
+    parser.add_argument('--model-type', choices=['deeplab', 'tessera', 'tessera-embed'], default='deeplab')
     parser.add_argument('--model-path', default=None, help='Optional explicit model checkpoint path.')
     return parser.parse_args()
 
