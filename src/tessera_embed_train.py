@@ -1,3 +1,48 @@
+"""
+TESSERA Lightweight Segmentation Head Training
+
+This module trains a lightweight segmentation head (2-4 Conv2d layers) on top of
+precomputed 128-dimensional TESSERA embeddings for deforestation/segmentation tasks.
+
+=== EMBEDDING SOURCE ===
+
+PRECOMPUTED GEOTESSERA EMBEDDINGS (RECOMMENDED)
+    Description:
+        - Uses embeddings already extracted by the TESSERA team (via GeoTessera library)
+        - Global coverage at 10m resolution for 2024 (progressively extending backwards)
+        - Avoids expensive local embedding generation
+    
+    Setup:
+        1. Install GeoTessera: pip install geotessera
+        2. Download embeddings for your region:
+           
+           python src/tessera_embedding_generation.py --mode download-geo \
+               --min-lat 51.4 --max-lat 51.6 \
+               --min-lon -0.2 --max-lon 0.0 \
+               --year 2024 --output-dir data/embeddings
+        
+        3. Train head on cached embeddings:
+           
+           python src/tessera_embed_train.py \
+               --embeddings-dir data/embeddings/embeddings \
+               --mask-dir data/masks \
+               --learning-rate 0.001
+
+=== EMBEDDING CACHE STRUCTURE ===
+
+Expected cache structure:
+
+    data/embeddings/
+    ├── embeddings/
+    │   ├── tile_001.npy      # shape: (H, W, 128) or (128, H, W)
+    │   ├── tile_002.npy
+    │   └── ...
+    └── metadata.json          # Maps tile_id → filepath, shape, dtype
+
+This module expects embeddings in {embeddings_dir}/embeddings/*.npy
+
+"""
+
 import argparse
 import os
 import random
@@ -65,6 +110,34 @@ def load_embedding(path: str) -> np.ndarray:
 
 
 class TesseraEmbeddingDataset(Dataset):
+    """
+    Load precomputed TESSERA embeddings + corresponding segmentation masks.
+    
+    This dataset assumes embeddings have already been extracted and cached to disk
+    (either via GeoTessera download or tessera_embedding_generation.py).
+    
+    Expected directory structure:
+        embeddings_dir/
+        ├── tile_001.npy  # shape: (128, H, W) or (H, W, 128)
+        ├── tile_002.npy
+        └── ...
+        
+        mask_dir/
+        ├── relation_12345_2020_hybrid.tif
+        ├── way_67890_2020_hybrid.tif
+        └── ...
+    
+    Pairs embeddings to masks by extracting farm_key and year from filename using regex.
+    
+    Args:
+        embeddings_dir (str): Directory containing .npy embedding files
+        mask_dir (str): Directory containing .tif segmentation masks
+        year (str): Filter by year (e.g., "2020")
+    
+    Raises:
+        RuntimeError: If no embedding-mask pairs found after filtering
+    """
+    
     def __init__(self, embeddings_dir: str, mask_dir: str, year: str = "2020"):
         self.pairs: List[Tuple[str, str]] = []
 
