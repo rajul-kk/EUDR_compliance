@@ -64,6 +64,8 @@ cache/
 # reports/generated_pdfs/
 reports/scraper_upgrade_spec.md
 TESSERA_mitigation_spec.md
+implementation_plan_tessera_deeplab.md
+*.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints/
@@ -76,3 +78,5 @@ Thumbs.db
 
 # Temporary or backup files
 src/sentinel_client2.py
+# unncessary .md files
+TESSERA_EMBEDDING_GUIDE.md
