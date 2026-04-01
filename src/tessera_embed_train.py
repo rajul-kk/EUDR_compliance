@@ -177,6 +177,7 @@ class TesseraEmbeddingDataset(Dataset):
     
     def __init__(self, embeddings_dir: str, mask_dir: str, year: str = "2020", dataset_mode: str = "auto"):
         self.pairs: List[Tuple[str, Optional[str], str]] = []
+        self.missing_scales_count = 0
 
         if dataset_mode not in {"auto", "legacy", "geotessera"}:
             raise ValueError("dataset_mode must be one of: auto, legacy, geotessera")
@@ -212,6 +213,8 @@ class TesseraEmbeddingDataset(Dataset):
                 mask_path = find_tile_mask(mask_dir, stem)
                 if mask_path is None:
                     continue
+                if not scales_path.exists():
+                    self.missing_scales_count += 1
                 self.pairs.append((str(emb_path), str(scales_path) if scales_path.exists() else None, mask_path))
 
         if not self.pairs:
@@ -324,6 +327,87 @@ def run_preflight_checks(pairs: List[Tuple[str, Optional[str], str]], expected_i
     )
 
 
+def run_dataset_wide_shape_audit(
+    pairs: List[Tuple[str, Optional[str], str]],
+    expected_in_channels: int,
+) -> None:
+    channel_errors = 0
+    empty_dim_errors = 0
+    read_errors = 0
+
+    for emb_path, scales_path, mask_path in pairs:
+        try:
+            embedding = load_embedding(emb_path, scales_path=scales_path)
+            with rasterio.open(mask_path) as src:
+                mask = src.read(1)
+
+            if embedding.shape[0] != expected_in_channels:
+                channel_errors += 1
+            if embedding.shape[1] == 0 or embedding.shape[2] == 0 or mask.shape[0] == 0 or mask.shape[1] == 0:
+                empty_dim_errors += 1
+        except Exception:
+            read_errors += 1
+
+    if channel_errors > 0 or empty_dim_errors > 0 or read_errors > 0:
+        raise RuntimeError(
+            "Dataset-wide shape audit failed: "
+            f"channel_errors={channel_errors}, empty_dim_errors={empty_dim_errors}, read_errors={read_errors}"
+        )
+
+    print(f"[preflight] Dataset-wide shape audit passed for {len(pairs)} pairs")
+
+
+def compute_subset_class_distribution(
+    dataset: "TesseraEmbeddingDataset",
+    subset,
+    num_classes: int,
+    ignore_index: int = 255,
+) -> np.ndarray:
+    counts = np.zeros((num_classes,), dtype=np.float64)
+
+    for idx in subset.indices:
+        _, _, mask_path = dataset.pairs[idx]
+        with rasterio.open(mask_path) as src:
+            mask = src.read(1).astype(np.int64)
+
+        valid = mask != ignore_index
+        mask_valid = mask[valid]
+        if mask_valid.size == 0:
+            continue
+
+        binc = np.bincount(mask_valid, minlength=num_classes)
+        counts += binc[:num_classes]
+
+    total = counts.sum()
+    if total == 0:
+        raise RuntimeError("Class distribution check failed: no valid labeled pixels found in subset")
+    return counts / total
+
+
+def run_split_distribution_check(
+    dataset: "TesseraEmbeddingDataset",
+    train_set,
+    val_set,
+    num_classes: int,
+    max_class_ratio_delta: float,
+    ignore_index: int = 255,
+) -> None:
+    train_dist = compute_subset_class_distribution(dataset, train_set, num_classes, ignore_index=ignore_index)
+    val_dist = compute_subset_class_distribution(dataset, val_set, num_classes, ignore_index=ignore_index)
+    deltas = np.abs(train_dist - val_dist)
+    max_delta = float(np.max(deltas))
+
+    print(
+        "[preflight] Class distribution delta (train vs val): "
+        + ", ".join([f"c{i}={d:.4f}" for i, d in enumerate(deltas)])
+    )
+
+    if max_delta > max_class_ratio_delta:
+        raise RuntimeError(
+            f"Class distribution check failed: max_delta={max_delta:.4f} exceeds threshold={max_class_ratio_delta:.4f}"
+        )
+
+
 def write_split_manifest(
     output_path: str,
     dataset: "TesseraEmbeddingDataset",
@@ -383,9 +467,24 @@ def train(args: argparse.Namespace) -> None:
     )
     print(f"Resolved dataset mode: {dataset.dataset_mode} | pairs: {len(dataset)}")
     if not args.skip_preflight:
+        if dataset.missing_scales_count > args.max_missing_scales:
+            raise RuntimeError(
+                f"Missing scales threshold exceeded: {dataset.missing_scales_count} > {args.max_missing_scales}"
+            )
         run_preflight_checks(dataset.pairs, expected_in_channels=args.in_channels)
+        run_dataset_wide_shape_audit(dataset.pairs, expected_in_channels=args.in_channels)
 
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
+    if not args.skip_preflight:
+        run_split_distribution_check(
+            dataset,
+            train_set,
+            val_set,
+            num_classes=args.num_classes,
+            max_class_ratio_delta=args.max_class_ratio_delta,
+            ignore_index=255,
+        )
+
     write_split_manifest(
         output_path=args.split_manifest_path,
         dataset=dataset,
@@ -512,6 +611,18 @@ def parse_args() -> argparse.Namespace:
         "--skip-preflight",
         action="store_true",
         help="Skip dataset preflight checks",
+    )
+    parser.add_argument(
+        "--max-missing-scales",
+        type=int,
+        default=0,
+        help="Maximum allowed missing *_scales.npy files in geotessera mode before failing",
+    )
+    parser.add_argument(
+        "--max-class-ratio-delta",
+        type=float,
+        default=0.10,
+        help="Maximum allowed absolute train-vs-val class distribution delta",
     )
 
     return parser.parse_args()

@@ -180,6 +180,19 @@ def run_baseline_metrics(
         raise FileNotFoundError(f"No predictions found in {prediction_dir}")
 
     allowed_keys = load_allowed_keys(split_manifest_path, split_name)
+    if allowed_keys is not None:
+        pred_keys = set()
+        for pred_path in pred_files:
+            pred_key = extract_prediction_key(os.path.basename(pred_path))
+            if pred_key:
+                pred_keys.add(pred_key)
+
+        matched_keys = allowed_keys.intersection(pred_keys)
+        if not matched_keys:
+            raise RuntimeError(
+                f"Split-manifest consistency check failed: no predictions found for split '{split_name}' "
+                f"from {split_manifest_path}"
+            )
 
     crop_map = load_crop_map(farms_csv)
     overall = {
