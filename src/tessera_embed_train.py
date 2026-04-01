@@ -16,16 +16,26 @@ PRECOMPUTED GEOTESSERA EMBEDDINGS (RECOMMENDED)
         1. Install GeoTessera: pip install geotessera
         2. Download embeddings for your region:
            
-           python src/tessera_embedding_generation.py --mode download-geo \
+           python src/tessera_embedding_generation.py \
                --min-lat 51.4 --max-lat 51.6 \
                --min-lon -0.2 --max-lon 0.0 \
                --year 2024 --output-dir data/embeddings
+
+        3. Build tile-aligned masks from source hybrid masks:
+
+           python src/geotessera_mask_tiler.py \
+               --tile-tiff-dir data/embeddings/global_0.1_degree_tiff_all \
+               --source-mask-dir data/hybrid_masks \
+               --out-dir data/geotessera_tile_masks \
+               --year 2024
         
-        3. Train head on cached embeddings:
+        4. Train head on cached embeddings:
            
            python src/tessera_embed_train.py \
-               --embeddings-dir data/embeddings/embeddings \
-               --mask-dir data/masks \
+               --embeddings-dir data/embeddings/global_0.1_degree_representation \
+               --mask-dir data/geotessera_tile_masks \
+               --dataset-mode geotessera \
+               --year 2024 \
                --learning-rate 0.001
 
 === EMBEDDING CACHE STRUCTURE ===
@@ -47,6 +57,7 @@ import argparse
 import os
 import random
 import re
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -93,10 +104,35 @@ def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
     return None
 
 
-def load_embedding(path: str) -> np.ndarray:
+def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
+    candidates = [
+        os.path.join(mask_dir, f"{stem}_mask.tif"),
+        os.path.join(mask_dir, f"{stem}_mask.tiff"),
+        os.path.join(mask_dir, f"{stem}.tif"),
+        os.path.join(mask_dir, f"{stem}.tiff"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
     arr = np.load(path)
     if arr.ndim != 3:
         raise ValueError(f"Expected 3D embedding array, got shape {arr.shape} for {path}")
+
+    # GeoTessera arrays are commonly int8 and require per-tile scales.
+    if scales_path is not None:
+        scales = np.load(scales_path)
+        if scales.ndim == 2:
+            scales = np.expand_dims(scales, axis=-1)
+        if arr.shape[:2] != scales.shape[:2]:
+            raise ValueError(
+                f"Embedding/scales spatial shape mismatch: {arr.shape[:2]} vs {scales.shape[:2]} "
+                f"for {path} and {scales_path}"
+            )
+        arr = arr.astype(np.float32) * scales.astype(np.float32)
 
     # Accept either HWC (H, W, C) or CHW (C, H, W).
     if arr.shape[-1] == 128:
@@ -138,38 +174,60 @@ class TesseraEmbeddingDataset(Dataset):
         RuntimeError: If no embedding-mask pairs found after filtering
     """
     
-    def __init__(self, embeddings_dir: str, mask_dir: str, year: str = "2020"):
-        self.pairs: List[Tuple[str, str]] = []
+    def __init__(self, embeddings_dir: str, mask_dir: str, year: str = "2020", dataset_mode: str = "auto"):
+        self.pairs: List[Tuple[str, Optional[str], str]] = []
 
-        emb_files = sorted([f for f in os.listdir(embeddings_dir) if f.endswith(".npy")])
-        for emb_file in emb_files:
-            farm_key = extract_farm_key(emb_file)
-            if not farm_key:
-                continue
+        if dataset_mode not in {"auto", "legacy", "geotessera"}:
+            raise ValueError("dataset_mode must be one of: auto, legacy, geotessera")
 
-            emb_year = extract_year(emb_file)
-            if emb_year is not None and emb_year != year:
-                continue
+        emb_root = Path(embeddings_dir)
+        all_npy_paths = sorted(emb_root.rglob("*.npy"))
+        geotessera_candidates = [p for p in all_npy_paths if p.stem.startswith("grid_") and not p.stem.endswith("_scales")]
 
-            mask_path = find_mask(mask_dir, farm_key, year)
-            if mask_path is None:
-                continue
+        resolved_mode = dataset_mode
+        if dataset_mode == "auto":
+            resolved_mode = "geotessera" if geotessera_candidates else "legacy"
 
-            self.pairs.append((os.path.join(embeddings_dir, emb_file), mask_path))
+        if resolved_mode == "legacy":
+            emb_files = sorted([f for f in os.listdir(embeddings_dir) if f.endswith(".npy")])
+            for emb_file in emb_files:
+                farm_key = extract_farm_key(emb_file)
+                if not farm_key:
+                    continue
+
+                emb_year = extract_year(emb_file)
+                if emb_year is not None and emb_year != year:
+                    continue
+
+                mask_path = find_mask(mask_dir, farm_key, year)
+                if mask_path is None:
+                    continue
+
+                self.pairs.append((os.path.join(embeddings_dir, emb_file), None, mask_path))
+        else:
+            for emb_path in geotessera_candidates:
+                stem = emb_path.stem
+                scales_path = emb_path.with_name(f"{stem}_scales.npy")
+                mask_path = find_tile_mask(mask_dir, stem)
+                if mask_path is None:
+                    continue
+                self.pairs.append((str(emb_path), str(scales_path) if scales_path.exists() else None, mask_path))
 
         if not self.pairs:
             raise RuntimeError(
                 f"No embedding-mask pairs found in embeddings_dir={embeddings_dir}, "
-                f"mask_dir={mask_dir}, year={year}."
+                f"mask_dir={mask_dir}, year={year}, dataset_mode={resolved_mode}."
             )
+
+        self.dataset_mode = resolved_mode
 
     def __len__(self) -> int:
         return len(self.pairs)
 
     def __getitem__(self, idx: int):
-        emb_path, mask_path = self.pairs[idx]
+        emb_path, scales_path, mask_path = self.pairs[idx]
 
-        embedding = load_embedding(emb_path)
+        embedding = load_embedding(emb_path, scales_path=scales_path)
         with rasterio.open(mask_path) as src:
             mask = src.read(1).astype(np.int64)
 
@@ -241,7 +299,13 @@ def save_checkpoint(model: nn.Module, output_path: str, config: Dict[str, object
 def train(args: argparse.Namespace) -> None:
     seed_everything(args.seed)
 
-    dataset = TesseraEmbeddingDataset(args.embeddings_dir, args.mask_dir, year=args.year)
+    dataset = TesseraEmbeddingDataset(
+        args.embeddings_dir,
+        args.mask_dir,
+        year=args.year,
+        dataset_mode=args.dataset_mode,
+    )
+    print(f"Resolved dataset mode: {dataset.dataset_mode} | pairs: {len(dataset)}")
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
 
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
@@ -333,6 +397,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-model-path", required=True, help="Output path for trained head checkpoint")
 
     parser.add_argument("--year", default="2020", help="Year of embeddings/masks to use for training")
+    parser.add_argument(
+        "--dataset-mode",
+        choices=["auto", "legacy", "geotessera"],
+        default="auto",
+        help="Dataset pairing mode. auto detects geotessera tile layout.",
+    )
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
