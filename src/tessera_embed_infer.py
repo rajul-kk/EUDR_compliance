@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import re
+from pathlib import Path
 from typing import Dict, Optional
 
 import numpy as np
@@ -35,10 +36,37 @@ def find_reference_profile(reference_dir: Optional[str], farm_key: str, year: st
     return None
 
 
-def load_embedding(path: str) -> np.ndarray:
+def find_tile_reference_profile(reference_dir: Optional[str], stem: str) -> Optional[dict]:
+    if not reference_dir:
+        return None
+
+    patterns = [
+        os.path.join(reference_dir, f"{stem}.tif"),
+        os.path.join(reference_dir, f"{stem}.tiff"),
+    ]
+    for pattern in patterns:
+        files = sorted(glob.glob(pattern))
+        if files:
+            with rasterio.open(files[0]) as src:
+                return src.profile
+    return None
+
+
+def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
     arr = np.load(path)
     if arr.ndim != 3:
         raise ValueError(f"Expected 3D embedding array, got {arr.shape} for {path}")
+
+    if scales_path is not None:
+        scales = np.load(scales_path)
+        if scales.ndim == 2:
+            scales = np.expand_dims(scales, axis=-1)
+        if arr.shape[:2] != scales.shape[:2]:
+            raise ValueError(
+                f"Embedding/scales spatial shape mismatch: {arr.shape[:2]} vs {scales.shape[:2]} "
+                f"for {path} and {scales_path}"
+            )
+        arr = arr.astype(np.float32) * scales.astype(np.float32)
 
     if arr.shape[-1] == 128:
         arr = np.transpose(arr, (2, 0, 1))
@@ -114,7 +142,17 @@ def run_inference(
 ) -> None:
     model = load_model(model_path)
 
-    emb_files = sorted(glob.glob(os.path.join(embeddings_dir, "*.npy")))
+    emb_root = Path(embeddings_dir)
+    emb_files = sorted(
+        [
+            str(p)
+            for p in emb_root.rglob("*.npy")
+            if p.stem.startswith("grid_") and not p.stem.endswith("_scales")
+        ]
+    )
+    if not emb_files:
+        emb_files = sorted(glob.glob(os.path.join(embeddings_dir, "*.npy")))
+
     if not emb_files:
         print(f"No embedding files found in {embeddings_dir}")
         return
@@ -125,11 +163,16 @@ def run_inference(
         base_name = os.path.splitext(os.path.basename(emb_path))[0]
         farm_key = extract_farm_key(base_name)
         if not farm_key:
-            print(f"[{idx}/{total}] Skipping (unrecognized farm key): {base_name}")
-            continue
+            if not base_name.startswith("grid_"):
+                print(f"[{idx}/{total}] Skipping (unrecognized key): {base_name}")
+                continue
 
         try:
-            embedding = load_embedding(emb_path)
+            scales_path = os.path.join(os.path.dirname(emb_path), f"{base_name}_scales.npy")
+            if not os.path.exists(scales_path):
+                scales_path = None
+
+            embedding = load_embedding(emb_path, scales_path=scales_path)
             tensor = torch.from_numpy(embedding).unsqueeze(0).to(DEVICE)
 
             with torch.no_grad():
@@ -137,7 +180,9 @@ def run_inference(
                 pred = torch.argmax(logits, dim=1).squeeze(0).cpu().numpy()
 
             output_path = os.path.join(output_dir, f"{base_name}_predicted.tif")
-            profile = find_reference_profile(reference_image_dir, farm_key, year)
+            profile = find_tile_reference_profile(reference_image_dir, base_name)
+            if profile is None and farm_key:
+                profile = find_reference_profile(reference_image_dir, farm_key, year)
             write_prediction(output_path, pred, profile)
 
             processed += 1

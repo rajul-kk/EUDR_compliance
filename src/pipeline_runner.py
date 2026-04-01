@@ -149,8 +149,8 @@ def run_pipeline(
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_tessera_embed_head.pth')
 
-            embeddings_dir = os.path.join(project_root, 'data', 'tessera_embeddings', '2020_baseline')
-            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            embeddings_dir = os.path.join(project_root, 'data', 'embeddings', 'global_0.1_degree_representation')
+            mask_dir = os.path.join(project_root, 'data', 'geotessera_tile_masks')
             subprocess.check_call(
                 [
                     python_exe,
@@ -158,7 +158,8 @@ def run_pipeline(
                     '--embeddings-dir', embeddings_dir,
                     '--mask-dir', mask_dir,
                     '--output-model-path', model_path,
-                    '--year', '2020',
+                    '--dataset-mode', 'geotessera',
+                    '--year', '2024',
                 ],
                 cwd=project_root,
             )
@@ -188,8 +189,8 @@ def run_pipeline(
                 if not os.path.exists(tessera_embed_infer_script):
                     raise FileNotFoundError(f"Script not found: {tessera_embed_infer_script}")
 
-                embeddings_dir_2024 = os.path.join(project_root, 'data', 'tessera_embeddings', '2024_current')
-                reference_image_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
+                embeddings_dir_2024 = os.path.join(project_root, 'data', 'embeddings', 'global_0.1_degree_representation')
+                reference_image_dir = os.path.join(project_root, 'data', 'embeddings', 'global_0.1_degree_tiff_all')
                 subprocess.check_call(
                     [
                         python_exe,
