@@ -2,6 +2,7 @@ import argparse
 import csv
 from collections import defaultdict
 import glob
+import json
 import os
 import re
 from typing import Dict, List, Optional, Tuple
@@ -20,6 +21,19 @@ def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
     candidates = [
         os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tif"),
         os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tiff"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
+    candidates = [
+        os.path.join(mask_dir, f"{stem}_mask.tif"),
+        os.path.join(mask_dir, f"{stem}_mask.tiff"),
+        os.path.join(mask_dir, f"{stem}.tif"),
+        os.path.join(mask_dir, f"{stem}.tiff"),
     ]
     for path in candidates:
         if os.path.exists(path):
@@ -84,6 +98,30 @@ def extract_farm_key_from_prediction_name(filename: str) -> str:
     return match.group(0)
 
 
+def extract_prediction_key(filename: str) -> str:
+    base = filename.replace("_predicted.tif", "").replace("_predicted.tiff", "")
+    farm_key = extract_farm_key_from_prediction_name(base)
+    if farm_key:
+        return farm_key
+    if base.startswith("grid_"):
+        return base
+    return ""
+
+
+def load_allowed_keys(split_manifest_path: Optional[str], split_name: str) -> Optional[set]:
+    if not split_manifest_path:
+        return None
+
+    with open(split_manifest_path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    splits = payload.get("splits", {})
+    keys = splits.get(split_name)
+    if keys is None:
+        raise ValueError(f"Split '{split_name}' not found in manifest: {split_manifest_path}")
+    return set(keys)
+
+
 def load_crop_map(farms_csv: str) -> Dict[str, str]:
     if not farms_csv or not os.path.exists(farms_csv):
         return {}
@@ -134,10 +172,14 @@ def run_baseline_metrics(
     model_name: str = "deeplab",
     train_seconds: Optional[float] = None,
     inference_seconds: Optional[float] = None,
+    split_manifest_path: Optional[str] = None,
+    split_name: str = "val",
 ) -> None:
     pred_files = sorted(glob.glob(os.path.join(prediction_dir, "*_predicted.tif")))
     if not pred_files:
         raise FileNotFoundError(f"No predictions found in {prediction_dir}")
+
+    allowed_keys = load_allowed_keys(split_manifest_path, split_name)
 
     crop_map = load_crop_map(farms_csv)
     overall = {
@@ -163,23 +205,37 @@ def run_baseline_metrics(
 
     for pred_path in pred_files:
         filename = os.path.basename(pred_path)
-        farm_key = extract_farm_key_from_prediction_name(filename)
-        if not farm_key:
+        pred_key = extract_prediction_key(filename)
+        if not pred_key:
             continue
 
-        mask_2024_path = find_mask(mask_dir, farm_key, "2024")
-        mask_2020_path = find_mask(mask_dir, farm_key, "2020")
-        if mask_2024_path is None or mask_2020_path is None:
+        if allowed_keys is not None and pred_key not in allowed_keys:
+            continue
+
+        farm_key = extract_farm_key_from_prediction_name(pred_key)
+        is_grid = pred_key.startswith("grid_")
+
+        if is_grid:
+            mask_2024_path = find_tile_mask(mask_dir, pred_key)
+            mask_2020_path = None
+        else:
+            mask_2024_path = find_mask(mask_dir, farm_key, "2024")
+            mask_2020_path = find_mask(mask_dir, farm_key, "2020")
+
+        if mask_2024_path is None:
             continue
 
         y_pred = load_mask(pred_path)
         y_true = load_mask(mask_2024_path)
-        y_2020 = load_mask(mask_2020_path)
-        y_pred, y_true, y_2020 = align_shapes(y_pred, y_true, y_2020)
+        y_2020 = load_mask(mask_2020_path) if mask_2020_path is not None else None
+        if y_2020 is not None:
+            y_pred, y_true, y_2020 = align_shapes(y_pred, y_true, y_2020)
+        else:
+            y_pred, y_true = align_shapes(y_pred, y_true)
 
         seg_metrics = compute_segmentation_metrics(y_true, y_pred)
         forest = compute_forest_stats(y_true, y_pred)
-        change = compute_change_stats(y_2020, y_true, y_pred)
+        change = compute_change_stats(y_2020, y_true, y_pred) if y_2020 is not None else {"tp": 0.0, "fp": 0.0, "fn": 0.0}
 
         overall["samples"] += 1
         overall["miou_sum"] += seg_metrics["miou"]
@@ -190,7 +246,7 @@ def run_baseline_metrics(
         overall["change_fp"] += change["fp"]
         overall["change_fn"] += change["fn"]
 
-        crop = crop_map.get(f"osm_{farm_key}", "UNKNOWN")
+        crop = crop_map.get(f"osm_{farm_key}", "UNKNOWN") if farm_key else "GRID"
         crop_acc = by_crop[crop]
         crop_acc["samples"] += 1
         crop_acc["miou_sum"] += seg_metrics["miou"]
@@ -365,6 +421,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-name", default="deeplab")
     parser.add_argument("--train-seconds", type=float, default=None)
     parser.add_argument("--inference-seconds", type=float, default=None)
+    parser.add_argument("--split-manifest-path", default=None, help="Optional JSON split manifest from training")
+    parser.add_argument("--split-name", default="val", help="Split name to evaluate from manifest, e.g. val")
     return parser.parse_args()
 
 
@@ -415,6 +473,8 @@ def main() -> None:
         model_name=args.model_name,
         train_seconds=args.train_seconds,
         inference_seconds=args.inference_seconds,
+            split_manifest_path=args.split_manifest_path,
+            split_name=args.split_name,
     )
 
 

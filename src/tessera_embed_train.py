@@ -54,6 +54,7 @@ This module expects embeddings in {embeddings_dir}/embeddings/*.npy
 """
 
 import argparse
+import json
 import os
 import random
 import re
@@ -283,6 +284,81 @@ def split_dataset(dataset: Dataset, val_ratio: float, seed: int):
     return random_split(dataset, [train_size, val_size], generator=gen)
 
 
+def pair_key_from_embedding_path(emb_path: str) -> str:
+    return Path(emb_path).stem
+
+
+def run_preflight_checks(pairs: List[Tuple[str, Optional[str], str]], expected_in_channels: int) -> None:
+    if not pairs:
+        raise RuntimeError("No pairs available for preflight checks")
+
+    orphan_scales = 0
+    for emb_path, scales_path, mask_path in pairs:
+        if not os.path.exists(mask_path):
+            raise FileNotFoundError(f"Missing mask path in pair: {mask_path}")
+        if scales_path is not None and not os.path.exists(scales_path):
+            orphan_scales += 1
+
+    # Validate channels and shape alignment on one deterministic sample.
+    emb_path, scales_path, mask_path = pairs[0]
+    embedding = load_embedding(emb_path, scales_path=scales_path)
+    with rasterio.open(mask_path) as src:
+        mask = src.read(1)
+
+    if embedding.shape[0] != expected_in_channels:
+        raise ValueError(
+            f"Embedding channels mismatch: got {embedding.shape[0]}, expected {expected_in_channels}"
+        )
+
+    if embedding.shape[1] == 0 or embedding.shape[2] == 0:
+        raise ValueError("Embedding has empty spatial dimensions")
+    if mask.shape[0] == 0 or mask.shape[1] == 0:
+        raise ValueError("Mask has empty spatial dimensions")
+
+    if orphan_scales > 0:
+        print(f"[preflight] Warning: {orphan_scales} pairs reference missing scales files.")
+
+    print(
+        f"[preflight] OK | pairs={len(pairs)} sample_key={pair_key_from_embedding_path(emb_path)} "
+        f"embedding_shape={embedding.shape} mask_shape={mask.shape}"
+    )
+
+
+def write_split_manifest(
+    output_path: str,
+    dataset: "TesseraEmbeddingDataset",
+    train_set,
+    val_set,
+    seed: int,
+    val_ratio: float,
+    dataset_mode: str,
+) -> None:
+    if not output_path:
+        return
+
+    train_keys = [pair_key_from_embedding_path(dataset.pairs[i][0]) for i in train_set.indices]
+    val_keys = [pair_key_from_embedding_path(dataset.pairs[i][0]) for i in val_set.indices]
+
+    payload = {
+        "dataset_mode": dataset_mode,
+        "seed": seed,
+        "val_ratio": val_ratio,
+        "counts": {
+            "train": len(train_keys),
+            "val": len(val_keys),
+        },
+        "splits": {
+            "train": train_keys,
+            "val": val_keys,
+        },
+    }
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    print(f"Wrote split manifest: {output_path}")
+
+
 def save_checkpoint(model: nn.Module, output_path: str, config: Dict[str, object], extra: Dict[str, object]) -> None:
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     torch.save(
@@ -306,7 +382,19 @@ def train(args: argparse.Namespace) -> None:
         dataset_mode=args.dataset_mode,
     )
     print(f"Resolved dataset mode: {dataset.dataset_mode} | pairs: {len(dataset)}")
+    if not args.skip_preflight:
+        run_preflight_checks(dataset.pairs, expected_in_channels=args.in_channels)
+
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
+    write_split_manifest(
+        output_path=args.split_manifest_path,
+        dataset=dataset,
+        train_set=train_set,
+        val_set=val_set,
+        seed=args.seed,
+        val_ratio=args.val_ratio,
+        dataset_mode=dataset.dataset_mode,
+    )
 
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
@@ -380,6 +468,7 @@ def train(args: argparse.Namespace) -> None:
                     "year": args.year,
                     "val_ratio": args.val_ratio,
                     "seed": args.seed,
+                    "dataset_mode": dataset.dataset_mode,
                 },
             )
             print(f"Saved best checkpoint: {args.output_model_path}")
@@ -414,6 +503,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--in-channels", type=int, default=128)
     parser.add_argument("--hidden-channels", type=int, default=128)
     parser.add_argument("--num-classes", type=int, default=4)
+    parser.add_argument(
+        "--split-manifest-path",
+        default="",
+        help="Optional JSON path to store deterministic train/val split keys",
+    )
+    parser.add_argument(
+        "--skip-preflight",
+        action="store_true",
+        help="Skip dataset preflight checks",
+    )
 
     return parser.parse_args()
 
