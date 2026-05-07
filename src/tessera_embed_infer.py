@@ -2,7 +2,7 @@ import argparse
 import glob
 import logging
 import os
-import re
+import sys
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -14,13 +14,13 @@ from affine import Affine
 import torch
 import torch.nn as nn
 
+_src_dir = os.path.dirname(os.path.abspath(__file__))
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
+from train_utils import extract_farm_key, load_embedding
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def extract_farm_key(name: str) -> Optional[str]:
-    match = re.match(r"^(relation|way)_\d+", name)
-    return match.group(0) if match else None
 
 
 def find_reference_profile(reference_dir: Optional[str], farm_key: str, year: str) -> Optional[dict]:
@@ -53,32 +53,6 @@ def find_tile_reference_profile(reference_dir: Optional[str], stem: str) -> Opti
             with rasterio.open(files[0]) as src:
                 return src.profile
     return None
-
-
-def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
-    arr = np.load(path)
-    if arr.ndim != 3:
-        raise ValueError(f"Expected 3D embedding array, got {arr.shape} for {path}")
-
-    if scales_path is not None:
-        scales = np.load(scales_path)
-        if scales.ndim == 2:
-            scales = np.expand_dims(scales, axis=-1)
-        if arr.shape[:2] != scales.shape[:2]:
-            raise ValueError(
-                f"Embedding/scales spatial shape mismatch: {arr.shape[:2]} vs {scales.shape[:2]} "
-                f"for {path} and {scales_path}"
-            )
-        arr = arr.astype(np.float32) * scales.astype(np.float32)
-
-    if arr.shape[-1] == 128:
-        arr = np.transpose(arr, (2, 0, 1))
-    elif arr.shape[0] == 128:
-        pass
-    else:
-        raise ValueError(f"Cannot infer embedding channel axis for {path}, shape={arr.shape}")
-
-    return arr.astype(np.float32)
 
 
 class TesseraEmbeddingSegHead(nn.Module):

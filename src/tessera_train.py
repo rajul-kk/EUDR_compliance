@@ -1,30 +1,26 @@
 import argparse
 import logging
 import os
-import random
 import sys
-from typing import Dict, Tuple
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Subset, random_split
+from torch.utils.data import DataLoader
 
-# Ensure src/ is on sys.path so sibling modules resolve when running from project root
 _src_dir = os.path.dirname(os.path.abspath(__file__))
 if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
 from tessera_backbone import TesseraSegmentationModel
+from train_utils import compute_miou, seed_everything, split_dataset
 
-current_dir = _src_dir
-parent_dir = os.path.dirname(current_dir)
-gee_dir = os.path.join(parent_dir, "GEE_dynamic")
-if gee_dir not in sys.path:
-    sys.path.append(gee_dir)
+_gee_dir = os.path.join(os.path.dirname(_src_dir), "GEE_dynamic")
+if _gee_dir not in sys.path:
+    sys.path.append(_gee_dir)
 
 try:
     from preprocessing.dataset_loader import FarmSegmentationDataset
@@ -34,45 +30,6 @@ except ImportError:
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def seed_everything(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-
-def split_dataset(dataset, val_ratio: float, seed: int) -> Tuple[Subset, Subset]:
-    val_size = max(1, int(len(dataset) * val_ratio))
-    train_size = len(dataset) - val_size
-    if train_size <= 0:
-        raise ValueError("Validation split too large for dataset size.")
-
-    generator = torch.Generator().manual_seed(seed)
-    train_subset, val_subset = random_split(dataset, [train_size, val_size], generator=generator)
-    return train_subset, val_subset
-
-
-def compute_miou(logits: torch.Tensor, targets: torch.Tensor, num_classes: int, ignore_index: int = 255) -> float:
-    preds = torch.argmax(logits, dim=1)
-    valid = targets != ignore_index
-
-    ious = []
-    for class_idx in range(num_classes):
-        pred_mask = (preds == class_idx) & valid
-        true_mask = (targets == class_idx) & valid
-
-        intersection = torch.logical_and(pred_mask, true_mask).sum().float()
-        union = torch.logical_or(pred_mask, true_mask).sum().float()
-
-        if union > 0:
-            ious.append((intersection / union).item())
-
-    if not ious:
-        return 0.0
-    return float(np.mean(ious))
 
 
 def train_tessera_head(

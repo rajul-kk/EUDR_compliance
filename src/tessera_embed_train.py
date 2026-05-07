@@ -57,7 +57,6 @@ import argparse
 import json
 import logging
 import os
-import random
 import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -68,26 +67,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset
 import rasterio
 
+from train_utils import compute_miou, extract_farm_key, load_embedding, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def seed_everything(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-
-def extract_farm_key(name: str) -> Optional[str]:
-    match = re.match(r"^(relation|way)_\d+", name)
-    if not match:
-        return None
-    return match.group(0)
 
 
 def extract_year(name: str) -> Optional[str]:
@@ -119,34 +104,6 @@ def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
         if os.path.exists(path):
             return path
     return None
-
-
-def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
-    arr = np.load(path)
-    if arr.ndim != 3:
-        raise ValueError(f"Expected 3D embedding array, got shape {arr.shape} for {path}")
-
-    # GeoTessera arrays are commonly int8 and require per-tile scales.
-    if scales_path is not None:
-        scales = np.load(scales_path)
-        if scales.ndim == 2:
-            scales = np.expand_dims(scales, axis=-1)
-        if arr.shape[:2] != scales.shape[:2]:
-            raise ValueError(
-                f"Embedding/scales spatial shape mismatch: {arr.shape[:2]} vs {scales.shape[:2]} "
-                f"for {path} and {scales_path}"
-            )
-        arr = arr.astype(np.float32) * scales.astype(np.float32)
-
-    # Accept either HWC (H, W, C) or CHW (C, H, W).
-    if arr.shape[-1] == 128:
-        arr = np.transpose(arr, (2, 0, 1))
-    elif arr.shape[0] == 128:
-        pass
-    else:
-        raise ValueError(f"Cannot infer embedding channel axis for shape {arr.shape} ({path})")
-
-    return arr.astype(np.float32)
 
 
 class TesseraEmbeddingDataset(Dataset):
@@ -260,34 +217,6 @@ class TesseraEmbeddingSegHead(nn.Module):
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
         return {"out": self.head(x)}
-
-
-@torch.no_grad()
-def compute_miou(logits: torch.Tensor, targets: torch.Tensor, num_classes: int = 4, ignore_index: int = 255) -> float:
-    preds = torch.argmax(logits, dim=1)
-    valid = targets != ignore_index
-
-    ious = []
-    for c in range(num_classes):
-        pred_mask = (preds == c) & valid
-        true_mask = (targets == c) & valid
-
-        inter = torch.logical_and(pred_mask, true_mask).sum().float()
-        union = torch.logical_or(pred_mask, true_mask).sum().float()
-        if union > 0:
-            ious.append((inter / union).item())
-
-    return float(np.mean(ious)) if ious else 0.0
-
-
-def split_dataset(dataset: Dataset, val_ratio: float, seed: int):
-    val_size = max(1, int(len(dataset) * val_ratio))
-    train_size = len(dataset) - val_size
-    if train_size <= 0:
-        raise ValueError("Validation split too large for dataset size")
-
-    gen = torch.Generator().manual_seed(seed)
-    return random_split(dataset, [train_size, val_size], generator=gen)
 
 
 def pair_key_from_embedding_path(emb_path: str) -> str:

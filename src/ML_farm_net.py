@@ -29,34 +29,18 @@ except ImportError:
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def get_deeplab_model(num_classes=4, in_channels=6):
-    """
-    Returns a DeepLabV3 model with ResNet50 backbone modified for N input channels.
-    """
-    # Load model with no pretrained weights (since we are changing input channels significantly)
-    # Alternatively, load pretrained and modify first layer, initializing new weights average
     model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-    
-    # Modify the first convolutional layer of the backbone
-    # Original: Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     original_conv1 = model.backbone.conv1
-    
-    # Create new layer with in_channels
     new_conv1 = nn.Conv2d(
-        in_channels, 
-        original_conv1.out_channels, 
-        kernel_size=original_conv1.kernel_size, 
-        stride=original_conv1.stride, 
-        padding=original_conv1.padding, 
-        bias=original_conv1.bias
+        in_channels,
+        original_conv1.out_channels,
+        kernel_size=original_conv1.kernel_size,
+        stride=original_conv1.stride,
+        padding=original_conv1.padding,
+        bias=original_conv1.bias,
     )
-    
-    # Initialize weights (optional: copy RGB weights if pretrained)
-    # For now, simple initialization
     nn.init.kaiming_normal_(new_conv1.weight, mode='fan_out', nonlinearity='relu')
-    
-    # Replace
     model.backbone.conv1 = new_conv1
-    
     return model
 
 def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, learning_rate=1e-4,
@@ -88,17 +72,11 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
         
         for i, (images, masks) in enumerate(dataloader):
             images = images.to(DEVICE)
-            masks = masks.to(DEVICE) # (B, H, W) LongTensor
+            masks = masks.to(DEVICE)
             
             optimizer.zero_grad()
-            
-            # Forward
-            outputs = model(images)['out'] # Dictionary output for DeepLab {'out': tensor, 'aux': tensor}
-            
-            # Calculate Loss
+            outputs = model(images)['out']
             loss = criterion(outputs, masks)
-            
-            # Backward
             loss.backward()
             optimizer.step()
             
@@ -109,7 +87,6 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
                 
         logger.info("Epoch %d complete avg_loss=%.4f", epoch+1, epoch_loss / len(dataloader))
         
-    # Save Model
     os.makedirs(os.path.dirname(output_model_path), exist_ok=True)
     torch.save(model.state_dict(), output_model_path)
     logger.info("Model saved to %s", output_model_path)
@@ -118,9 +95,10 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
 def parse_args():
     parser = argparse.ArgumentParser(description="Train DeepLabV3 baseline model.")
 
-    default_raw_dir = os.path.join(project_root, 'data', 'raw_satellite', '2020_baseline')
-    default_mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
-    default_model_path = os.path.join(project_root, 'models', 'farm_deeplab.pth')
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    default_raw_dir = os.path.join(_root, 'data', 'raw_satellite', '2020_baseline')
+    default_mask_dir = os.path.join(_root, 'data', 'hybrid_masks')
+    default_model_path = os.path.join(_root, 'models', 'farm_deeplab.pth')
 
     parser.add_argument('--raw-dir', default=default_raw_dir, help='Directory with baseline (2020) images')
     parser.add_argument('--mask-dir', default=default_mask_dir, help='Directory with hybrid masks')
