@@ -1,18 +1,25 @@
-import time
-import os
-import glob
+import io
 import json
+import logging
+import os
 import random
+import glob
 import argparse
 import threading
+import time
+
+import numpy as np
 import pandas as pd
 import requests
+import rasterio
 import dask
 from dask import delayed
 from dotenv import load_dotenv
 from pystac_client import Client
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 # CONFIGURATION
 USERNAME = os.getenv("CDSE_EMAIL")
@@ -28,26 +35,49 @@ ACCESS_TOKEN = None
 TOKEN_EXPIRY = 0
 STATE_LOCK = threading.Lock()
 
+# SCL classes treated as cloud / shadow
+_CLOUD_SCL = {0, 1, 3, 8, 9, 10}
+
 DEFAULT_PROFILE = {
     "default": {
         "month_windows": [["05-01", "09-30"]],
-        "max_cloud": 15
+        "max_cloud": 30,
+        "max_scenes": 8,
     },
     "tropical": {
         "month_windows": [["01-01", "12-31"]],
-        "max_cloud": 20
-    }
+        "max_cloud": 50,
+        "max_scenes": 10,
+    },
 }
 
 EU_COUNTRY_CODES = {
     "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR",
     "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK",
-    "SI", "ES", "SE"
+    "SI", "ES", "SE",
 }
 
+# JavaScript evalscript — requests 5 bands: R, G, B, NIR, SCL
+_EVALSCRIPT = """
+//VERSION=3
+function setup() {
+  return {
+    input: ["B04", "B03", "B02", "B08", "SCL"],
+    output: { bands: 5, sampleType: "FLOAT32" }
+  };
+}
+function evaluatePixel(sample) {
+  return [sample.B04, sample.B03, sample.B02, sample.B08, sample.SCL];
+}
+"""
+
+
+# ---------------------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------------------
 
 def request_with_retry(method, url, max_retries=4, retryable_statuses=None, timeout=60, **kwargs):
-    """HTTP wrapper with bounded retries for transient API failures."""
+    """HTTP wrapper with bounded exponential-backoff retries."""
     if retryable_statuses is None:
         retryable_statuses = {429, 500, 502, 503, 504}
 
@@ -55,14 +85,14 @@ def request_with_retry(method, url, max_retries=4, retryable_statuses=None, time
         try:
             response = requests.request(method=method, url=url, timeout=timeout, **kwargs)
             if response.status_code in retryable_statuses:
-                raise requests.HTTPError(f"Transient API status {response.status_code}", response=response)
+                raise requests.HTTPError(f"Transient {response.status_code}", response=response)
             return response
-        except Exception as e:
+        except Exception as exc:
             if attempt == max_retries - 1:
                 raise
-            wait_time = min(30, (2 ** attempt) + random.random())
-            print(f"⚠️ Request failed ({e}). Retrying in {wait_time:.1f}s...")
-            time.sleep(wait_time)
+            wait = min(30, (2 ** attempt) + random.random())
+            logger.warning("Request failed (%s). Retry %d/%d in %.1fs", exc, attempt + 1, max_retries, wait)
+            time.sleep(wait)
 
 
 def normalize_farm_id(raw_id):
@@ -75,8 +105,8 @@ def load_json_file(path, default):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception as e:
-        print(f"⚠️ Failed to load JSON {path}: {e}. Using default.")
+    except Exception as exc:
+        logger.warning("Failed to load JSON %s: %s. Using default.", path, exc)
         return default
 
 
@@ -87,8 +117,6 @@ def save_json_file(path, data):
 
 
 def get_country_code(row):
-    if "country_iso2" not in row:
-        return ""
     value = str(row.get("country_iso2", "")).strip().upper()
     return value[:2] if value else ""
 
@@ -102,308 +130,340 @@ def get_profile_for_country(country_code, profile):
 def get_year_windows(year, country_code, profile):
     cfg = get_profile_for_country(country_code, profile)
     windows = cfg.get("month_windows", DEFAULT_PROFILE["default"]["month_windows"])
-    year_windows = []
-    for start_mmdd, end_mmdd in windows:
-        year_windows.append((f"{year}-{start_mmdd}", f"{year}-{end_mmdd}"))
-    return year_windows
+    return [(f"{year}-{s}", f"{year}-{e}") for s, e in windows]
 
 
 def get_farm_bbox(row, delta=0.005):
-    """Build AOI bbox from row columns. Uses bbox columns when present, else point buffer."""
-    lat = float(row["lat"])
-    lon = float(row["lon"])
-
-    min_lon = row.get("min_lon")
-    min_lat = row.get("min_lat")
-    max_lon = row.get("max_lon")
-    max_lat = row.get("max_lat")
-
+    lat, lon = float(row["lat"]), float(row["lon"])
+    min_lon, min_lat = row.get("min_lon"), row.get("min_lat")
+    max_lon, max_lat = row.get("max_lon"), row.get("max_lat")
     if pd.notna(min_lon) and pd.notna(min_lat) and pd.notna(max_lon) and pd.notna(max_lat):
         return [float(min_lon), float(min_lat), float(max_lon), float(max_lat)]
-
     return [lon - delta, lat - delta, lon + delta, lat + delta]
 
 
 def update_manifest(manifest_path, farm_id, year, status, message=""):
-    """Store per-farm/year state for resume-safe downloads."""
     with STATE_LOCK:
         os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
-
         if os.path.exists(manifest_path):
             df = pd.read_csv(manifest_path)
         else:
             df = pd.DataFrame(columns=["farm_id", "year", "status", "message", "updated_at"])
-
         mask = (df["farm_id"] == farm_id) & (df["year"] == int(year))
         now_ts = pd.Timestamp.utcnow().isoformat()
-
         if mask.any():
             df.loc[mask, ["status", "message", "updated_at"]] = [status, message, now_ts]
         else:
-            df = pd.concat([
-                df,
-                pd.DataFrame([
-                    {
-                        "farm_id": farm_id,
-                        "year": int(year),
-                        "status": status,
-                        "message": message,
-                        "updated_at": now_ts,
-                    }
-                ])
-            ], ignore_index=True)
-
+            df = pd.concat([df, pd.DataFrame([{
+                "farm_id": farm_id, "year": int(year),
+                "status": status, "message": message, "updated_at": now_ts,
+            }])], ignore_index=True)
         df.to_csv(manifest_path, index=False)
+
+
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
 
 def get_auth_token():
     global ACCESS_TOKEN, TOKEN_EXPIRY
-    
     current_time = time.time()
-    
-    # 1. Return cached token if valid (buffer of 60s)
     if ACCESS_TOKEN and current_time < (TOKEN_EXPIRY - 60):
         return ACCESS_TOKEN
-        
-    print("   🔑 Refreshing Access Token...")
-    
+
+    logger.debug("Refreshing Copernicus access token")
     payload = {
         "client_id": "cdse-public",
         "username": USERNAME,
         "password": PASSWORD,
         "grant_type": "password",
     }
-    
     for attempt in range(3):
         try:
             response = request_with_retry("POST", AUTH_URL, data=payload, timeout=60)
             response.raise_for_status()
             data = response.json()
-            
             ACCESS_TOKEN = data["access_token"]
-            # Default to 600s if expires_in not provided
-            expires_in = data.get("expires_in", 600) 
-            TOKEN_EXPIRY = current_time + expires_in
-            
+            TOKEN_EXPIRY = current_time + data.get("expires_in", 600)
             return ACCESS_TOKEN
-            
-        except Exception as e:
+        except Exception as exc:
             if attempt < 2:
-                wait_time = (attempt + 1) * 2
-                print(f"⚠️ Auth Attempt {attempt+1} failed ({e}). Retrying in {wait_time}s...")
-                time.sleep(wait_time)
+                wait = (attempt + 1) * 2
+                logger.warning("Auth attempt %d failed (%s). Retrying in %ds", attempt + 1, exc, wait)
+                time.sleep(wait)
             else:
-                print(f"❌ Auth Failed after 3 attempts: {e}")
-                if hasattr(e, 'response') and e.response:
-                    print(f"Server Response: {e.response.text}")
-                raise e
+                logger.error("Auth failed after 3 attempts: %s", exc)
+                raise
 
-def find_cleanest_date(bbox, start_date, end_date, max_cloud=15):
-    """
-    Step 1: Search the Catalog to find the EXACT date of a clear flyover.
-    """
-    print(f"🔎 Searching for clear images between {start_date} and {end_date}...")
-    
+
+# ---------------------------------------------------------------------------
+# STAC scene search
+# ---------------------------------------------------------------------------
+
+def search_scenes(bbox, start_date, end_date, max_cloud=50):
+    """Return all STAC items in the window at or below max_cloud, sorted ascending by cloud cover."""
+    logger.debug("Searching scenes %s to %s (max cloud %.0f%%)", start_date, end_date, max_cloud)
     client = Client.open(CATALOG_URL)
-    
-    # Search for Sentinel-2 Level-2A (Cloud corrected)
     search = client.search(
         collections=["sentinel-2-l2a"],
         bbox=bbox,
-        datetime=f"{start_date}/{end_date}"
+        datetime=f"{start_date}/{end_date}",
     )
-    
     items = list(search.items())
-    
-    # Filter for low clouds
-    clean_items = [i for i in items if i.properties.get("eo:cloud_cover", 100) < max_cloud]
-    
-    if not clean_items:
-        print("⚠️ No cloud-free images found in this range. Trying all images...")
-        clean_items = items
-        
-    if not clean_items:
-        print("❌ No satellite passes found at all. Check coordinates.")
-        return None
-
-    # Sort by least cloudy
-    best_item = sorted(clean_items, key=lambda x: x.properties.get("eo:cloud_cover"))[0]
-    best_date = best_item.datetime.strftime("%Y-%m-%d")
-    
-    print(f"✅ Best Match Found: {best_date} (Cloud Cover: {best_item.properties['eo:cloud_cover']}%)")
-    return best_date
+    items = [i for i in items if i.properties.get("eo:cloud_cover", 100) <= max_cloud]
+    items.sort(key=lambda x: x.properties.get("eo:cloud_cover", 100))
+    logger.debug("Found %d scenes under %.0f%% cloud", len(items), max_cloud)
+    return items
 
 
-def get_best_date_for_year(row, year, profile, scene_cache, scene_cache_path):
-    farm_id = normalize_farm_id(row["farm_id"])
-    country_code = get_country_code(row)
-    cache_key = f"{farm_id}:{year}"
-    if cache_key in scene_cache:
-        return scene_cache[cache_key]
+# ---------------------------------------------------------------------------
+# Single-scene download (in-memory array)
+# ---------------------------------------------------------------------------
 
-    bbox = get_farm_bbox(row)
-    cfg = get_profile_for_country(country_code, profile)
-    max_cloud = cfg.get("max_cloud", 15)
-
-    for start_date, end_date in get_year_windows(year, country_code, profile):
-        selected = find_cleanest_date(bbox=bbox, start_date=start_date, end_date=end_date, max_cloud=max_cloud)
-        if selected:
-            with STATE_LOCK:
-                scene_cache[cache_key] = selected
-                save_json_file(scene_cache_path, scene_cache)
-            return selected
-
-    return None
-
-def download_farm_image(row, date, farm_id):
-    # 1. Determine Output Filename First (for Checkpointing)
-    year = date.split("-")[0]
-    if year == "2020":
-        output_dir = "data/raw_satellite/2020_baseline"
-    elif year == "2024":
-        output_dir = "data/raw_satellite/2024_current"
-    else:
-        output_dir = f"data/raw_satellite/{year}_other"
-        
-    os.makedirs(output_dir, exist_ok=True)
-    filename = f"{output_dir}/{farm_id}_{date}.tiff"
-    
-    # 2. Check if already exists
-    if os.path.exists(filename):
-        print(f"   ⏭️ Image exists, skipping download: {filename}")
-        return filename
-
-    # 3. Proceed with Download
-    print(f"⬇️ Downloading tile for {farm_id} on {date}...")
+def _download_scene_bytes(bbox, date):
+    """Call the Sentinel Hub Process API for one date. Returns raw bytes or None."""
     token = get_auth_token()
-    bbox = get_farm_bbox(row)
-
-    # EVALSCRIPT: Ask for 5 Bands (Red, Green, Blue, NIR, SCL)
-    evalscript = """
-    //VERSION=3
-    function setup() {
-      return {
-        input: ["B04", "B03", "B02", "B08", "SCL"], 
-        output: { bands: 5, sampleType: "FLOAT32" }
-      };
-    }
-    function evaluatePixel(sample) {
-      return [sample.B04, sample.B03, sample.B02, sample.B08, sample.SCL];
-    }
-    """
-
-    # --- PAYLOAD STRUCTURE ---
     payload = {
         "input": {
             "bounds": {
                 "bbox": bbox,
-                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/4326"}
+                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/4326"},
             },
-            "data": [{
-                "type": "sentinel-2-l2a",
-                "dataFilter": {
-                    "timeRange": {
-                        "from": f"{date}T00:00:00Z",
-                        "to": f"{date}T23:59:59Z"
-                    }
-                }
-            }]
+            "data": [{"type": "sentinel-2-l2a", "dataFilter": {
+                "timeRange": {"from": f"{date}T00:00:00Z", "to": f"{date}T23:59:59Z"},
+            }}],
         },
         "output": {
-            "width": 512,
-            "height": 512,
-            "responses": [{
-                "identifier": "default", 
-                "format": {"type": "image/tiff"}
-            }]
+            "width": 512, "height": 512,
+            "responses": [{"identifier": "default", "format": {"type": "image/tiff"}}],
         },
-        "evalscript": evalscript
+        "evalscript": _EVALSCRIPT,
     }
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     response = request_with_retry("POST", PROCESS_URL, json=payload, headers=headers, timeout=60)
 
-    # Re-auth once if needed
     if response.status_code == 401:
         token = get_auth_token()
         headers["Authorization"] = f"Bearer {token}"
         response = request_with_retry("POST", PROCESS_URL, json=payload, headers=headers, timeout=60)
 
-    # ERROR HANDLING
     if response.status_code != 200:
-        print(f"❌ API Error: {response.status_code}")
-        print(f"📜 Server Message: {response.text}")
+        logger.warning("Process API error %d for date %s: %s", response.status_code, date, response.text[:200])
         return None
-    
-    print(f"   💾 Saving to: {filename}")
-    with open(filename, "wb") as f:
-        f.write(response.content)
-        
-    print(f"✅ Success! Saved raw TIFF to: {filename}")
+
+    return response.content
+
+
+def _bytes_to_array(data):
+    """Open GeoTIFF bytes in memory. Returns (array, profile) or (None, None)."""
+    try:
+        with rasterio.open(io.BytesIO(data)) as src:
+            return src.read().astype(np.float32), src.profile.copy()
+    except Exception as exc:
+        logger.warning("Failed to parse scene bytes: %s", exc)
+        return None, None
+
+
+# ---------------------------------------------------------------------------
+# Cloud-free median compositing
+# ---------------------------------------------------------------------------
+
+def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=8):
+    """
+    Download up to max_scenes scenes and produce a cloud-free composite.
+
+    Strategy:
+      - Bands 0-3 (R, G, B, NIR): per-pixel nanmedian across all observations
+        where that pixel was not cloud/shadow in any scene.
+      - Band 4 (SCL): taken from the least-cloudy scene; pixels that were cloudy
+        there but clear in at least one other scene are overwritten with SCL=4.
+
+    Falls back to a relaxed cloud threshold (80%) when nothing is found.
+
+    Returns:
+        (composite_array, rasterio_profile)  shape (5, H, W), float32
+        or (None, None) on failure.
+    """
+    scenes = search_scenes(bbox, start_date, end_date, max_cloud=max_cloud)
+
+    if not scenes:
+        logger.warning("No scenes under %.0f%% cloud — relaxing threshold to 80%%", max_cloud)
+        scenes = search_scenes(bbox, start_date, end_date, max_cloud=80)
+
+    if not scenes:
+        logger.error("No scenes found between %s and %s", start_date, end_date)
+        return None, None
+
+    scenes = scenes[:max_scenes]
+    logger.info("Compositing %d scene(s) [%s – %s]", len(scenes), start_date, end_date)
+
+    spectral_stack = []   # list of (4, H, W) arrays with NaN for clouds
+    scl_clearest = None   # SCL from least-cloudy scene (first in sorted list)
+    best_profile = None
+
+    for item in scenes:
+        date_str = item.datetime.strftime("%Y-%m-%d")
+        raw = _download_scene_bytes(bbox, date_str)
+        if raw is None:
+            continue
+
+        arr, profile = _bytes_to_array(raw)
+        if arr is None:
+            continue
+
+        if best_profile is None:
+            best_profile = profile
+
+        scl = arr[4].astype(np.int16)
+        cloud_mask = np.isin(scl, list(_CLOUD_SCL))
+
+        spectral = arr[:4].copy()
+        spectral[:, cloud_mask] = np.nan
+        spectral_stack.append(spectral)
+
+        if scl_clearest is None:
+            scl_clearest = scl.astype(np.float32)
+
+    if not spectral_stack:
+        logger.error("All scene downloads failed for window %s – %s", start_date, end_date)
+        return None, None
+
+    # Spectral composite
+    stacked = np.stack(spectral_stack, axis=0)          # (N, 4, H, W)
+    composite_spectral = np.nanmedian(stacked, axis=0)  # (4, H, W)
+    composite_spectral = np.nan_to_num(composite_spectral, nan=0.0)
+
+    # SCL: mark pixels that were cloudy in clearest scene but have data elsewhere
+    had_any_clear = ~np.all(np.isnan(stacked), axis=(0, 1))  # (H, W)
+    was_cloud = np.isin(scl_clearest.astype(np.int16), list(_CLOUD_SCL))
+    scl_clearest[had_any_clear & was_cloud] = 4.0  # reclassify as clear vegetation
+
+    composite = np.concatenate(
+        [composite_spectral, scl_clearest[np.newaxis]], axis=0
+    )  # (5, H, W)
+
+    valid_pct = float(np.mean(composite_spectral[0] != 0) * 100)
+    logger.info("Composite complete — %.1f%% valid pixels (non-zero in band 0)", valid_pct)
+
+    return composite, best_profile
+
+
+# ---------------------------------------------------------------------------
+# Farm image download (uses compositing)
+# ---------------------------------------------------------------------------
+
+def download_farm_image(row, year, farm_id, start_date, end_date, profile_cfg):
+    """
+    Build a cloud-free composite for one farm/year and save as GeoTIFF.
+
+    Args:
+        row:         Farm metadata row (needs lat, lon, and optional bbox columns).
+        year:        Integer year (2020 or 2024).
+        farm_id:     Normalised farm identifier string.
+        start_date:  Composite window start (YYYY-MM-DD).
+        end_date:    Composite window end (YYYY-MM-DD).
+        profile_cfg: Profile dict with max_cloud, max_scenes keys.
+
+    Returns:
+        Output file path on success, None on failure.
+    """
+    year_str = str(year)
+    if year_str == "2020":
+        output_dir = "data/raw_satellite/2020_baseline"
+    elif year_str == "2024":
+        output_dir = "data/raw_satellite/2024_current"
+    else:
+        output_dir = f"data/raw_satellite/{year_str}_other"
+
+    os.makedirs(output_dir, exist_ok=True)
+    filename = os.path.join(output_dir, f"{farm_id}_{year}.tiff")
+
+    if os.path.exists(filename):
+        logger.info("Skipping %s — composite already exists", filename)
+        return filename
+
+    bbox = get_farm_bbox(row)
+    max_cloud = profile_cfg.get("max_cloud", 30)
+    max_scenes = profile_cfg.get("max_scenes", 8)
+
+    composite, profile = build_median_composite(
+        bbox, start_date, end_date,
+        max_cloud=max_cloud, max_scenes=max_scenes,
+    )
+
+    if composite is None:
+        logger.error("Compositing failed for farm %s year %d", farm_id, year)
+        return None
+
+    profile.update(count=5, dtype="float32", driver="GTiff", compress="lzw")
+    with rasterio.open(filename, "w", **profile) as dst:
+        dst.write(composite)
+
+    logger.info("Saved composite (%d scenes) to %s", max_scenes, filename)
     return filename
 
-# --- MAIN WORKFLOW ---
 
-def process_single_farm(row, skip_count, index, profile, scene_cache, scene_cache_path, manifest_path):
-    """
-    Worker function to process a single farm.
-    """
+# ---------------------------------------------------------------------------
+# Per-farm orchestration
+# ---------------------------------------------------------------------------
+
+def process_single_farm(row, skip_count, index, profile, manifest_path):
     try:
-        crop = row.get('crop_type', 'Unknown')
+        crop = row.get("crop_type", "Unknown")
+        farm_id = normalize_farm_id(row["farm_id"])
         display_index = index + skip_count + 1
-        
-        farm_id = normalize_farm_id(row['farm_id'])
-        
-        print(f"\n--- Farm {display_index} [{crop}]: ID {farm_id} ---")
+        country_code = get_country_code(row)
+        profile_cfg = get_profile_for_country(country_code, profile)
 
-        # Check if already processed
+        logger.info("Farm %d [%s]: %s", display_index, crop, farm_id)
+
         path_2020 = f"data/raw_satellite/2020_baseline/{farm_id}_*.tiff"
         path_2024 = f"data/raw_satellite/2024_current/{farm_id}_*.tiff"
-        
-        has_2020 = len(glob.glob(path_2020)) > 0
-        has_2024 = len(glob.glob(path_2024)) > 0
-        
-        if has_2020 and has_2024:
-            print(f"   ⏭️ Fully processed (2020 & 2024 found). Skipping.")
+
+        if glob.glob(path_2020) and glob.glob(path_2024):
+            logger.info("Farm %s already fully downloaded — skipping", farm_id)
             update_manifest(manifest_path, farm_id, 2020, "downloaded", "existing file")
             update_manifest(manifest_path, farm_id, 2024, "downloaded", "existing file")
             return True
 
         for year in [2020, 2024]:
-            expected_glob = f"data/raw_satellite/{year}_baseline/{farm_id}_*.tiff" if year == 2020 else f"data/raw_satellite/{year}_current/{farm_id}_*.tiff"
-            if len(glob.glob(expected_glob)) > 0:
+            suffix = "baseline" if year == 2020 else "current"
+            if glob.glob(f"data/raw_satellite/{year}_{suffix}/{farm_id}_*.tiff"):
                 update_manifest(manifest_path, farm_id, year, "downloaded", "existing file")
                 continue
 
-            update_manifest(manifest_path, farm_id, year, "pending", "selecting scene")
-            date_selected = get_best_date_for_year(row, year, profile, scene_cache, scene_cache_path)
-            if not date_selected:
-                update_manifest(manifest_path, farm_id, year, "failed", "no suitable scene date")
-                print(f"   ⚠️ No clear {year} image found.")
-                return False
+            update_manifest(manifest_path, farm_id, year, "pending", "selecting window")
 
-            update_manifest(manifest_path, farm_id, year, "selected_scene", date_selected)
-            out_file = download_farm_image(row, date_selected, f"{farm_id}_{year}")
-            if out_file and os.path.exists(out_file):
-                update_manifest(manifest_path, farm_id, year, "downloaded", out_file)
-            else:
-                update_manifest(manifest_path, farm_id, year, "failed", f"download failed for {date_selected}")
+            windows = get_year_windows(year, country_code, profile)
+            success = False
+            for start_date, end_date in windows:
+                out = download_farm_image(row, year, farm_id, start_date, end_date, profile_cfg)
+                if out and os.path.exists(out):
+                    update_manifest(manifest_path, farm_id, year, "downloaded", out)
+                    success = True
+                    break
+
+            if not success:
+                update_manifest(manifest_path, farm_id, year, "failed", "no composite produced")
+                logger.warning("No composite produced for farm %s year %d", farm_id, year)
                 return False
 
         return True
 
-    except Exception as e:
-        print(f"Skipping row {index}: {e}")
+    except Exception as exc:
+        logger.exception("Unexpected error processing farm at index %d: %s", index, exc)
         try:
-            farm_id = normalize_farm_id(row['farm_id'])
-            update_manifest(manifest_path, farm_id, 2020, "failed", str(e))
-            update_manifest(manifest_path, farm_id, 2024, "failed", str(e))
+            fid = normalize_farm_id(row["farm_id"])
+            update_manifest(manifest_path, fid, 2020, "failed", str(exc))
+            update_manifest(manifest_path, fid, 2024, "failed", str(exc))
         except Exception:
             pass
         return False
+
+
+# ---------------------------------------------------------------------------
+# Batch entry point
+# ---------------------------------------------------------------------------
 
 def download_all_farms(
     csv_path: str,
@@ -413,93 +473,70 @@ def download_all_farms(
     countries=None,
     profile_path: str = "inputs/acquisition_profiles.json",
     manifest_path: str = "reports/download_manifest.csv",
-    scene_cache_path: str = "cache/scene_candidates.json",
     limit_per_crop: int = 100,
 ):
-    """
-    Batch download satellite imagery for all farms in the CSV.
-    Uses Dask for parallelism if use_dask is True.
-    """
+    """Download composite imagery for all farms in the CSV."""
     if not os.path.exists(csv_path):
-        print(f"❌ CSV file not found: {csv_path}")
+        logger.error("CSV not found: %s", csv_path)
         return
 
-    print(f"📖 Reading farms from: {csv_path}")
+    logger.info("Reading farms from %s", csv_path)
     df = pd.read_csv(csv_path)
 
-    if countries and 'country_iso2' in df.columns:
+    if countries and "country_iso2" in df.columns:
         normalized = {c.strip().upper()[:2] for c in countries if c.strip()}
-        df = df[df['country_iso2'].astype(str).str.upper().str[:2].isin(normalized)].reset_index(drop=True)
-        print(f"🌍 Country filter active: {sorted(normalized)} -> {len(df)} farms")
+        df = df[df["country_iso2"].astype(str).str.upper().str[:2].isin(normalized)].reset_index(drop=True)
+        logger.info("Country filter %s -> %d farms", sorted(normalized), len(df))
 
-    if 'crop_type' in df.columns:
-        df = df.groupby('crop_type').head(limit_per_crop).reset_index(drop=True)
-    
+    if "crop_type" in df.columns:
+        df = df.groupby("crop_type").head(limit_per_crop).reset_index(drop=True)
+
     if skip_count > 0:
         df = df.iloc[skip_count:].reset_index(drop=True)
 
     profile = load_json_file(profile_path, DEFAULT_PROFILE)
-    scene_cache = load_json_file(scene_cache_path, {})
 
-    print(f"🚜 Found {len(df)} total farms to process.")
+    logger.info("Processing %d farms", len(df))
 
     if use_dask:
-        print("⚡ Using Dask for parallel downloads...")
-        tasks = []
-        for index, row in df.iterrows():
-            tasks.append(
-                delayed(process_single_farm)(
-                    row,
-                    skip_count,
-                    index,
-                    profile,
-                    scene_cache,
-                    scene_cache_path,
-                    manifest_path,
-                )
-            )
-        
-        # Run tasks with a limited number of workers to respect rate limits
-        results = dask.compute(*tasks, scheduler='threads', num_workers=max_workers)
-        success_count = sum(results)
-        fail_count = len(results) - success_count
+        logger.info("Using Dask (%d workers)", max_workers)
+        tasks = [
+            delayed(process_single_farm)(row, skip_count, idx, profile, manifest_path)
+            for idx, row in df.iterrows()
+        ]
+        results = dask.compute(*tasks, scheduler="threads", num_workers=max_workers)
     else:
-        print("🚶 Processing sequentially...")
-        success_count = 0
-        fail_count = 0
-        for index, row in df.iterrows():
-            if process_single_farm(row, skip_count, index, profile, scene_cache, scene_cache_path, manifest_path):
-                success_count += 1
-            else:
-                fail_count += 1
+        results = [
+            process_single_farm(row, skip_count, idx, profile, manifest_path)
+            for idx, row in df.iterrows()
+        ]
 
-    print(f"\n🎉 Batch processing complete!")
-    print(f"✅ Successful PAIRS: {int(success_count)}")
-    print(f"❌ Failed/Parity Removed: {int(fail_count)}")
+    success = sum(results)
+    logger.info("Batch complete — %d succeeded, %d failed", success, len(results) - success)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Download Sentinel-2 farm imagery with retries and resume support.")
-    parser.add_argument("--csv-path", default="inputs/farms_osm.csv", help="Input farm CSV path")
-    parser.add_argument("--skip-count", type=int, default=0, help="Rows to skip from start")
-    parser.add_argument("--no-dask", action="store_true", help="Disable threaded dask execution")
-    parser.add_argument("--max-workers", type=int, default=4, help="Number of dask thread workers")
-    parser.add_argument("--countries", default="", help="Optional comma-separated ISO2 country filter, e.g. DE,FR,ES")
-    parser.add_argument("--profile-path", default="inputs/acquisition_profiles.json", help="Country acquisition profile JSON")
-    parser.add_argument("--manifest-path", default="reports/download_manifest.csv", help="Resume/manifest CSV")
-    parser.add_argument("--scene-cache-path", default="cache/scene_candidates.json", help="Scene date cache JSON")
-    parser.add_argument("--limit-per-crop", type=int, default=100, help="Maximum farms per crop type")
+    import logging as _logging
+    _logging.basicConfig(level=_logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
+    parser = argparse.ArgumentParser(description="Download Sentinel-2 composite imagery for farms.")
+    parser.add_argument("--csv-path", default="inputs/farms_osm.csv")
+    parser.add_argument("--skip-count", type=int, default=0)
+    parser.add_argument("--no-dask", action="store_true")
+    parser.add_argument("--max-workers", type=int, default=4)
+    parser.add_argument("--countries", default="")
+    parser.add_argument("--profile-path", default="inputs/acquisition_profiles.json")
+    parser.add_argument("--manifest-path", default="reports/download_manifest.csv")
+    parser.add_argument("--limit-per-crop", type=int, default=100)
     args = parser.parse_args()
-    country_list = [c.strip() for c in args.countries.split(",") if c.strip()]
 
     download_all_farms(
         csv_path=args.csv_path,
         skip_count=args.skip_count,
         use_dask=not args.no_dask,
         max_workers=args.max_workers,
-        countries=country_list,
+        countries=[c.strip() for c in args.countries.split(",") if c.strip()],
         profile_path=args.profile_path,
         manifest_path=args.manifest_path,
-        scene_cache_path=args.scene_cache_path,
         limit_per_crop=args.limit_per_crop,
     )
