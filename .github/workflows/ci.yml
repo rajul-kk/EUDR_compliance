@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, Tessera-head]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax-check:
+    name: Syntax & import check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install pure-Python dependencies
+        # Install a lightweight subset that doesn't require GDAL/CUDA so CI
+        # stays fast. Heavy packages (torch, rasterio, opencv) are skipped here
+        # but validated by the syntax-only check below.
+        run: |
+          pip install --upgrade pip
+          pip install \
+            numpy pandas requests python-dotenv \
+            shapely jinja2 matplotlib
+
+      - name: Compile all Python source files
+        run: |
+          python -m compileall -q src/ GEE_dynamic/ NDVI_pred/ main_audit.py
+
+      - name: Verify src package is importable (pure-Python path only)
+        # Heavy deps are absent in CI; patch them out so the import graph itself
+        # is validated without requiring GDAL, CUDA, or the Earth Engine SDK.
+        run: |
+          python - <<'EOF'
+          import sys, types
+
+          # Stub out heavy optional imports so the module graph can be walked
+          for mod in [
+              "torch", "torch.nn", "torch.optim", "torch.utils", "torch.utils.data",
+              "torchvision", "torchvision.models", "torchvision.models.segmentation",
+              "rasterio", "rasterio.warp", "rasterio.features",
+              "cv2", "ee", "s2cloudless", "geotessera",
+              "geopandas", "osmnx", "lightgbm", "sklearn", "sklearn.metrics",
+              "pystac_client", "dask", "folium", "reportlab", "skimage",
+          ]:
+              sys.modules.setdefault(mod, types.ModuleType(mod))
+
+          sys.path.insert(0, ".")
+          import src  # must not raise
+          from src import SentinelClient, CloudFilter, VegetationIndex
+          from src import ChangeDetector, ChangeResult, RiskLevel
+          print("src package imports OK")
+          EOF
+
+  lint:
+    name: Ruff lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Run ruff
+        run: ruff check src/ GEE_dynamic/ NDVI_pred/ main_audit.py --output-format=github

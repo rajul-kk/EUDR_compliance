@@ -33,6 +33,7 @@ venv/
 ENV/
 env/
 .venv/
+.venv313/
 
 # IDE
 .idea/
@@ -65,7 +66,8 @@ cache/
 reports/scraper_upgrade_spec.md
 TESSERA_mitigation_spec.md
 implementation_plan_tessera_deeplab.md
-*.txt
+reports/*.txt
+reports/**/*.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints/
