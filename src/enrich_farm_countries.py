@@ -2,9 +2,13 @@
 Enrich farms_osm.csv with ISO2 country codes using boundary heuristics.
 Simple lookup based on lat/lon ranges for major agricultural regions.
 """
-import pandas as pd
+import logging
 import os
 import sys
+
+import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 # Country boundary lookup: (lat_min, lat_max, lon_min, lon_max, iso2)
 # Covers major agricultural regions in the dataset
@@ -63,13 +67,12 @@ def infer_country_iso2(lat, lon):
 def enrich_with_heuristic(df):
     """Use simple lat/lon-based country lookup."""
     try:
-        print("🌍 Using lat/lon boundary lookup for country inference...")
+        logger.info("Using lat/lon boundary lookup for country inference")
         df = df.copy()
 
         if 'country_iso2' not in df.columns:
             df['country_iso2'] = ''
 
-        # Fill only missing ISO2 values to preserve existing assignments.
         for idx, row in df.iterrows():
             raw_current = row.get('country_iso2', '')
             if pd.notna(raw_current) and str(raw_current).strip() and str(raw_current).strip().lower() != 'nan':
@@ -77,51 +80,47 @@ def enrich_with_heuristic(df):
             df.at[idx, 'country_iso2'] = infer_country_iso2(row['lat'], row['lon'])
 
         return df
-        
+
     except Exception as e:
-        print(f"⚠️ Heuristic enrichment failed: {e}")
+        logger.warning("Heuristic enrichment failed: %s", e)
         return None
 
 
 def main():
     csv_path = 'inputs/farms_osm.csv'
-    output_path = 'inputs/farms_osm.csv'  # Overwrites in place
-    
+    output_path = 'inputs/farms_osm.csv'
+
     if not os.path.exists(csv_path):
-        print(f"❌ CSV not found: {csv_path}")
+        logger.error("CSV not found: %s", csv_path)
         sys.exit(1)
-    
-    print(f"📖 Loading {csv_path}...")
+
+    logger.info("Loading %s", csv_path)
     df = pd.read_csv(csv_path)
-    
+
     before_filled = 0
     if 'country_iso2' in df.columns:
         before_filled = (df['country_iso2'].fillna('').astype(str).str.strip() != '').sum()
-        print(f"🔄 country_iso2 already exists. Filling missing values (currently {before_filled}/{len(df)} filled)...")
+        logger.info("country_iso2 already exists — filling missing values (%d/%d filled)", before_filled, len(df))
     else:
-        print(f"🔄 Enriching {len(df)} farms with country ISO2 codes...")
-    
-    # Use heuristic boundary lookup
+        logger.info("Enriching %d farms with country ISO2 codes", len(df))
+
     result = enrich_with_heuristic(df)
-    
+
     if result is None:
-        print("❌ Enrichment failed. CSV not updated.")
+        logger.error("Enrichment failed — CSV not updated")
         sys.exit(1)
-    
-    # Report results
+
     filled = (result['country_iso2'].fillna('').astype(str).str.strip() != '').sum()
-    print(f"\n✅ Enrichment complete: {filled}/{len(result)} farms with country_iso2")
+    logger.info("Enrichment complete: %d/%d farms with country_iso2", filled, len(result))
     if before_filled:
-        print(f"📈 Newly filled this run: {filled - before_filled}")
-    
-    # Show distribution
+        logger.info("Newly filled this run: %d", filled - before_filled)
+
     if filled > 0:
-        print("\nCountry distribution:")
-        print(result[result['country_iso2'].fillna('').astype(str).str.strip() != '']['country_iso2'].value_counts().head(15))
-    
-    # Save
+        dist = result[result['country_iso2'].fillna('').astype(str).str.strip() != '']['country_iso2'].value_counts().head(15)
+        logger.info("Country distribution:\n%s", dist.to_string())
+
     result.to_csv(output_path, index=False)
-    print(f"\n💾 Saved enriched CSV to {output_path}")
+    logger.info("Saved enriched CSV to %s", output_path)
 
 
 if __name__ == "__main__":

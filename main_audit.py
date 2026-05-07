@@ -22,8 +22,9 @@ _root = os.path.dirname(os.path.abspath(__file__))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
+from src.logging_config import setup_pipeline_logging  # noqa: E402
 from src.pipeline_runner import main  # noqa: E402
 
-
 if __name__ == "__main__":
+    setup_pipeline_logging()
     main()

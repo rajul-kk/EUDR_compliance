@@ -1,9 +1,12 @@
 import argparse
 import glob
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 import numpy as np
 import rasterio
@@ -154,7 +157,7 @@ def run_inference(
         emb_files = sorted(glob.glob(os.path.join(embeddings_dir, "*.npy")))
 
     if not emb_files:
-        print(f"No embedding files found in {embeddings_dir}")
+        logger.warning("No embedding files found in %s", embeddings_dir)
         return
 
     total = len(emb_files)
@@ -164,7 +167,7 @@ def run_inference(
         farm_key = extract_farm_key(base_name)
         if not farm_key:
             if not base_name.startswith("grid_"):
-                print(f"[{idx}/{total}] Skipping (unrecognized key): {base_name}")
+                logger.debug("[%d/%d] Skipping (unrecognized key): %s", idx, total, base_name)
                 continue
 
         try:
@@ -186,11 +189,11 @@ def run_inference(
             write_prediction(output_path, pred, profile)
 
             processed += 1
-            print(f"[{idx}/{total}] Saved: {output_path}")
+            logger.info("[%d/%d] Saved: %s", idx, total, output_path)
         except Exception as e:
-            print(f"[{idx}/{total}] Failed {base_name}: {e}")
+            logger.error("[%d/%d] Failed %s: %s", idx, total, base_name, e)
 
-    print(f"Done: processed {processed}/{total} embeddings.")
+    logger.info("Done: processed %d/%d embeddings", processed, total)
 
 
 def parse_args() -> argparse.Namespace:

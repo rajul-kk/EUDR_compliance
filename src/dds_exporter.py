@@ -27,8 +27,11 @@ import os
 import uuid
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+import logging
 from datetime import date, datetime, timezone
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 import pandas as pd
 
@@ -258,7 +261,7 @@ class DDSExporter:
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2, ensure_ascii=False)
 
-        print(f"DDS JSON written to {output_path} ({len(records)} records)")
+        logger.info("DDS JSON written to %s (%d records)", output_path, len(records))
         return output_path
 
     # ------------------------------------------------------------------
@@ -317,7 +320,7 @@ class DDSExporter:
         ET.indent(tree, space="  ")
         tree.write(output_path, encoding="utf-8", xml_declaration=True)
 
-        print(f"DDS XML written to {output_path} ({len(records)} records)")
+        logger.info("DDS XML written to %s (%d records)", output_path, len(records))
         return output_path
 
     # ------------------------------------------------------------------
@@ -443,5 +446,5 @@ class DDSExporter:
             story.append(Paragraph(f"Evidence hash: {records[0].evidence_hash}", normal_style))
 
         doc.build(story)
-        print(f"DDS PDF written to {output_path}")
+        logger.info("DDS PDF written to %s", output_path)
         return output_path

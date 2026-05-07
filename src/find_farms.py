@@ -1,7 +1,11 @@
-import osmnx as ox
-import pandas as pd
+import logging
 import os
 import time
+
+import osmnx as ox
+import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 # CONFIGURATION
 # Extensive list of regions to ensure we fill the dataset
@@ -82,27 +86,25 @@ OUTPUT_FILE = "inputs/farms_osm.csv"
 GLOBAL_TIMEOUT_SEC = 600 # 10 Minutes Limit
 
 def build_farm_csv():
-    print(f"🌍 Starting Multi-Crop scouting with FALLBACKS...")
+    logger.info("Starting multi-crop scouting")
     start_time = time.time()
-    
-    # Initialize/Load logic
+
     if not os.path.exists(OUTPUT_FILE) or os.path.getsize(OUTPUT_FILE) == 0:
         pd.DataFrame(columns=["farm_id", "lat", "lon", "crop_type"]).to_csv(OUTPUT_FILE, index=False)
         existing_ids = set()
-        print("   Created new database file.")
+        counts = {}
+        logger.info("Created new farm database file")
     else:
         try:
             df_exist = pd.read_csv(OUTPUT_FILE)
             if "farm_id" in df_exist.columns:
                 existing_ids = set(df_exist["farm_id"].astype(str))
-                # Count current per crop
                 counts = df_exist["crop_type"].value_counts().to_dict()
-                print(f"📖 Loaded {len(existing_ids)} existing farms.")
-                print(f"   Current counts: {counts}")
+                logger.info("Loaded %d existing farms | counts=%s", len(existing_ids), counts)
             else:
                 existing_ids = set()
                 counts = {}
-        except:
+        except Exception:
             existing_ids = set()
             counts = {}
 
@@ -110,42 +112,42 @@ def build_farm_csv():
 
     for crop, regions_list in TARGETS.items():
         if time.time() - start_time > GLOBAL_TIMEOUT_SEC:
-            print(f"⏰ Global time limit ({GLOBAL_TIMEOUT_SEC}s) reached. Stopping.")
+            logger.warning("Global time limit (%ds) reached — stopping", GLOBAL_TIMEOUT_SEC)
             break
 
         current_count = counts.get(crop, 0)
         needed = TARGET_COUNT_PER_CROP - current_count
-        
+
         if needed <= 0:
-            print(f"\n✅ {crop}: Already have {current_count} (Target {TARGET_COUNT_PER_CROP}). Skipping.")
+            logger.info("%s: already have %d (target %d) — skipping", crop, current_count, TARGET_COUNT_PER_CROP)
             continue
-            
-        print(f"\n🔎 Scouting for {crop} (Need {needed})...")
-        
+
+        logger.info("Scouting for %s (need %d)", crop, needed)
+
         for info in regions_list:
             if needed <= 0:
                 break
             if time.time() - start_time > GLOBAL_TIMEOUT_SEC:
                 break
-                
+
             region = info["region"]
             tags = info["tags"]
-            print(f"   📍 Checking {region}...")
-            
+            logger.debug("Checking %s", region)
+
             try:
                 gdf = ox.features_from_place(region, tags=tags)
-                print(f"      ✅ Found {len(gdf)} candidates.")
-                
+                logger.debug("Found %d candidates in %s", len(gdf), region)
+
                 batch_farms = []
                 for idx, row in gdf.iterrows():
                     if needed <= 0:
                         break
-                    
+
                     farm_id = f"osm_{idx}".replace("('", "").replace("', ", "_").replace(")", "")
-                    
+
                     if farm_id in existing_ids:
-                        continue 
-                    
+                        continue
+
                     centroid = row.geometry.centroid
                     batch_farms.append({
                         "farm_id": farm_id,
@@ -159,15 +161,14 @@ def build_farm_csv():
 
                 if batch_farms:
                     pd.DataFrame(batch_farms).to_csv(OUTPUT_FILE, mode='a', header=False, index=False)
-                    print(f"      💾 Appended {len(batch_farms)} farms.")
-                
-            except Exception as e:
-                print(f"      ⚠️ Failed/Empty: {e}")
-                
-        print(f"   📦 {crop} finished. New total: {TARGET_COUNT_PER_CROP - needed}")
+                    logger.debug("Appended %d farms from %s", len(batch_farms), region)
 
-    print(f"\n🎉 Process Complete!")
-    print(f"   Total NEW farms added: {total_added}")
+            except Exception as e:
+                logger.warning("OSM query failed for %s: %s", region, e)
+
+        logger.info("%s finished — new total: %d", crop, TARGET_COUNT_PER_CROP - needed)
+
+    logger.info("Farm discovery complete | total new farms added: %d", total_added)
 
 if __name__ == "__main__":
     build_farm_csv()

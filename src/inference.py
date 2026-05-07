@@ -1,5 +1,8 @@
+import logging
 import torch
 import torch.nn as nn
+
+logger = logging.getLogger(__name__)
 from torchvision.models.segmentation import deeplabv3_resnet50
 import rasterio
 import numpy as np
@@ -65,7 +68,7 @@ def load_model(model_path, num_classes=4, in_channels=6):
     model.to(DEVICE)
     model.eval()
     
-    print(f"✅ Model loaded from {model_path}")
+    logger.info("Model loaded from %s", model_path)
     return model
 
 
@@ -82,7 +85,7 @@ def load_tessera_model(model_path):
     model.to(DEVICE)
     model.eval()
 
-    print(f"✅ TESSERA model loaded from {model_path}")
+    logger.info("TESSERA model loaded from %s", model_path)
     return model
 
 def load_image(image_path, expected_in_channels=6):
@@ -161,7 +164,7 @@ def predict_single_image(model, image_path, output_path=None, expected_in_channe
         with rasterio.open(output_path, 'w', **output_profile) as dst:
             dst.write(prediction.astype(rasterio.uint8), 1)
         
-        print(f"✅ Saved prediction to {output_path}")
+        logger.debug("Saved prediction to %s", output_path)
     
     return prediction
 
@@ -189,10 +192,10 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
     image_files = glob.glob(os.path.join(input_dir, file_pattern))
     
     if not image_files:
-        print(f"⚠️ No images found matching {file_pattern} in {input_dir}")
+        logger.warning("No images found matching %s in %s", file_pattern, input_dir)
         return {}
-    
-    print(f"🚀 Running inference on {len(image_files)} images...")
+
+    logger.info("Running inference on %d images", len(image_files))
     
     results = {}
     for i, image_path in enumerate(image_files, 1):
@@ -202,16 +205,16 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
             output_path = os.path.join(output_dir, f"{base_name}_predicted.tif")
             
             # Run inference
-            print(f"[{i}/{len(image_files)}] Processing {base_name}...")
+            logger.info("[%d/%d] Processing %s", i, len(image_files), base_name)
             predict_single_image(model, image_path, output_path, expected_in_channels=6)
             
             results[image_path] = output_path
             
         except Exception as e:
-            print(f"❌ Failed to process {os.path.basename(image_path)}: {e}")
+            logger.error("Failed to process %s: %s", os.path.basename(image_path), e)
             continue
     
-    print(f"\n✅ Inference complete. Processed {len(results)}/{len(image_files)} images.")
+    logger.info("Inference complete: %d/%d images processed", len(results), len(image_files))
     return results
 
 def parse_args():

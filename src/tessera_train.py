@@ -1,8 +1,11 @@
 import argparse
+import logging
 import os
 import random
 import sys
 from typing import Dict, Tuple
+
+logger = logging.getLogger(__name__)
 
 import numpy as np
 import torch
@@ -136,11 +139,9 @@ def train_tessera_head(
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou_running / max(1, len(val_loader))
 
-        print(
-            f"Epoch [{epoch + 1}/{epochs}] "
-            f"train_loss={avg_train_loss:.4f} "
-            f"val_loss={avg_val_loss:.4f} "
-            f"val_mIoU={avg_val_miou:.4f}"
+        logger.info(
+            "Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f",
+            epoch + 1, epochs, avg_train_loss, avg_val_loss, avg_val_miou,
         )
 
         if avg_val_miou > best_miou:
@@ -156,11 +157,11 @@ def train_tessera_head(
                     "seed": seed,
                 },
             )
-            print(f"Saved best checkpoint to {output_model_path}")
+            logger.info("Saved best checkpoint to %s", output_model_path)
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= patience:
-                print(f"Early stopping triggered at epoch {epoch + 1}")
+                logger.info("Early stopping triggered at epoch %d", epoch + 1)
                 break
 
     return {
@@ -198,7 +199,7 @@ def main() -> None:
         seed=args.seed,
         num_workers=args.num_workers,
     )
-    print(f"Best epoch: {int(metrics['best_epoch'])} | Best val mIoU: {metrics['best_val_miou']:.4f}")
+    logger.info("Best epoch: %d | Best val mIoU: %.4f", int(metrics['best_epoch']), metrics['best_val_miou'])
 
 
 if __name__ == "__main__":

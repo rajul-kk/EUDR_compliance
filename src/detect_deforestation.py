@@ -1,5 +1,8 @@
+import logging
 import numpy as np
 import rasterio
+
+logger = logging.getLogger(__name__)
 import rasterio.features
 import pandas as pd
 import os
@@ -110,18 +113,18 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
         
         return metrics
     except Exception as e:
-        print(f"❌ Analysis failed for {farm_id}: {e}")
+        logger.error("Analysis failed for %s: %s", farm_id, e)
         return None
 
 def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path, vector_dir=None):
     """
     Compare all pairs and generate reports.
     """
-    print("🔍 Starting Deforestation Detection with Refinement...")
+    logger.info("Starting deforestation detection with refinement")
     predicted_files = glob.glob(os.path.join(prediction_dir, "*_predicted.tif"))
     
     if not predicted_files:
-        print(f"⚠️ No predicted masks found in {prediction_dir}")
+        logger.warning("No predicted masks found in %s", prediction_dir)
         return None
     
     if vector_dir: os.makedirs(vector_dir, exist_ok=True)
@@ -148,7 +151,7 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
     os.makedirs(os.path.dirname(output_report_path), exist_ok=True)
     report_df.to_csv(output_report_path, index=False)
     
-    print(f"\n✅ Deforestation Report saved to {output_report_path}")
+    logger.info("Deforestation report saved to %s", output_report_path)
     return report_df
 
 def generate_summary_stats(report_df, output_json_path):

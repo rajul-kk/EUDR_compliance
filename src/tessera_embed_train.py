@@ -55,11 +55,14 @@ This module expects embeddings in {embeddings_dir}/embeddings/*.npy
 
 import argparse
 import json
+import logging
 import os
 import random
 import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 import numpy as np
 import torch
@@ -319,11 +322,11 @@ def run_preflight_checks(pairs: List[Tuple[str, Optional[str], str]], expected_i
         raise ValueError("Mask has empty spatial dimensions")
 
     if orphan_scales > 0:
-        print(f"[preflight] Warning: {orphan_scales} pairs reference missing scales files.")
+        logger.warning("[preflight] %d pairs reference missing scales files", orphan_scales)
 
-    print(
-        f"[preflight] OK | pairs={len(pairs)} sample_key={pair_key_from_embedding_path(emb_path)} "
-        f"embedding_shape={embedding.shape} mask_shape={mask.shape}"
+    logger.info(
+        "[preflight] OK | pairs=%d sample_key=%s embedding_shape=%s mask_shape=%s",
+        len(pairs), pair_key_from_embedding_path(emb_path), embedding.shape, mask.shape,
     )
 
 
@@ -354,7 +357,7 @@ def run_dataset_wide_shape_audit(
             f"channel_errors={channel_errors}, empty_dim_errors={empty_dim_errors}, read_errors={read_errors}"
         )
 
-    print(f"[preflight] Dataset-wide shape audit passed for {len(pairs)} pairs")
+    logger.info("[preflight] Dataset-wide shape audit passed for %d pairs", len(pairs))
 
 
 def compute_subset_class_distribution(
@@ -397,9 +400,9 @@ def run_split_distribution_check(
     deltas = np.abs(train_dist - val_dist)
     max_delta = float(np.max(deltas))
 
-    print(
-        "[preflight] Class distribution delta (train vs val): "
-        + ", ".join([f"c{i}={d:.4f}" for i, d in enumerate(deltas)])
+    logger.info(
+        "[preflight] Class distribution delta (train vs val): %s",
+        ", ".join([f"c{i}={d:.4f}" for i, d in enumerate(deltas)]),
     )
 
     if max_delta > max_class_ratio_delta:
@@ -440,7 +443,7 @@ def write_split_manifest(
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
-    print(f"Wrote split manifest: {output_path}")
+    logger.info("Wrote split manifest: %s", output_path)
 
 
 def save_checkpoint(model: nn.Module, output_path: str, config: Dict[str, object], extra: Dict[str, object]) -> None:
@@ -465,7 +468,7 @@ def train(args: argparse.Namespace) -> None:
         year=args.year,
         dataset_mode=args.dataset_mode,
     )
-    print(f"Resolved dataset mode: {dataset.dataset_mode} | pairs: {len(dataset)}")
+    logger.info("Resolved dataset mode: %s | pairs: %d", dataset.dataset_mode, len(dataset))
     if not args.skip_preflight:
         if dataset.missing_scales_count > args.max_missing_scales:
             raise RuntimeError(
@@ -547,9 +550,9 @@ def train(args: argparse.Namespace) -> None:
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou_sum / max(1, len(val_loader))
 
-        print(
-            f"Epoch [{epoch + 1}/{args.epochs}] "
-            f"train_loss={avg_train_loss:.4f} val_loss={avg_val_loss:.4f} val_mIoU={avg_val_miou:.4f}"
+        logger.info(
+            "Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f",
+            epoch + 1, args.epochs, avg_train_loss, avg_val_loss, avg_val_miou,
         )
 
         if avg_val_miou > best_miou:
@@ -570,11 +573,11 @@ def train(args: argparse.Namespace) -> None:
                     "dataset_mode": dataset.dataset_mode,
                 },
             )
-            print(f"Saved best checkpoint: {args.output_model_path}")
+            logger.info("Saved best checkpoint: %s", args.output_model_path)
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= args.patience:
-                print(f"Early stopping at epoch {epoch + 1}")
+                logger.info("Early stopping at epoch %d", epoch + 1)
                 break
 
 

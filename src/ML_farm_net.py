@@ -1,7 +1,10 @@
 
+import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+logger = logging.getLogger(__name__)
 from torch.utils.data import DataLoader
 from torchvision.models.segmentation import deeplabv3_resnet50
 import argparse
@@ -61,7 +64,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     """
     Trains the DeepLabV3 model.
     """
-    print(f"Initializing Dataset from {raw_dir}...")
+    logger.info("Initializing dataset from %s", raw_dir)
     dataset = FarmSegmentationDataset(
         raw_dir, mask_dir, 
         cache_aligned_masks=True,
@@ -70,7 +73,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     )
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0) # workers=0 for windows compat
     
-    print(f"Dataset size: {len(dataset)}")
+    logger.info("Dataset size: %d", len(dataset))
     
     model = get_deeplab_model().to(DEVICE)
     model.train()
@@ -78,7 +81,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     criterion = nn.CrossEntropyLoss(ignore_index=255) # ignore cloud masked pixels
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
-    print(f"Starting training on {DEVICE} for {epochs} epochs...")
+    logger.info("Starting training on %s for %d epochs", DEVICE, epochs)
     
     for epoch in range(epochs):
         epoch_loss = 0.0
@@ -102,14 +105,14 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
             epoch_loss += loss.item()
             
             if i % 5 == 0:
-                print(f"Epoch [{epoch+1}/{epochs}], Step [{i+1}/{len(dataloader)}], Loss: {loss.item():.4f}")
+                logger.info("Epoch [%d/%d] Step [%d/%d] loss=%.4f", epoch+1, epochs, i+1, len(dataloader), loss.item())
                 
-        print(f"Epoch {epoch+1} Complete. Average Loss: {epoch_loss / len(dataloader):.4f}")
+        logger.info("Epoch %d complete avg_loss=%.4f", epoch+1, epoch_loss / len(dataloader))
         
     # Save Model
     os.makedirs(os.path.dirname(output_model_path), exist_ok=True)
     torch.save(model.state_dict(), output_model_path)
-    print(f"Model saved to {output_model_path}")
+    logger.info("Model saved to %s", output_model_path)
 
 
 def parse_args():
