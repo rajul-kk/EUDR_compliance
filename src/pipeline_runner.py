@@ -96,6 +96,35 @@ def run_pipeline(
         logger.error("Mask generation error: %s", e)
         return
 
+    # --- Step 3b: Download embeddings (tessera-embed only) ---
+    tessera_embed_gen_script = os.path.join(current_dir, 'tessera_embedding_generation.py')
+    farms_csv = os.path.join(project_root, 'inputs', 'farms_osm.csv')
+    embeddings_dir = os.path.join(project_root, 'data', 'embeddings', 'global_0.1_degree_representation')
+
+    if model_type == 'tessera-embed':
+        raw_emb_dir = os.path.join(project_root, 'data', 'embeddings')
+        if os.path.isdir(embeddings_dir) and any(True for _ in os.scandir(embeddings_dir)):
+            logger.info("[3b/8] Embeddings already present in %s — skipping download", embeddings_dir)
+        else:
+            logger.info("[3b/8] Downloading precomputed TESSERA embeddings (bbox from farms CSV)")
+            try:
+                if not os.path.exists(tessera_embed_gen_script):
+                    raise FileNotFoundError(f"Script not found: {tessera_embed_gen_script}")
+                subprocess.check_call(
+                    [python_exe, tessera_embed_gen_script,
+                     '--farms-csv', farms_csv,
+                     '--year', '2024',
+                     '--output-dir', raw_emb_dir],
+                    cwd=project_root,
+                )
+                logger.info("Embedding download complete")
+            except subprocess.CalledProcessError as e:
+                logger.error("Embedding download failed (exit %d)", e.returncode)
+                return
+            except Exception as e:
+                logger.error("Embedding download error: %s", e)
+                return
+
     # --- Step 4: Train Model ---
     logger.info("[4/8] Training %s model", model_type.upper())
     try:
@@ -129,7 +158,6 @@ def run_pipeline(
         else:
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_tessera_embed_head.pth')
-            embeddings_dir = os.path.join(project_root, 'data', 'embeddings', 'global_0.1_degree_representation')
             mask_dir = os.path.join(project_root, 'data', 'geotessera_tile_masks')
             subprocess.check_call(
                 [python_exe, training_script,
