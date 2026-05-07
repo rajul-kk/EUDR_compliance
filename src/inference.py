@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 from torchvision.models.segmentation import deeplabv3_resnet50
@@ -9,8 +8,14 @@ import sys
 import glob
 import argparse
 
-# Add parent directory and GEE_dynamic to path for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# Ensure src/ is on sys.path so sibling modules (tessera_backbone) resolve
+# correctly when this script is run from the project root.
+_src_dir = os.path.dirname(os.path.abspath(__file__))
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
+# Add GEE_dynamic for dataset_loader access
+current_dir = _src_dir
 parent_dir = os.path.dirname(current_dir)
 gee_dir = os.path.join(parent_dir, 'GEE_dynamic')
 if gee_dir not in sys.path:

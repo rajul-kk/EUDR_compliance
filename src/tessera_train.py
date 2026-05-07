@@ -10,10 +10,14 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Subset, random_split
 
+# Ensure src/ is on sys.path so sibling modules resolve when running from project root
+_src_dir = os.path.dirname(os.path.abspath(__file__))
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+
 from tessera_backbone import TesseraSegmentationModel
 
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
+current_dir = _src_dir
 parent_dir = os.path.dirname(current_dir)
 gee_dir = os.path.join(parent_dir, "GEE_dynamic")
 if gee_dir not in sys.path:
