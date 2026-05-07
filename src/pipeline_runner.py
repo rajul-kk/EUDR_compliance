@@ -3,7 +3,14 @@ import subprocess
 import sys
 import os
 import argparse
+import json
 import time
+
+# Ensure project root is on sys.path for src.* imports
+_src_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root_early = os.path.dirname(_src_dir)
+if _project_root_early not in sys.path:
+    sys.path.insert(0, _project_root_early)
 
 # Define paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +33,15 @@ def run_pipeline(
     skip_baseline_metrics=False,
     model_type='deeplab',
     model_path=None,
+    export_dds=False,
+    operator_name="",
+    operator_address="",
+    operator_country="",
+    operator_eori="",
+    commodity_hs_code="",
+    commodity_description="",
+    commodity_quantity=0.0,
+    commodity_unit="kg",
 ):
     """
     Runs the end-to-end pipeline:
@@ -294,6 +310,79 @@ def run_pipeline(
     else:
         print("\n[Step 7/7] ⏭️  Skipping Deforestation Detection")
 
+    # --- Step 8: Audit trail + optional DDS export ---
+    if not skip_inference:
+        print("\n" + "="*60)
+        print("[Step 8/8] Writing audit trail...")
+        print("="*60)
+        try:
+            from src.audit_trail import AuditLog, build_audit_entry
+
+            report_csv = os.path.join(project_root, 'reports', 'deforestation_report.csv')
+            summary_json = os.path.join(project_root, 'reports', 'summary_stats.json')
+            summary = {}
+            if os.path.exists(summary_json):
+                with open(summary_json, 'r') as f:
+                    summary = json.load(f)
+
+            try:
+                import subprocess as _sp
+                git_sha = _sp.check_output(
+                    ['git', 'rev-parse', '--short', 'HEAD'],
+                    cwd=project_root, stderr=_sp.DEVNULL
+                ).decode().strip()
+            except Exception:
+                git_sha = "unknown"
+
+            entry = build_audit_entry(
+                model_type=model_type,
+                model_version=git_sha,
+                input_image_dir=os.path.join(project_root, 'data', 'raw_satellite', '2024_current'),
+                prediction_dir=os.path.join(project_root, 'data', f'predictions_2024_{model_type}'),
+                report_csv_path=report_csv,
+                summary=summary,
+            )
+            log = AuditLog(log_path=os.path.join(project_root, 'reports', 'audit_log.jsonl'))
+            entry = log.append(entry)
+            print(f"Audit entry written (run_id={entry.run_id})")
+
+            if export_dds and operator_name:
+                print("Exporting Due Diligence Statements...")
+                from src.dds_exporter import CommodityInfo, DDSExporter, OperatorInfo
+                import pandas as pd
+
+                report_df = pd.read_csv(report_csv)
+                op = OperatorInfo(
+                    name=operator_name,
+                    address=operator_address,
+                    country_iso2=operator_country,
+                    eori=operator_eori,
+                )
+                com = CommodityInfo(
+                    hs_code=commodity_hs_code,
+                    description=commodity_description,
+                    quantity=commodity_quantity,
+                    unit=commodity_unit,
+                    production_start=f"{entry.assessment_year}-01-01",
+                    production_end=f"{entry.assessment_year}-12-31",
+                )
+                exporter = DDSExporter(op, com, model_version=git_sha)
+                records = exporter.from_report(
+                    report_df,
+                    farms_csv=os.path.join(project_root, 'inputs', 'farms_osm.csv'),
+                    evidence_hash=entry.report_hash,
+                )
+                dds_dir = os.path.join(project_root, 'reports', 'dds')
+                exporter.to_json(records, os.path.join(dds_dir, 'dds.json'))
+                exporter.to_xml(records, os.path.join(dds_dir, 'dds.xml'))
+                try:
+                    exporter.to_pdf(records, os.path.join(dds_dir, 'dds.pdf'))
+                except ImportError:
+                    print("PDF export skipped (reportlab not installed).")
+
+        except Exception as e:
+            print(f"Audit/DDS step failed (non-fatal): {e}")
+
     print("\n🎉 Pipeline Finished Successfully!")
     print("📊 Outputs:")
     print(f"   - Trained model: {model_path}")
@@ -302,7 +391,10 @@ def run_pipeline(
         if model_type == 'deeplab' and not skip_baseline_metrics:
             print("   - Baseline metrics: reports/deeplab_baseline_metrics.csv")
         print("   - Compliance report: reports/deforestation_report.csv")
-        print("   - Summary stats: reports/summary_stats.json")
+        print("   - Summary stats:     reports/summary_stats.json")
+        print("   - Audit log:         reports/audit_log.jsonl")
+        if export_dds:
+            print("   - DDS export:        reports/dds/ (JSON, XML, PDF)")
 
 
 def parse_args():
@@ -313,9 +405,22 @@ def parse_args():
     parser.add_argument('--skip-baseline-metrics', action='store_true', help='Skip baseline metric export step (DeepLab only).')
     parser.add_argument('--model-type', choices=['deeplab', 'tessera', 'tessera-embed'], default='deeplab')
     parser.add_argument('--model-path', default=None, help='Optional explicit model checkpoint path.')
+
+    dds = parser.add_argument_group('DDS export (requires --export-dds)')
+    dds.add_argument('--export-dds', action='store_true',
+                     help='Export Due Diligence Statements (JSON, XML, PDF) after detection.')
+    dds.add_argument('--operator-name', default='', help='Legal name of the operator submitting the DDS.')
+    dds.add_argument('--operator-address', default='', help='Operator registered address.')
+    dds.add_argument('--operator-country', default='', help='Operator country (ISO-3166-1 alpha-2).')
+    dds.add_argument('--operator-eori', default='', help='EORI number (optional).')
+    dds.add_argument('--commodity-hs-code', default='', help='HS code of the commodity (e.g. 1801 for cocoa).')
+    dds.add_argument('--commodity-description', default='', help='Commodity description.')
+    dds.add_argument('--commodity-quantity', type=float, default=0.0, help='Quantity of commodity.')
+    dds.add_argument('--commodity-unit', default='kg', help='Unit of measure (kg, t, m3 …).')
     return parser.parse_args()
 
-if __name__ == "__main__":
+
+def main() -> None:
     args = parse_args()
     run_pipeline(
         skip_farm_discovery=not args.run_farm_discovery,
@@ -324,4 +429,17 @@ if __name__ == "__main__":
         skip_baseline_metrics=args.skip_baseline_metrics,
         model_type=args.model_type,
         model_path=args.model_path,
+        export_dds=args.export_dds,
+        operator_name=args.operator_name,
+        operator_address=args.operator_address,
+        operator_country=args.operator_country,
+        operator_eori=args.operator_eori,
+        commodity_hs_code=args.commodity_hs_code,
+        commodity_description=args.commodity_description,
+        commodity_quantity=args.commodity_quantity,
+        commodity_unit=args.commodity_unit,
     )
+
+
+if __name__ == "__main__":
+    main()
