@@ -165,7 +165,7 @@ def generate_summary_stats(report_df, output_json_path):
     return summary
 
 if __name__ == "__main__":
-    BASE_DIR = r'd:\Work\Segmentation-logistics\EUDR-compliance'
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     prediction_dir = os.getenv('EUDR_PRED_DIR', os.path.join(BASE_DIR, 'data/predictions_2024'))
     report_df = batch_detect_deforestation(
         os.path.join(BASE_DIR, 'data/hybrid_masks'),
