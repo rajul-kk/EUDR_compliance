@@ -71,8 +71,6 @@ reports/**/*.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints/
-notebooks/
-*.ipynb
 
 # OS files
 .DS_Store
