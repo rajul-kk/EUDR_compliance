@@ -1,18 +1,18 @@
+import argparse
+import glob
 import io
 import json
 import logging
 import os
 import random
-import glob
-import argparse
 import threading
 import time
 
+import dask
 import numpy as np
 import pandas as pd
-import requests
 import rasterio
-import dask
+import requests
 from dask import delayed
 from dotenv import load_dotenv
 from pystac_client import Client

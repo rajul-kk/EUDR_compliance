@@ -5,10 +5,10 @@ This package provides tools for analyzing satellite imagery to verify
 EUDR (EU Deforestation Regulation) compliance for agricultural supply chains.
 """
 
-from .sentinel_client import SentinelClient
-from .cloud_filter import CloudFilter
-from .vegetation_index import VegetationIndex
 from .change_detector import ChangeDetector, ChangeResult, RiskLevel
+from .cloud_filter import CloudFilter
+from .sentinel_client import SentinelClient
+from .vegetation_index import VegetationIndex
 
 __all__ = [
     "SentinelClient",

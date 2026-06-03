@@ -28,8 +28,8 @@ jobs:
         run: python -m compileall -q src/ GEE_dynamic/ NDVI_pred/ main_audit.py
 
       - name: Verify src package is importable
-        # MagicMock handles any attribute access (e.g. `from dask import delayed`)
-        # without needing GDAL, CUDA, or Earth Engine installed.
+        # MagicMock stubs let us walk the full import graph without
+        # installing GDAL, CUDA, Earth Engine, or other native deps.
         run: |
           python - <<'EOF'
           import sys
@@ -39,6 +39,7 @@ jobs:
               "torch", "torch.nn", "torch.optim", "torch.utils", "torch.utils.data",
               "torchvision", "torchvision.models", "torchvision.models.segmentation",
               "rasterio", "rasterio.warp", "rasterio.features",
+              "affine",
               "cv2", "ee", "s2cloudless", "geotessera",
               "geopandas", "osmnx", "lightgbm",
               "sklearn", "sklearn.metrics", "sklearn.model_selection",
@@ -51,10 +52,31 @@ jobs:
               sys.modules.setdefault(mod, MagicMock())
 
           sys.path.insert(0, ".")
+          sys.path.insert(0, "src")
+
+          # Core package exports
           import src
           from src import SentinelClient, CloudFilter, VegetationIndex
           from src import ChangeDetector, ChangeResult, RiskLevel
-          print("src package imports OK")
+
+          # New modules added this session
+          import src.train_utils
+          import src.logging_config
+          import src.benchmark
+          import src.tessera_embed_infer
+          import src.tessera_embed_train
+          import src.tessera_train
+          import src.pipeline_runner
+          import src.inference
+          import src.detect_deforestation
+          import src.audit_trail
+          import src.dds_exporter
+          import src.find_farms
+          import src.enrich_farm_countries
+          import src.tessera_embedding_generation
+          import src.geotessera_mask_tiler
+
+          print("All src modules import OK")
           EOF
 
   lint:
@@ -71,21 +93,13 @@ jobs:
       - name: Install ruff
         run: pip install ruff
 
-      - name: Lint new files
-        # Only enforce on files added in this project session.
-        # Pre-existing code is reported but does not fail CI.
+      - name: Lint src/ (blocking)
         run: |
-          ruff check \
-            src/cloud_filter.py \
-            src/vegetation_index.py \
-            src/change_detector.py \
-            src/audit_trail.py \
-            src/dds_exporter.py \
-            main_audit.py \
+          ruff check src/ main_audit.py \
             --output-format=github
 
-      - name: Report issues in rest of codebase (informational)
+      - name: Lint GEE_dynamic/ and NDVI_pred/ (informational)
         run: |
-          ruff check src/ GEE_dynamic/ NDVI_pred/ \
+          ruff check GEE_dynamic/ NDVI_pred/ \
             --output-format=github \
             --exit-zero

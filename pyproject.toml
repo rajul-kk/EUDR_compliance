@@ -60,4 +60,9 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "E402",   # module-level import not at top — intentional: logger declared before path-dependent imports
+    "W291",   # trailing whitespace in code
+    "W293",   # trailing whitespace in blank lines (common in docstrings)
+]

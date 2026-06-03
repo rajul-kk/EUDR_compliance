@@ -64,13 +64,19 @@ from typing import Dict, List, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 import numpy as np
+import rasterio
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
-import rasterio
 
-from train_utils import compute_miou, extract_farm_key, load_embedding, seed_everything, split_dataset
+from train_utils import (
+    compute_miou,
+    extract_farm_key,
+    load_embedding,
+    seed_everything,
+    split_dataset,
+)
 
 
 def extract_year(name: str) -> Optional[str]:
@@ -132,7 +138,7 @@ class TesseraEmbeddingDataset(Dataset):
     Raises:
         RuntimeError: If no embedding-mask pairs found after filtering
     """
-    
+
     def __init__(self, embeddings_dir: str, mask_dir: str, year: str = "2020", dataset_mode: str = "auto"):
         self.pairs: List[Tuple[str, Optional[str], str]] = []
         self.missing_scales_count = 0

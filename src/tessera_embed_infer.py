@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 import numpy as np
 import rasterio
-from affine import Affine
 import torch
 import torch.nn as nn
+from affine import Affine
 
 _src_dir = os.path.dirname(os.path.abspath(__file__))
 if _src_dir not in sys.path:

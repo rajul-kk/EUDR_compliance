@@ -23,13 +23,13 @@ Usage:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import uuid
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
-import logging
-from datetime import date, datetime, timezone
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -352,7 +352,7 @@ class DDSExporter:
 
         story.append(Paragraph("EU Deforestation Regulation — Due Diligence Statement", title_style))
         story.append(Spacer(1, 0.4 * cm))
-        story.append(Paragraph(f"Regulation: EU 2023/1115", normal_style))
+        story.append(Paragraph("Regulation: EU 2023/1115", normal_style))
         story.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", normal_style))
         story.append(Spacer(1, 0.6 * cm))
 

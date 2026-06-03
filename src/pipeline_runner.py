@@ -1,10 +1,10 @@
 
-import logging
-import subprocess
-import sys
-import os
 import argparse
 import json
+import logging
+import os
+import subprocess
+import sys
 import time
 
 logger = logging.getLogger(__name__)
@@ -304,8 +304,9 @@ def run_pipeline(
 
             if export_dds and operator_name:
                 logger.info("Exporting Due Diligence Statements")
-                from src.dds_exporter import CommodityInfo, DDSExporter, OperatorInfo
                 import pandas as pd
+
+                from src.dds_exporter import CommodityInfo, DDSExporter, OperatorInfo
 
                 report_df = pd.read_csv(report_csv)
                 op = OperatorInfo(name=operator_name, address=operator_address,

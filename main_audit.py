@@ -14,8 +14,8 @@ Usage examples:
 Run `python main_audit.py --help` for all options.
 """
 
-import sys
 import os
+import sys
 
 # Ensure project root is first on sys.path so all src.* imports resolve.
 _root = os.path.dirname(os.path.abspath(__file__))

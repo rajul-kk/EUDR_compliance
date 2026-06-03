@@ -1,15 +1,17 @@
 import logging
+
 import torch
 import torch.nn as nn
 
 logger = logging.getLogger(__name__)
-from torchvision.models.segmentation import deeplabv3_resnet50
-import rasterio
-import numpy as np
+import argparse
+import glob
 import os
 import sys
-import glob
-import argparse
+
+import numpy as np
+import rasterio
+from torchvision.models.segmentation import deeplabv3_resnet50
 
 # Ensure src/ is on sys.path so sibling modules (tessera_backbone) resolve
 # correctly when this script is run from the project root.
@@ -32,20 +34,20 @@ def get_deeplab_model(num_classes=4, in_channels=5):
     Must match the architecture used in training.
     """
     model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-    
+
     # Modify first conv layer to accept 5 channels (R, G, B, NIR, SCL)
     original_conv1 = model.backbone.conv1
     new_conv1 = nn.Conv2d(
-        in_channels, 
-        original_conv1.out_channels, 
-        kernel_size=original_conv1.kernel_size, 
-        stride=original_conv1.stride, 
-        padding=original_conv1.padding, 
+        in_channels,
+        original_conv1.out_channels,
+        kernel_size=original_conv1.kernel_size,
+        stride=original_conv1.stride,
+        padding=original_conv1.padding,
         bias=original_conv1.bias
     )
     nn.init.kaiming_normal_(new_conv1.weight, mode='fan_out', nonlinearity='relu')
     model.backbone.conv1 = new_conv1
-    
+
     return model
 
 def load_model(model_path, num_classes=4, in_channels=6):
@@ -62,12 +64,12 @@ def load_model(model_path, num_classes=4, in_channels=6):
     """
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found: {model_path}")
-    
+
     model = get_deeplab_model(num_classes, in_channels)
     model.load_state_dict(torch.load(model_path, map_location=DEVICE))
     model.to(DEVICE)
     model.eval()
-    
+
     logger.info("Model loaded from %s", model_path)
     return model
 
@@ -102,11 +104,11 @@ def load_image(image_path, expected_in_channels=6):
     with rasterio.open(image_path) as src:
         image = src.read()  # (C, H, W)
         profile = src.profile
-        
+
         # Validate band count
         if image.shape[0] < 5:
             raise ValueError(f"Expected at least 5 bands, got {image.shape[0]} in {os.path.basename(image_path)}")
-        
+
         # Convert to float32
         image = image.astype(np.float32)
 
@@ -123,10 +125,10 @@ def load_image(image_path, expected_in_channels=6):
                 f"Expected {expected_in_channels} channels after preprocessing, "
                 f"got {image.shape[0]} in {os.path.basename(image_path)}"
             )
-        
+
         # Add batch dimension and convert to tensor
         image_tensor = torch.from_numpy(image).unsqueeze(0)  # (1, C, H, W)
-        
+
     return image_tensor, profile
 
 def predict_single_image(model, image_path, output_path=None, expected_in_channels=6):
@@ -144,12 +146,12 @@ def predict_single_image(model, image_path, output_path=None, expected_in_channe
     # Load image
     image_tensor, profile = load_image(image_path, expected_in_channels=expected_in_channels)
     image_tensor = image_tensor.to(DEVICE)
-    
+
     # Run inference
     with torch.no_grad():
         output = model(image_tensor)['out']  # (1, num_classes, H, W)
         prediction = torch.argmax(output, dim=1).squeeze(0).cpu().numpy()  # (H, W)
-    
+
     # Save if output path provided
     if output_path:
         # Update profile for single-band output
@@ -159,13 +161,13 @@ def predict_single_image(model, image_path, output_path=None, expected_in_channe
             'dtype': rasterio.uint8,
             'compress': 'lzw'
         })
-        
+
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with rasterio.open(output_path, 'w', **output_profile) as dst:
             dst.write(prediction.astype(rasterio.uint8), 1)
-        
+
         logger.debug("Saved prediction to %s", output_path)
-    
+
     return prediction
 
 def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", model_type="deeplab"):
@@ -191,33 +193,33 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
     if torch.cuda.device_count() > 1:
         logger.info("Using DataParallel across %d GPUs for inference", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)
-    
+
     # Find all matching files
     image_files = glob.glob(os.path.join(input_dir, file_pattern))
-    
+
     if not image_files:
         logger.warning("No images found matching %s in %s", file_pattern, input_dir)
         return {}
 
     logger.info("Running inference on %d images", len(image_files))
-    
+
     results = {}
     for i, image_path in enumerate(image_files, 1):
         try:
             # Generate output filename
             base_name = os.path.splitext(os.path.basename(image_path))[0]
             output_path = os.path.join(output_dir, f"{base_name}_predicted.tif")
-            
+
             # Run inference
             logger.info("[%d/%d] Processing %s", i, len(image_files), base_name)
             predict_single_image(model, image_path, output_path, expected_in_channels=6)
-            
+
             results[image_path] = output_path
-            
+
         except Exception as e:
             logger.error("Failed to process %s: %s", os.path.basename(image_path), e)
             continue
-    
+
     logger.info("Inference complete: %d/%d images processed", len(results), len(image_files))
     return results
 

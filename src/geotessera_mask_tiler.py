@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import rasterio
-from rasterio.warp import reproject, Resampling
+from rasterio.warp import Resampling, reproject
 
 
 def read_bounds(path: Path) -> Tuple[float, float, float, float]:

@@ -16,7 +16,7 @@ TARGETS = {
     "Cattle": [
         {"region": "Alta Floresta, Mato Grosso, Brazil", "tags": {"landuse": "meadow"}},
         {"region": "Ji-Parana, Rondonia, Brazil", "tags": {"landuse": "meadow"}},
-        {"region": "Amarillo, Texas, USA", "tags": {"landuse": "meadow"}}, 
+        {"region": "Amarillo, Texas, USA", "tags": {"landuse": "meadow"}},
         {"region": "Rockhampton, Queensland, Australia", "tags": {"landuse": "meadow"}},
         {"region": "La Pampa, Argentina", "tags": {"landuse": "meadow"}},
         {"region": "Cork, Ireland", "tags": {"landuse": "meadow"}},
@@ -25,7 +25,7 @@ TARGETS = {
         {"region": "Garden City, Kansas, USA", "tags": {"landuse": "meadow"}},
         {"region": "Uberaba, Minas Gerais, Brazil", "tags": {"landuse": "meadow"}},
         {"region": "Waikato, New Zealand", "tags": {"landuse": "meadow"}},
-        {"region": "Omaheke, Namibia", "tags": {"landuse": "meadow"}} 
+        {"region": "Omaheke, Namibia", "tags": {"landuse": "meadow"}}
     ],
     "Rubber": [
         {"region": "Surat Thani, Thailand", "tags": {"landuse": "farmland"}},
@@ -54,7 +54,7 @@ TARGETS = {
     ],
     "Coffee": [
         {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
-        {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}}, 
+        {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
         {"region": "Buon Ma Thuot, Vietnam", "tags": {"landuse": "farm"}},
         {"region": "Chinchina, Caldas, Colombia", "tags": {"landuse": "farmland"}},
         {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},

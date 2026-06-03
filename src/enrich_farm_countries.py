@@ -46,11 +46,11 @@ def infer_country_iso2(lat, lon):
     """Simple lat/lon boundary lookup for country ISO2."""
     lat = float(lat)
     lon = float(lon)
-    
+
     for lat_min, lat_max, lon_min, lon_max, iso2 in COUNTRY_BOUNDS:
         if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
             return iso2
-    
+
     # Default fallback based on major regions
     if -20 <= lat <= 5 and lon > 20:
         return 'ZA'  # Africa (generic)
@@ -60,7 +60,7 @@ def infer_country_iso2(lat, lon):
         return 'ID'  # Asia (generic)
     if -30 < lat < 5 and -80 < lon < -35:
         return 'BR'  # South America (generic)
-    
+
     return ''  # Unknown
 
 

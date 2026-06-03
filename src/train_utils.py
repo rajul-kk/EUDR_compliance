@@ -1,13 +1,11 @@
 """Shared training utilities used by tessera_train and tessera_embed_train."""
 
 import logging
-import os
 import random
 import re
 from typing import Optional, Tuple
 
 import numpy as np
-import rasterio
 import torch
 from torch.utils.data import Dataset, Subset, random_split
 

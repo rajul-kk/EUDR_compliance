@@ -1,16 +1,18 @@
 
 import logging
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 logger = logging.getLogger(__name__)
-from torch.utils.data import DataLoader
-from torchvision.models.segmentation import deeplabv3_resnet50
 import argparse
 import os
 import sys
+
 import numpy as np
+from torch.utils.data import DataLoader
+from torchvision.models.segmentation import deeplabv3_resnet50
 
 # Add parent directory and GEE_dynamic to path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +52,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     """
     logger.info("Initializing dataset from %s", raw_dir)
     dataset = FarmSegmentationDataset(
-        raw_dir, mask_dir, 
+        raw_dir, mask_dir,
         cache_aligned_masks=True,
         exclude_crops=exclude_crops,
         exclude_regions=exclude_regions

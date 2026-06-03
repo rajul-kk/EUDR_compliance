@@ -1,10 +1,10 @@
 import argparse
 import csv
-from collections import defaultdict
 import glob
 import json
 import os
 import re
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
