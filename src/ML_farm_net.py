@@ -55,40 +55,52 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
         exclude_crops=exclude_crops,
         exclude_regions=exclude_regions
     )
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0) # workers=0 for windows compat
-    
+    _cuda = torch.cuda.is_available()
+    dataloader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=True,
+        num_workers=min(4, os.cpu_count() or 1),
+        pin_memory=_cuda,
+    )
+
     logger.info("Dataset size: %d", len(dataset))
-    
+
     model = get_deeplab_model().to(DEVICE)
+    if torch.cuda.device_count() > 1:
+        logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
+        model = torch.nn.DataParallel(model)
     model.train()
-    
-    criterion = nn.CrossEntropyLoss(ignore_index=255) # ignore cloud masked pixels
+
+    criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    
+    scaler = torch.cuda.amp.GradScaler(enabled=_cuda)
+
     logger.info("Starting training on %s for %d epochs", DEVICE, epochs)
-    
+
     for epoch in range(epochs):
         epoch_loss = 0.0
-        
+
         for i, (images, masks) in enumerate(dataloader):
             images = images.to(DEVICE)
             masks = masks.to(DEVICE)
-            
+
             optimizer.zero_grad()
-            outputs = model(images)['out']
-            loss = criterion(outputs, masks)
-            loss.backward()
-            optimizer.step()
-            
+            with torch.autocast("cuda", enabled=_cuda):
+                outputs = model(images)['out']
+                loss = criterion(outputs, masks)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+
             epoch_loss += loss.item()
-            
+
             if i % 5 == 0:
                 logger.info("Epoch [%d/%d] Step [%d/%d] loss=%.4f", epoch+1, epochs, i+1, len(dataloader), loss.item())
-                
+
         logger.info("Epoch %d complete avg_loss=%.4f", epoch+1, epoch_loss / len(dataloader))
-        
+
     os.makedirs(os.path.dirname(output_model_path), exist_ok=True)
-    torch.save(model.state_dict(), output_model_path)
+    _state = model.module.state_dict() if isinstance(model, torch.nn.DataParallel) else model.state_dict()
+    torch.save(_state, output_model_path)
     logger.info("Model saved to %s", output_model_path)
 
 
@@ -104,7 +116,7 @@ def parse_args():
     parser.add_argument('--mask-dir', default=default_mask_dir, help='Directory with hybrid masks')
     parser.add_argument('--output-model-path', default=default_model_path, help='Output model .pth path')
     parser.add_argument('--epochs', type=int, default=2, help='Number of training epochs')
-    parser.add_argument('--batch-size', type=int, default=2, help='Batch size')
+    parser.add_argument('--batch-size', type=int, default=8, help='Batch size')
     parser.add_argument('--learning-rate', type=float, default=1e-4, help='Adam learning rate')
     parser.add_argument('--seed', type=int, default=42, help='Random seed')
     return parser.parse_args()
