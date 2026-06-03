@@ -187,6 +187,10 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
         model = load_tessera_model(model_path)
     else:
         raise ValueError(f"Unsupported model_type: {model_type}")
+
+    if torch.cuda.device_count() > 1:
+        logger.info("Using DataParallel across %d GPUs for inference", torch.cuda.device_count())
+        model = torch.nn.DataParallel(model)
     
     # Find all matching files
     image_files = glob.glob(os.path.join(input_dir, file_pattern))
