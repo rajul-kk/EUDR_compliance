@@ -163,7 +163,8 @@ def run_pipeline(
                 [python_exe, training_script,
                  '--embeddings-dir', embeddings_dir, '--mask-dir', mask_dir,
                  '--output-model-path', model_path,
-                 '--dataset-mode', 'geotessera', '--year', '2024'],
+                 '--dataset-mode', 'geotessera', '--year', '2024',
+                 '--device', 'cpu'],
                 cwd=project_root,
             )
         logger.info("Training complete — model: %s", model_path)
