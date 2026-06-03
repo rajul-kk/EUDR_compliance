@@ -72,8 +72,6 @@ import rasterio
 
 from train_utils import compute_miou, extract_farm_key, load_embedding, seed_everything, split_dataset
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 def extract_year(name: str) -> Optional[str]:
     match = re.search(r"_(20\d{2})(?:_|\.)", name)
@@ -389,6 +387,7 @@ def save_checkpoint(model: nn.Module, output_path: str, config: Dict[str, object
 
 
 def train(args: argparse.Namespace) -> None:
+    DEVICE = torch.device(args.device)
     seed_everything(args.seed)
 
     dataset = TesseraEmbeddingDataset(
@@ -530,6 +529,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--patience", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--device", default="cpu",
+                        help="torch device for training (default: cpu — embed head is tiny, CPU is faster)")
 
     parser.add_argument("--in-channels", type=int, default=128)
     parser.add_argument("--hidden-channels", type=int, default=128)
