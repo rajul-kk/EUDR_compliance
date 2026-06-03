@@ -49,13 +49,20 @@ def train_tessera_head(
     dataset = FarmSegmentationDataset(raw_dir, mask_dir, cache_aligned_masks=True)
     train_subset, val_subset = split_dataset(dataset, val_ratio=val_ratio, seed=seed)
 
-    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    _cuda = torch.cuda.is_available()
+    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True,
+                              num_workers=num_workers, pin_memory=_cuda)
+    val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False,
+                            num_workers=num_workers, pin_memory=_cuda)
 
     model = TesseraSegmentationModel(in_channels=6, num_classes=4, freeze_encoder=True).to(DEVICE)
+    if torch.cuda.device_count() > 1:
+        logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
+        model = torch.nn.DataParallel(model)
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam([p for p in model.parameters() if p.requires_grad], lr=learning_rate)
+    scaler = torch.cuda.amp.GradScaler(enabled=_cuda)
 
     best_miou = -1.0
     best_epoch = -1
@@ -70,10 +77,12 @@ def train_tessera_head(
             masks = masks.to(DEVICE)
 
             optimizer.zero_grad()
-            logits = model(images)["out"]
-            loss = criterion(logits, masks)
-            loss.backward()
-            optimizer.step()
+            with torch.autocast("cuda", enabled=_cuda):
+                logits = model(images)["out"]
+                loss = criterion(logits, masks)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
 
             train_loss += loss.item()
 
@@ -105,7 +114,8 @@ def train_tessera_head(
             best_miou = avg_val_miou
             best_epoch = epoch + 1
             epochs_without_improvement = 0
-            model.save_checkpoint(
+            _model = model.module if isinstance(model, torch.nn.DataParallel) else model
+            _model.save_checkpoint(
                 output_model_path,
                 extra={
                     "best_epoch": best_epoch,
