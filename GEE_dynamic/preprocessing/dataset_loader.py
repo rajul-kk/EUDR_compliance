@@ -1,11 +1,13 @@
+import random
+
+import numpy as np
+import os
+import pandas as pd
+import re
+import rasterio
+import sys
 import torch
 from torch.utils.data import Dataset
-import rasterio
-import os
-import re
-import numpy as np
-import sys
-import pandas as pd
 
 # Add parent dir to path if needed to find preprocessing
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,8 +18,8 @@ if parent_dir not in sys.path:
 from preprocessing.aligner import align_mask_to_image, check_alignment
 
 class FarmSegmentationDataset(Dataset):
-    def __init__(self, raw_dir, mask_dir, transform=None, cache_aligned_masks=True, 
-                 exclude_crops=None, exclude_regions=None):
+    def __init__(self, raw_dir, mask_dir, transform=None, cache_aligned_masks=True,
+                 exclude_crops=None, exclude_regions=None, training=False):
         """
         Args:
             raw_dir (str): Directory with Sentinel-2 images.
@@ -31,6 +33,7 @@ class FarmSegmentationDataset(Dataset):
         self.mask_dir = mask_dir
         self.transform = transform
         self.cache_aligned_masks = cache_aligned_masks
+        self.training = training
         
         # Load metadata for filtering
         project_root = os.path.dirname(parent_dir)
@@ -154,16 +157,16 @@ class FarmSegmentationDataset(Dataset):
             scl = image[4, :, :]
             image = image.astype(np.float32)
             
-            # --- NDVI Calculation ---
-            # Red = Band 0 (B04), NIR = Band 3 (B08)
+            # Derived indices
             red = image[0, :, :]
             nir = image[3, :, :]
+            green = image[1, :, :]
             ndvi = (nir - red) / (nir + red + 1e-8)
-            
-            # Append NDVI as 6th channel (B, 1, H, W) -> concatenate along channel dim
-            # ndvi is (H, W), we need (1, H, W)
+            ndwi = (green - nir) / (green + nir + 1e-8)  # water mask; negative inside forests
+
             ndvi = np.expand_dims(ndvi, axis=0)
-            image = np.concatenate([image, ndvi], axis=0) # Now 6 channels: [R, G, B, NIR, SCL, NDVI]
+            ndwi = np.expand_dims(ndwi, axis=0)
+            image = np.concatenate([image, ndvi, ndwi], axis=0)  # 7 channels: [R,G,B,NIR,SCL,NDVI,NDWI]
 
         # 3. Load Mask
         with rasterio.open(aligned_mask_path) as src:
@@ -176,7 +179,26 @@ class FarmSegmentationDataset(Dataset):
         # Set label to 255 (ignore_index) where clouds exist
         mask[cloud_pixels] = 255
         
-        # Convert to Tensor
+        # Training augmentation (geometric + mild radiometric)
+        if self.training:
+            # Random horizontal flip
+            if random.random() < 0.5:
+                image = image[:, :, ::-1].copy()
+                mask = mask[:, ::-1].copy()
+            # Random vertical flip
+            if random.random() < 0.5:
+                image = image[:, ::-1, :].copy()
+                mask = mask[::-1, :].copy()
+            # Random 90° rotation
+            k = random.randint(0, 3)
+            if k > 0:
+                image = np.rot90(image, k=k, axes=(1, 2)).copy()
+                mask = np.rot90(mask, k=k, axes=(0, 1)).copy()
+            # Brightness jitter on optical bands only (not SCL at index 4)
+            factor = random.uniform(0.9, 1.1)
+            optical = [0, 1, 2, 3, 5, 6]  # R, G, B, NIR, NDVI, NDWI
+            image[optical] = np.clip(image[optical] * factor, 0, None)
+
         image = torch.from_numpy(image)
         mask = torch.from_numpy(mask)
 

@@ -38,9 +38,10 @@ def _load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
         raise ValueError(f"Expected ≥5 bands, got {img.shape[0]} in {path}")
 
     scl = img[4].astype(np.uint8)
-    red, nir = img[0], img[3]
+    red, nir, green = img[0], img[3], img[1]
     ndvi = (nir - red) / (nir + red + 1e-8)
-    img = np.concatenate([img, np.expand_dims(ndvi, 0)], axis=0)  # (6, H, W)
+    ndwi = (green - nir) / (green + nir + 1e-8)
+    img = np.concatenate([img, np.expand_dims(ndvi, 0), np.expand_dims(ndwi, 0)], axis=0)  # (7, H, W)
     return img, scl
 
 

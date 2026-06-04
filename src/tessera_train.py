@@ -55,7 +55,7 @@ def train_tessera_head(
     val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False,
                             num_workers=num_workers, pin_memory=_cuda)
 
-    model = TesseraSegmentationModel(in_channels=6, num_classes=4, freeze_encoder=True).to(DEVICE)
+    model = TesseraSegmentationModel(in_channels=7, num_classes=4, freeze_encoder=True).to(DEVICE)
     if torch.cuda.device_count() > 1:
         logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)
