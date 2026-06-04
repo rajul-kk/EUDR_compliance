@@ -416,11 +416,126 @@ def run_benchmark(
     print(f"Benchmark report saved to {output_csv}")
 
 
+ALL_MODEL_TYPES = ["deeplab", "tessera", "tessera-embed", "siamese", "embed-change", "hybrid"]
+
+# Models that output a change map directly (binary: 0=no-change, 1=forest-loss)
+CHANGE_DETECTION_MODELS = {"siamese", "embed-change"}
+
+# Models that still do two-stage segmentation but can be benchmarked via run_baseline_metrics
+TWO_STAGE_MODELS = {"deeplab", "tessera", "tessera-embed", "hybrid"}
+
+
+def run_change_detection_benchmark(
+    change_pred_dir: str,
+    mask_t1_dir: str,
+    mask_t2_dir: str,
+    farms_csv: str,
+    output_csv: str,
+    model_name: str,
+    train_seconds: Optional[float] = None,
+    inference_seconds: Optional[float] = None,
+) -> None:
+    """Benchmark models that directly output a binary change map.
+
+    Args:
+        change_pred_dir: Directory with *_change.tif predictions (1=forest-loss, 0=no-change).
+        mask_t1_dir:     Directory with 2020 hybrid masks (ground truth for t1 forest cover).
+        mask_t2_dir:     Directory with 2024 hybrid masks (ground truth for t2 forest cover).
+    """
+    pred_files = sorted(glob.glob(os.path.join(change_pred_dir, "*.tif")))
+    if not pred_files:
+        raise FileNotFoundError(f"No change prediction .tif files found in {change_pred_dir}")
+
+    crop_map = load_crop_map(farms_csv)
+    overall = {"samples": 0, "change_tp": 0.0, "change_fp": 0.0, "change_fn": 0.0}
+    by_crop: Dict = defaultdict(lambda: {"samples": 0, "change_tp": 0.0, "change_fp": 0.0, "change_fn": 0.0})
+
+    for pred_path in pred_files:
+        filename = os.path.basename(pred_path)
+        farm_key = extract_farm_key_from_prediction_name(filename)
+        if not farm_key:
+            continue
+
+        mask_t1_path = find_mask(mask_t1_dir, farm_key, "2020")
+        mask_t2_path = find_mask(mask_t2_dir, farm_key, "2024")
+        if mask_t1_path is None or mask_t2_path is None:
+            continue
+
+        y_pred_change = load_mask(pred_path)  # 1 = predicted forest loss
+        y_t1 = load_mask(mask_t1_path)
+        y_t2 = load_mask(mask_t2_path)
+
+        y_pred_change, y_t1, y_t2 = align_shapes(y_pred_change, y_t1, y_t2)
+
+        # Ground truth change: was forest in 2020, not forest in 2024
+        gt_change = (y_t1 == 1) & (y_t2 != 1) & (y_t2 != 255)
+        pred_change = y_pred_change == 1
+
+        tp = float(np.sum(gt_change & pred_change))
+        fp = float(np.sum((~gt_change) & pred_change))
+        fn = float(np.sum(gt_change & (~pred_change)))
+
+        overall["samples"] += 1
+        overall["change_tp"] += tp
+        overall["change_fp"] += fp
+        overall["change_fn"] += fn
+
+        crop = crop_map.get(f"osm_{farm_key}", "UNKNOWN")
+        by_crop[crop]["samples"] += 1
+        by_crop[crop]["change_tp"] += tp
+        by_crop[crop]["change_fp"] += fp
+        by_crop[crop]["change_fn"] += fn
+
+    if overall["samples"] == 0:
+        raise RuntimeError("No valid change prediction / mask pairs found.")
+
+    rows: List[Dict] = []
+    cp, cr, cf1 = precision_recall_f1(overall["change_tp"], overall["change_fp"], overall["change_fn"])
+    rows.append({
+        "scope": "overall", "model": model_name, "crop_type": "ALL",
+        "samples": overall["samples"], "miou": "",
+        "forest_precision": "", "forest_recall": "", "forest_f1": "",
+        "change_precision": cp, "change_recall": cr, "change_f1": cf1,
+        "train_seconds": train_seconds if train_seconds is not None else "",
+        "inference_seconds": inference_seconds if inference_seconds is not None else "",
+    })
+
+    for crop, acc in sorted(by_crop.items()):
+        if acc["samples"] == 0:
+            continue
+        cp2, cr2, cf2 = precision_recall_f1(acc["change_tp"], acc["change_fp"], acc["change_fn"])
+        rows.append({
+            "scope": "crop", "model": model_name, "crop_type": crop,
+            "samples": acc["samples"], "miou": "",
+            "forest_precision": "", "forest_recall": "", "forest_f1": "",
+            "change_precision": cp2, "change_recall": cr2, "change_f1": cf2,
+            "train_seconds": "", "inference_seconds": "",
+        })
+
+    os.makedirs(os.path.dirname(output_csv) or ".", exist_ok=True)
+    file_exists = os.path.exists(output_csv)
+    fieldnames = ["scope", "model", "crop_type", "samples", "miou",
+                  "forest_precision", "forest_recall", "forest_f1",
+                  "change_precision", "change_recall", "change_f1",
+                  "train_seconds", "inference_seconds"]
+    with open(output_csv, "a" if file_exists else "w", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Change detection benchmark saved to {output_csv}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Benchmark utilities for segmentation outputs.")
-    parser.add_argument("--mode", choices=["compare", "baseline"], default="compare")
+    parser.add_argument("--mode", choices=["compare", "baseline", "change"], default="baseline",
+                        help="compare: deeplab vs tessera; baseline: two-stage model; change: direct change map")
     parser.add_argument("--output-csv", required=True)
+    parser.add_argument("--model-type", choices=ALL_MODEL_TYPES, default="deeplab",
+                        help="Model architecture being evaluated")
 
+    # compare mode
     parser.add_argument("--baseline-2020-dir", default=None)
     parser.add_argument("--masks-2024-dir", default=None)
     parser.add_argument("--deeplab-pred-dir", default=None)
@@ -428,33 +543,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--deeplab-elapsed-seconds", type=float, default=None)
     parser.add_argument("--tessera-elapsed-seconds", type=float, default=None)
 
+    # baseline mode (two-stage models)
     parser.add_argument("--prediction-dir", default=None)
     parser.add_argument("--mask-dir", default=None)
     parser.add_argument("--farms-csv", default=None)
-    parser.add_argument("--model-name", default="deeplab")
+    parser.add_argument("--model-name", default=None, help="Model name label in output CSV (defaults to --model-type)")
     parser.add_argument("--train-seconds", type=float, default=None)
     parser.add_argument("--inference-seconds", type=float, default=None)
-    parser.add_argument("--split-manifest-path", default=None, help="Optional JSON split manifest from training")
-    parser.add_argument("--split-name", default="val", help="Split name to evaluate from manifest, e.g. val")
+    parser.add_argument("--split-manifest-path", default=None)
+    parser.add_argument("--split-name", default="val")
+
+    # change mode (direct change map models: siamese, embed-change)
+    parser.add_argument("--change-pred-dir", default=None, help="Directory with binary change map predictions")
+    parser.add_argument("--mask-t1-dir", default=None, help="2020 hybrid mask directory")
+    parser.add_argument("--mask-t2-dir", default=None, help="2024 hybrid mask directory")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    model_label = args.model_name or args.model_type
+
     if args.mode == "compare":
-        missing = [
-            name
-            for name, value in [
-                ("--baseline-2020-dir", args.baseline_2020_dir),
-                ("--masks-2024-dir", args.masks_2024_dir),
-                ("--deeplab-pred-dir", args.deeplab_pred_dir),
-                ("--tessera-pred-dir", args.tessera_pred_dir),
-            ]
-            if not value
-        ]
+        missing = [n for n, v in [
+            ("--baseline-2020-dir", args.baseline_2020_dir),
+            ("--masks-2024-dir", args.masks_2024_dir),
+            ("--deeplab-pred-dir", args.deeplab_pred_dir),
+            ("--tessera-pred-dir", args.tessera_pred_dir),
+        ] if not v]
         if missing:
             raise ValueError(f"Missing required arguments for compare mode: {', '.join(missing)}")
-
         run_benchmark(
             baseline_2020_dir=args.baseline_2020_dir,
             masks_2024_dir=args.masks_2024_dir,
@@ -466,28 +584,45 @@ def main() -> None:
         )
         return
 
-    missing = [
-        name
-        for name, value in [
-            ("--prediction-dir", args.prediction_dir),
-            ("--mask-dir", args.mask_dir),
+    if args.mode == "change" or args.model_type in CHANGE_DETECTION_MODELS:
+        missing = [n for n, v in [
+            ("--change-pred-dir", args.change_pred_dir),
+            ("--mask-t1-dir", args.mask_t1_dir),
+            ("--mask-t2-dir", args.mask_t2_dir),
             ("--farms-csv", args.farms_csv),
-        ]
-        if not value
-    ]
+        ] if not v]
+        if missing:
+            raise ValueError(f"Missing required arguments for change mode: {', '.join(missing)}")
+        run_change_detection_benchmark(
+            change_pred_dir=args.change_pred_dir,
+            mask_t1_dir=args.mask_t1_dir,
+            mask_t2_dir=args.mask_t2_dir,
+            farms_csv=args.farms_csv,
+            output_csv=args.output_csv,
+            model_name=model_label,
+            train_seconds=args.train_seconds,
+            inference_seconds=args.inference_seconds,
+        )
+        return
+
+    # baseline mode — all two-stage models (deeplab, tessera, tessera-embed, hybrid)
+    missing = [n for n, v in [
+        ("--prediction-dir", args.prediction_dir),
+        ("--mask-dir", args.mask_dir),
+        ("--farms-csv", args.farms_csv),
+    ] if not v]
     if missing:
         raise ValueError(f"Missing required arguments for baseline mode: {', '.join(missing)}")
-
     run_baseline_metrics(
         prediction_dir=args.prediction_dir,
         mask_dir=args.mask_dir,
         farms_csv=args.farms_csv,
         output_csv=args.output_csv,
-        model_name=args.model_name,
+        model_name=model_label,
         train_seconds=args.train_seconds,
         inference_seconds=args.inference_seconds,
-            split_manifest_path=args.split_manifest_path,
-            split_name=args.split_name,
+        split_manifest_path=args.split_manifest_path,
+        split_name=args.split_name,
     )
 
 
