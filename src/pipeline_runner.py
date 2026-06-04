@@ -128,12 +128,22 @@ def run_pipeline(
     # --- Step 4: Train Model ---
     logger.info("[4/8] Training %s model", model_type.upper())
     try:
+        _change_siamese_script = os.path.join(current_dir, 'change_siamese_train.py')
+        _change_embed_script = os.path.join(current_dir, 'change_embed_train.py')
+        _hybrid_script = os.path.join(current_dir, 'hybrid_train.py')
+
         if model_type == 'deeplab':
             training_script = train_script
         elif model_type == 'tessera':
             training_script = tessera_train_script
         elif model_type == 'tessera-embed':
             training_script = tessera_embed_train_script
+        elif model_type == 'siamese':
+            training_script = _change_siamese_script
+        elif model_type == 'embed-change':
+            training_script = _change_embed_script
+        elif model_type == 'hybrid':
+            training_script = _hybrid_script
         else:
             raise ValueError(f"Unsupported model_type: {model_type}")
 
@@ -155,7 +165,7 @@ def run_pipeline(
                  '--output-model-path', model_path],
                 cwd=project_root,
             )
-        else:
+        elif model_type == 'tessera-embed':
             if model_path is None:
                 model_path = os.path.join(project_root, 'models', 'farm_tessera_embed_head.pth')
             mask_dir = os.path.join(project_root, 'data', 'geotessera_tile_masks')
@@ -165,6 +175,42 @@ def run_pipeline(
                  '--output-model-path', model_path,
                  '--dataset-mode', 'geotessera', '--year', '2024',
                  '--device', 'cpu'],
+                cwd=project_root,
+            )
+        elif model_type == 'siamese':
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_change_siamese.pth')
+            t1_dir = os.path.join(project_root, 'data', 'raw_satellite', '2020_baseline')
+            t2_dir = os.path.join(project_root, 'data', 'raw_satellite', '2024_current')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            subprocess.check_call(
+                [python_exe, training_script,
+                 '--t1-dir', t1_dir, '--t2-dir', t2_dir,
+                 '--mask-dir', mask_dir, '--output-model-path', model_path],
+                cwd=project_root,
+            )
+        elif model_type == 'embed-change':
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_embed_change.pth')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            subprocess.check_call(
+                [python_exe, training_script,
+                 '--embeddings-dir-t1', embeddings_dir,
+                 '--embeddings-dir-t2', embeddings_dir,
+                 '--mask-dir', mask_dir, '--output-model-path', model_path,
+                 '--device', 'cpu'],
+                cwd=project_root,
+            )
+        elif model_type == 'hybrid':
+            if model_path is None:
+                model_path = os.path.join(project_root, 'models', 'farm_hybrid.pth')
+            raw_dir = os.path.join(project_root, 'data', 'raw_satellite', '2020_baseline')
+            mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
+            subprocess.check_call(
+                [python_exe, training_script,
+                 '--raw-dir', raw_dir, '--mask-dir', mask_dir,
+                 '--embeddings-dir', embeddings_dir,
+                 '--output-model-path', model_path],
                 cwd=project_root,
             )
         logger.info("Training complete — model: %s", model_path)
@@ -345,7 +391,10 @@ def parse_args():
     parser.add_argument('--run-image-download', action='store_true')
     parser.add_argument('--skip-inference', action='store_true')
     parser.add_argument('--skip-baseline-metrics', action='store_true')
-    parser.add_argument('--model-type', choices=['deeplab', 'tessera', 'tessera-embed'], default='deeplab')
+    parser.add_argument('--model-type',
+                        choices=['deeplab', 'tessera', 'tessera-embed',
+                                 'siamese', 'embed-change', 'hybrid'],
+                        default='deeplab')
     parser.add_argument('--model-path', default=None)
 
     dds = parser.add_argument_group('DDS export (requires --export-dds)')

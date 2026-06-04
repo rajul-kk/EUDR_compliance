@@ -122,6 +122,58 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
         logger.error("Analysis failed for %s: %s", farm_id, e)
         return None
 
+def analyze_farm_change(change_mask_path: str, farm_id: str, output_vector_dir=None):
+    """Analyze deforestation from a pre-computed binary change mask.
+
+    For use with change-detection models (M3 Siamese, M5 embed-change) that
+    directly output a change map (1=forest-loss, 0=no-change) rather than
+    requiring a two-mask comparison.
+
+    Args:
+        change_mask_path: Path to GeoTIFF where 1 = predicted forest loss.
+        farm_id:          Farm identifier string for output labelling.
+        output_vector_dir: Optional directory to write a GeoJSON vector output.
+
+    Returns:
+        Dict with change metrics, or None on failure.
+    """
+    try:
+        with rasterio.open(change_mask_path) as src:
+            change_mask = src.read(1)
+            transform = src.transform
+            crs = src.crs
+
+        total_pixels = change_mask.size
+        change_pixels = int(np.sum(change_mask == 1))
+        deforestation_pct = (change_pixels / total_pixels) * 100 if total_pixels > 0 else 0.0
+
+        if deforestation_pct > 10:
+            alert_level = 'VIOLATION'
+        elif deforestation_pct > 5:
+            alert_level = 'WARNING'
+        else:
+            alert_level = 'COMPLIANT'
+
+        metrics = {
+            'farm_id': farm_id,
+            'change_pixels': change_pixels,
+            'total_pixels': total_pixels,
+            'deforestation_percent': round(deforestation_pct, 2),
+            'alert_level': alert_level,
+        }
+
+        if output_vector_dir:
+            os.makedirs(output_vector_dir, exist_ok=True)
+            vector_path = os.path.join(output_vector_dir, f"{farm_id}_change.geojson")
+            export_deforestation_vector(change_mask, np.zeros_like(change_mask), transform, crs, vector_path, forest_class=1)
+            metrics['vector_report'] = vector_path
+
+        return metrics
+    except Exception as e:
+        logger.error("Change analysis failed for %s: %s", farm_id, e)
+        return None
+
+
 def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path, vector_dir=None):
     """
     Compare all pairs and generate reports.
