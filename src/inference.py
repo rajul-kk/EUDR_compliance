@@ -28,14 +28,9 @@ if gee_dir not in sys.path:
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def get_deeplab_model(num_classes=4, in_channels=5):
-    """
-    Returns a DeepLabV3 model with ResNet50 backbone modified for N input channels.
-    Must match the architecture used in training.
-    """
+def get_deeplab_model(num_classes=4, in_channels=7):
+    """Returns a DeepLabV3 model with ResNet50 backbone modified for N input channels."""
     model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-
-    # Modify first conv layer to accept 5 channels (R, G, B, NIR, SCL)
     original_conv1 = model.backbone.conv1
     new_conv1 = nn.Conv2d(
         in_channels,
@@ -43,14 +38,13 @@ def get_deeplab_model(num_classes=4, in_channels=5):
         kernel_size=original_conv1.kernel_size,
         stride=original_conv1.stride,
         padding=original_conv1.padding,
-        bias=original_conv1.bias
+        bias=original_conv1.bias,
     )
     nn.init.kaiming_normal_(new_conv1.weight, mode='fan_out', nonlinearity='relu')
     model.backbone.conv1 = new_conv1
-
     return model
 
-def load_model(model_path, num_classes=4, in_channels=6):
+def load_model(model_path, num_classes=4, in_channels=7):
     """
     Load a trained DeepLabV3 model from disk.
     
@@ -112,13 +106,14 @@ def load_image(image_path, expected_in_channels=6):
         # Convert to float32
         image = image.astype(np.float32)
 
-        # The training pipeline appends NDVI as an extra channel.
-        if expected_in_channels >= 6 and image.shape[0] == 5:
-            red = image[0, :, :]
-            nir = image[3, :, :]
+        # Append derived indices to match training channel layout [R,G,B,NIR,SCL,NDVI,NDWI]
+        if image.shape[0] == 5:
+            red, nir, green = image[0], image[3], image[1]
             ndvi = (nir - red) / (nir + red + 1e-8)
-            ndvi = np.expand_dims(ndvi, axis=0)
-            image = np.concatenate([image, ndvi], axis=0)
+            ndwi = (green - nir) / (green + nir + 1e-8)
+            image = np.concatenate([image,
+                                    np.expand_dims(ndvi, 0),
+                                    np.expand_dims(ndwi, 0)], axis=0)  # → 7 channels
 
         if image.shape[0] != expected_in_channels:
             raise ValueError(
@@ -131,46 +126,50 @@ def load_image(image_path, expected_in_channels=6):
 
     return image_tensor, profile
 
-def predict_single_image(model, image_path, output_path=None, expected_in_channels=6):
-    """
-    Run inference on a single image and optionally save the result.
-    
+def predict_single_image(model, image_path, output_path=None, expected_in_channels=7,
+                         uncertainty=False, mc_passes=20):
+    """Run inference on a single image and optionally save the result.
+
     Args:
-        model: Trained PyTorch model
-        image_path: Path to input image
-        output_path: Optional path to save predicted mask
-    
-    Returns:
-        prediction: Numpy array (H, W) with class labels
+        uncertainty: If True, run MC Dropout and save an entropy uncertainty GeoTIFF
+                     alongside the prediction (suffix _uncertainty.tif).
+        mc_passes:   Number of stochastic passes for MC Dropout (default 20).
     """
-    # Load image
+    from train_utils import mc_dropout_predict
+
     image_tensor, profile = load_image(image_path, expected_in_channels=expected_in_channels)
     image_tensor = image_tensor.to(DEVICE)
 
-    # Run inference
-    with torch.no_grad():
-        output = model(image_tensor)['out']  # (1, num_classes, H, W)
-        prediction = torch.argmax(output, dim=1).squeeze(0).cpu().numpy()  # (H, W)
+    if uncertainty:
+        mean_probs, unc_map = mc_dropout_predict(model, image_tensor, n_passes=mc_passes)
+        prediction = torch.argmax(mean_probs, dim=1).squeeze(0).cpu().numpy()
+        unc_np = unc_map.squeeze(0).cpu().numpy()
+    else:
+        with torch.no_grad():
+            output = model(image_tensor)['out']
+            prediction = torch.argmax(output, dim=1).squeeze(0).cpu().numpy()
+        unc_np = None
 
-    # Save if output path provided
     if output_path:
-        # Update profile for single-band output
         output_profile = profile.copy()
-        output_profile.update({
-            'count': 1,
-            'dtype': rasterio.uint8,
-            'compress': 'lzw'
-        })
-
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_profile.update({'count': 1, 'dtype': rasterio.uint8, 'compress': 'lzw'})
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         with rasterio.open(output_path, 'w', **output_profile) as dst:
             dst.write(prediction.astype(rasterio.uint8), 1)
-
         logger.debug("Saved prediction to %s", output_path)
+
+        if unc_np is not None:
+            unc_path = output_path.replace('.tif', '_uncertainty.tif')
+            unc_profile = profile.copy()
+            unc_profile.update({'count': 1, 'dtype': rasterio.float32, 'compress': 'lzw'})
+            with rasterio.open(unc_path, 'w', **unc_profile) as dst:
+                dst.write(unc_np.astype(np.float32), 1)
+            logger.debug("Saved uncertainty map to %s", unc_path)
 
     return prediction
 
-def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", model_type="deeplab"):
+def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", model_type="deeplab",
+                    uncertainty=False, mc_passes=20):
     """
     Run inference on all images in a directory.
     
@@ -184,7 +183,7 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
         results: Dictionary mapping input paths to output paths
     """
     if model_type == "deeplab":
-        model = load_model(model_path, num_classes=4, in_channels=6)
+        model = load_model(model_path, num_classes=4, in_channels=7)
     elif model_type == "tessera":
         model = load_tessera_model(model_path)
     else:
@@ -212,7 +211,8 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
 
             # Run inference
             logger.info("[%d/%d] Processing %s", i, len(image_files), base_name)
-            predict_single_image(model, image_path, output_path, expected_in_channels=6)
+            predict_single_image(model, image_path, output_path, expected_in_channels=7,
+                                 uncertainty=uncertainty, mc_passes=mc_passes)
 
             results[image_path] = output_path
 
@@ -230,6 +230,10 @@ def parse_args():
     parser.add_argument("--output-dir", required=True, help="Directory where predictions will be written")
     parser.add_argument("--file-pattern", default="*.tiff", help="Glob pattern for input files")
     parser.add_argument("--model-type", choices=["deeplab", "tessera"], default="deeplab")
+    parser.add_argument("--uncertainty", action="store_true",
+                        help="Run MC Dropout and save per-pixel entropy uncertainty maps alongside predictions")
+    parser.add_argument("--mc-passes", type=int, default=20,
+                        help="Number of MC Dropout forward passes (default 20; use 10 for production)")
     return parser.parse_args()
 
 
@@ -241,4 +245,6 @@ if __name__ == "__main__":
         output_dir=args.output_dir,
         file_pattern=args.file_pattern,
         model_type=args.model_type,
+        uncertainty=args.uncertainty,
+        mc_passes=args.mc_passes,
     )

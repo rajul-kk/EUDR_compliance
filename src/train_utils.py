@@ -55,6 +55,49 @@ def extract_farm_key(name: str) -> Optional[str]:
     return match.group(0) if match else None
 
 
+def mc_dropout_predict(
+    model: "torch.nn.Module",
+    x: "torch.Tensor",
+    n_passes: int = 20,
+    extra_inputs: Optional[tuple] = None,
+) -> tuple:
+    """Monte Carlo Dropout inference: returns (mean_probs, uncertainty_entropy).
+
+    Activates dropout by calling model.train(), then runs n_passes forward passes
+    under torch.no_grad(). Returns pixel-wise mean softmax probabilities and
+    Shannon entropy as an uncertainty map.
+
+    Args:
+        model:        Any model with Dropout2d layers. Must already be on the right device.
+        x:            Input tensor (B, C, H, W).
+        n_passes:     Number of stochastic forward passes (default 20; use 10 for production).
+        extra_inputs: Optional tuple of additional positional args (e.g. embed tensor for M6).
+
+    Returns:
+        mean_probs:  (B, num_classes, H, W) float32 — averaged softmax over passes.
+        uncertainty: (B, H, W) float32 — pixel-wise Shannon entropy (nats).
+    """
+    import torch
+    import torch.nn.functional as F
+
+    model.train()  # activates Dropout2d
+    probs_list = []
+
+    with torch.no_grad():
+        for _ in range(n_passes):
+            if extra_inputs:
+                logits = model(x, *extra_inputs)["out"]
+            else:
+                logits = model(x)["out"]
+            probs_list.append(F.softmax(logits, dim=1))
+
+    mean_probs = torch.stack(probs_list, dim=0).mean(dim=0)  # (B, C, H, W)
+    # Shannon entropy: -sum(p * log(p + eps))
+    uncertainty = -(mean_probs * (mean_probs + 1e-8).log()).sum(dim=1)  # (B, H, W)
+    model.eval()
+    return mean_probs, uncertainty
+
+
 def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
     arr = np.load(path)
     if arr.ndim != 3:
