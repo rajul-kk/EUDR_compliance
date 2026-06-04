@@ -63,18 +63,38 @@ def download_geotessera_embeddings(
     max_lon: float,
     year: int,
     output_dir: str,
+    grid_resolution: Optional[float] = None,
 ) -> None:
-    """Download precomputed TESSERA embeddings for a bounding box."""
+    """Download precomputed TESSERA embeddings for a bounding box.
+
+    Args:
+        grid_resolution: Grid cell size in degrees. Default (None) uses the GeoTessera
+            library default (~0.1° ≈ 11 km). Pass 0.01 for ~1.1 km resolution if the
+            library supports it — check geotessera API for availability.
+    """
     try:
         from geotessera import GeoTessera
     except ImportError as exc:
         raise RuntimeError("GeoTessera is required. Install with: pip install geotessera") from exc
 
     bounds = (min_lat, min_lon, max_lat, max_lon)
-    logger.info("Downloading precomputed embeddings for bounds=%s year=%s", bounds, year)
+    logger.info("Downloading precomputed embeddings for bounds=%s year=%s resolution=%s", bounds, year, grid_resolution)
 
     geo = GeoTessera()
-    geo.download(bounds=bounds, year=year, output_dir=output_dir)
+
+    # Pass resolution kwarg only if the installed version supports it; fall back gracefully.
+    import inspect
+    download_sig = inspect.signature(geo.download)
+    if grid_resolution is not None and "resolution" in download_sig.parameters:
+        geo.download(bounds=bounds, year=year, output_dir=output_dir, resolution=grid_resolution)
+    elif grid_resolution is not None:
+        logger.warning(
+            "Installed geotessera version does not support resolution= kwarg; "
+            "downloading at default resolution. Upgrade with: pip install --upgrade geotessera"
+        )
+        geo.download(bounds=bounds, year=year, output_dir=output_dir)
+    else:
+        geo.download(bounds=bounds, year=year, output_dir=output_dir)
 
     logger.info("Download complete. Embeddings saved under %s", output_dir)
 
@@ -141,6 +161,16 @@ def main() -> None:
         default="data/embeddings",
         help="Output directory for downloaded embeddings",
     )
+    parser.add_argument(
+        "--grid-resolution",
+        type=float,
+        default=None,
+        help=(
+            "Grid cell size in degrees (e.g. 0.01 ≈ 1.1 km). "
+            "Default uses the GeoTessera library default (~0.1° ≈ 11 km). "
+            "Only effective if the installed geotessera version supports the resolution= kwarg."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -160,6 +190,7 @@ def main() -> None:
         max_lon=max_lon,
         year=args.year,
         output_dir=args.output_dir,
+        grid_resolution=args.grid_resolution,
     )
 
 
