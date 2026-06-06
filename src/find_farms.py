@@ -50,7 +50,8 @@ TARGETS = {
         {"region": "Rio Verde, Goias, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Venado Tuerto, Argentina", "tags": {"landuse": "farmland"}},
         {"region": "Ames, Iowa, USA", "tags": {"landuse": "farmland"}},
-        {"region": "Toledo, Parana, Brazil", "tags": {"landuse": "farmland"}}
+        {"region": "Toledo, Parana, Brazil", "tags": {"landuse": "farmland"}},
+        {"region": "Braila, Romania", "tags": {"landuse": "farmland"}},
     ],
     "Coffee": [
         {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
@@ -67,8 +68,9 @@ TARGETS = {
     ],
     "Cocoa": [
         # Keeping existing
-        {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "orchard"}},
-        {"region": "Soubré, Ivory Coast", "tags": {"landuse": "orchard"}},
+        {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Soubré, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Daloa, Ivory Coast", "tags": {"landuse": "farmland"}},
         {"region": "Kumasi, Ghana", "tags": {"landuse": "farmland"}},
         {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
     ],
