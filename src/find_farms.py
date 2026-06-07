@@ -56,8 +56,8 @@ TARGETS = {
     "Coffee": [
         {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
-        {"region": "Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
-        {"region": "Chinchina, Colombia", "tags": {"landuse": "farmland"}},
+        {"region": "Ea H'Leo District, Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Armenia, Quindio, Colombia", "tags": {"landuse": "orchard"}},
         {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
         # New Regions
         {"region": "Coorg, India", "tags": {"landuse": "plantation"}}, # Often plantation
