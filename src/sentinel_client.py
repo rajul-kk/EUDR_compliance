@@ -42,12 +42,12 @@ DEFAULT_PROFILE = {
     "default": {
         "month_windows": [["05-01", "09-30"]],
         "max_cloud": 30,
-        "max_scenes": 8,
+        "max_scenes": 3,
     },
     "tropical": {
         "month_windows": [["01-01", "12-31"]],
         "max_cloud": 50,
-        "max_scenes": 10,
+        "max_scenes": 3,
     },
 }
 
