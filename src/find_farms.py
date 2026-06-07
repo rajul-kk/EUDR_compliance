@@ -17,10 +17,11 @@ ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
 # and ensuring better OSM data availability
 TARGETS = {
     "Oil Palm": [
-        {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Kotawaringin Barat, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Minas, Siak, Riau, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Duri, Bengkalis, Riau, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Pangkalan Bun, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Muaro Jambi, Jambi, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Ujung Batu, Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
         {"region": "Keningau, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
         {"region": "Beaufort, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
     ],
