@@ -7,6 +7,9 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+# Use a reliable Overpass mirror — overpass-api.de times out frequently
+ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
+
 # CONFIGURATION
 # Extensive list of regions to ensure we fill the dataset
 # CONFIGURATION
@@ -29,7 +32,7 @@ TARGETS = {
     ],
     "Rubber": [
         {"region": "Surat Thani, Thailand", "tags": {"landuse": "farmland"}},
-        {"region": "Binh Phuoc Province, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Loc Ninh, Binh Phuoc, Vietnam", "tags": {"landuse": "farmland"}},
         {"region": "Hat Yai District, Songkhla, Thailand", "tags": {"landuse": "farmland"}},
         {"region": "Kottayam, India", "tags": {"landuse": "farmland"}},
         {"region": "Bong County, Liberia", "tags": {"landuse": "plantation"}},
@@ -48,7 +51,7 @@ TARGETS = {
         # Keeping existing
         {"region": "Sorriso, Mato Grosso, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Rio Verde, Goias, Brazil", "tags": {"landuse": "farmland"}},
-        {"region": "Venado Tuerto, Argentina", "tags": {"landuse": "farmland"}},
+        {"region": "Casilda, Santa Fe, Argentina", "tags": {"landuse": "farmland"}},
         {"region": "Ames, Iowa, USA", "tags": {"landuse": "farmland"}},
         {"region": "Toledo, Parana, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Braila, Romania", "tags": {"landuse": "farmland"}},
@@ -56,7 +59,7 @@ TARGETS = {
     "Coffee": [
         {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
-        {"region": "Ea H'Leo District, Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Buon Ho, Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
         {"region": "Armenia, Quindio, Colombia", "tags": {"landuse": "orchard"}},
         {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
         # New Regions
@@ -69,21 +72,23 @@ TARGETS = {
     "Cocoa": [
         # Keeping existing
         {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Soubré, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Daloa, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Kumasi, Ghana", "tags": {"landuse": "farmland"}},
+        {"region": "Soubre, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Issia, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Kumasi Metropolitan, Ashanti, Ghana", "tags": {"landuse": "farmland"}},
         {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
     ],
     "Oil Palm": [
         # Keeping existing
         {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Sandakan Division, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
-        {"region": "Lahad Datu District, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
-        {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}}
+        {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Kotawaringin Barat, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Keningau, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
+        {"region": "Beaufort, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
     ]
 }
 
-TARGET_COUNT_PER_CROP = 600
+TARGET_COUNT_PER_CROP = 700
 OUTPUT_FILE = "inputs/farms_osm.csv"
 GLOBAL_TIMEOUT_SEC = 600 # 10 Minutes Limit
 
