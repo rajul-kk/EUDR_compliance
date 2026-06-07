@@ -83,9 +83,20 @@ class ChangeDetectionDataset(Dataset):
         self._build_pairs()
         logger.info("ChangeDetectionDataset: %d paired samples", len(self.pairs))
 
+    @staticmethod
+    def _is_zero_image(path: str) -> bool:
+        """Return True if all pixels in every band are zero (corrupted tile)."""
+        try:
+            with rasterio.open(path) as src:
+                data = src.read()
+            return bool(np.all(data == 0))
+        except Exception:
+            return True
+
     def _build_pairs(self) -> None:
         t1_files = {f for f in os.listdir(self.t1_dir) if f.endswith((".tif", ".tiff"))}
         t2_files = {f for f in os.listdir(self.t2_dir) if f.endswith((".tif", ".tiff"))}
+        skipped_zero = 0
 
         for f in sorted(t1_files):
             m = re.match(r"((relation|way)_(\d+))_(\d{4})_.*\.tiff?", f)
@@ -109,12 +120,16 @@ class ChangeDetectionDataset(Dataset):
             if not os.path.exists(mask_t1) or not os.path.exists(mask_t2):
                 continue
 
-            self.pairs.append((
-                os.path.join(self.t1_dir, f),
-                os.path.join(self.t2_dir, t2_match),
-                mask_t1,
-                mask_t2,
-            ))
+            t1_path = os.path.join(self.t1_dir, f)
+            t2_path = os.path.join(self.t2_dir, t2_match)
+            if self._is_zero_image(t1_path) or self._is_zero_image(t2_path):
+                skipped_zero += 1
+                continue
+
+            self.pairs.append((t1_path, t2_path, mask_t1, mask_t2))
+
+        if skipped_zero:
+            logger.warning("Skipped %d pairs with all-zero images (corrupted tiles)", skipped_zero)
 
     def __len__(self) -> int:
         return len(self.pairs)

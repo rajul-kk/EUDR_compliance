@@ -159,7 +159,7 @@ def parse_args():
     parser.add_argument('--raw-dir', default=default_raw_dir, help='Directory with baseline (2020) images')
     parser.add_argument('--mask-dir', default=default_mask_dir, help='Directory with hybrid masks')
     parser.add_argument('--output-model-path', default=default_model_path, help='Output model .pth path')
-    parser.add_argument('--epochs', type=int, default=2, help='Number of training epochs')
+    parser.add_argument('--epochs', type=int, default=15, help='Number of training epochs')
     parser.add_argument('--batch-size', type=int, default=8, help='Batch size')
     parser.add_argument('--learning-rate', type=float, default=1e-4, help='Adam learning rate')
     parser.add_argument('--val-ratio', type=float, default=0.15, help='Fraction of data held out for validation')

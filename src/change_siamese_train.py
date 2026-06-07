@@ -137,11 +137,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--t2-dir", required=True, help="Current (t2) satellite image directory")
     parser.add_argument("--mask-dir", required=True)
     parser.add_argument("--output-model-path", required=True)
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=1e-4)
     parser.add_argument("--val-ratio", type=float, default=0.15)
-    parser.add_argument("--patience", type=int, default=5)
+    parser.add_argument("--patience", type=int, default=7)
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args()
 
