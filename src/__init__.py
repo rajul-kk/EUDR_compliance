@@ -7,11 +7,11 @@ EUDR (EU Deforestation Regulation) compliance for agricultural supply chains.
 
 from .change_detector import ChangeDetector, ChangeResult, RiskLevel
 from .cloud_filter import CloudFilter
-from .sentinel_client import SentinelClient
+from .sentinel_client import download_all_farms
 from .vegetation_index import VegetationIndex
 
 __all__ = [
-    "SentinelClient",
+    "download_all_farms",
     "CloudFilter",
     "VegetationIndex",
     "ChangeDetector",
