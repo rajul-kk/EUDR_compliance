@@ -71,10 +71,6 @@ TARGETS = {
         {"region": "Mon, Myanmar", "tags": {"landuse": "plantation"}},
         {"region": "Edo State, Nigeria", "tags": {"landuse": "plantation"}}
     ],
-    "Rice": [
-        # Keeping existing
-        {"region": "Vercelli, Italy", "tags": {"landuse": "farmland"}}
-    ],
     "Soy": [
         # Keeping existing
         {"region": "Sorriso, Mato Grosso, Brazil", "tags": {"landuse": "farmland"}},
@@ -86,7 +82,14 @@ TARGETS = {
     ],
 }
 
-TARGET_COUNT_PER_CROP = 700
+TARGET_COUNT_PER_CROP = {
+    "Oil Palm": 200,
+    "Cocoa":    250,
+    "Coffee":   250,
+    "Soy":      200,
+    "Cattle":   200,
+    "Rubber":   150,
+}
 OUTPUT_FILE = "inputs/farms_osm.csv"
 GLOBAL_TIMEOUT_SEC = 1200 # 20 Minutes Limit
 
@@ -121,10 +124,11 @@ def build_farm_csv():
             break
 
         current_count = counts.get(crop, 0)
-        needed = TARGET_COUNT_PER_CROP - current_count
+        target = TARGET_COUNT_PER_CROP.get(crop, 200)
+        needed = target - current_count
 
         if needed <= 0:
-            logger.info("%s: already have %d (target %d) — skipping", crop, current_count, TARGET_COUNT_PER_CROP)
+            logger.info("%s: already have %d (target %d) — skipping", crop, current_count, target)
             continue
 
         logger.info("Scouting for %s (need %d)", crop, needed)
@@ -171,7 +175,7 @@ def build_farm_csv():
             except Exception as e:
                 logger.warning("OSM query failed for %s: %s", region, e)
 
-        logger.info("%s finished — new total: %d", crop, TARGET_COUNT_PER_CROP - needed)
+        logger.info("%s finished — new total: %d", crop, target - needed)
 
     logger.info("Farm discovery complete | total new farms added: %d", total_added)
 
