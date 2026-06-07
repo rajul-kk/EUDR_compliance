@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 # Use a reliable Overpass mirror — overpass-api.de times out frequently
-ox.settings.overpass_url = "https://overpass.openstreetmap.ru/api/interpreter"
+ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
 
 # CONFIGURATION
 # Extensive list of regions to ensure we fill the dataset
