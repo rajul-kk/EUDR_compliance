@@ -29,8 +29,8 @@ TARGETS = {
     ],
     "Rubber": [
         {"region": "Surat Thani, Thailand", "tags": {"landuse": "farmland"}},
-        {"region": "Binh Phuoc, Vietnam", "tags": {"landuse": "plantation"}},
-        {"region": "Hat Yai, Thailand", "tags": {"landuse": "farmland"}},
+        {"region": "Binh Phuoc Province, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Hat Yai District, Songkhla, Thailand", "tags": {"landuse": "farmland"}},
         {"region": "Kottayam, India", "tags": {"landuse": "farmland"}},
         {"region": "Bong County, Liberia", "tags": {"landuse": "plantation"}},
         # New Regions
@@ -56,15 +56,15 @@ TARGETS = {
     "Coffee": [
         {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
-        {"region": "Buon Ma Thuot, Vietnam", "tags": {"landuse": "farm"}},
-        {"region": "Chinchina, Caldas, Colombia", "tags": {"landuse": "farmland"}},
+        {"region": "Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Chinchina, Colombia", "tags": {"landuse": "farmland"}},
         {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
         # New Regions
         {"region": "Coorg, India", "tags": {"landuse": "plantation"}}, # Often plantation
         {"region": "Boquete, Panama", "tags": {"landuse": "farmland"}},
         {"region": "Alajuela, Costa Rica", "tags": {"landuse": "farmland"}},
         {"region": "Nyeri, Kenya", "tags": {"landuse": "farmland"}},
-        {"region": "Aceh, Indonesia", "tags": {"landuse": "plantation"}}
+        {"region": "Bener Meriah, Aceh, Indonesia", "tags": {"landuse": "farmland"}}
     ],
     "Cocoa": [
         # Keeping existing
@@ -77,8 +77,8 @@ TARGETS = {
     "Oil Palm": [
         # Keeping existing
         {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Sandakan, Malaysia", "tags": {"landuse": "plantation"}},
-        {"region": "Lahad Datu, Malaysia", "tags": {"landuse": "plantation"}},
+        {"region": "Sandakan Division, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
+        {"region": "Lahad Datu District, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
         {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}}
     ]
 }
