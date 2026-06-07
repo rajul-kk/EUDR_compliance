@@ -14,32 +14,48 @@ logger = logging.getLogger(__name__)
 # Covers major agricultural regions in the dataset
 COUNTRY_BOUNDS = [
     # Africa
-    (2, 5, 12, 16, 'CM'),      # Cameroon (Cocoa)
-    (2, 7, 8, 15, 'GH'),       # Ghana (Cocoa)
-    (3, 6, 13, 18, 'CI'),      # Ivory Coast (Cocoa)
-    (-3, 0, 25, 35, 'TZ'),     # Tanzania (Cocoa, Coffee)
+    (2, 13, 8, 16, 'CM'),      # Cameroon (Cocoa)
+    (4, 12, -4, 2, 'GH'),      # Ghana (Cocoa)
+    (4, 11, -9, -2, 'CI'),     # Ivory Coast (Cocoa)
+    (-3, 0, 25, 35, 'TZ'),     # Tanzania
     (-15, -5, 20, 35, 'ZM'),   # Zambia (Coffee)
-    (8, 12, 2, 15, 'NG'),      # Nigeria
-    (0, 12, 30, 43, 'ET'),     # Ethiopia (Coffee)
+    (4, 14, 2, 15, 'NG'),      # Nigeria
+    (3, 15, 33, 48, 'ET'),     # Ethiopia (Coffee)
     (-5, 5, 33, 42, 'KE'),     # Kenya (Coffee)
     (-2, 4, 29, 35, 'UG'),     # Uganda (Coffee)
-    # Southeast Asia
-    (-5, 5, 95, 115, 'ID'),    # Indonesia (Oil Palm)
-    (0, 8, 95, 110, 'MY'),     # Malaysia (Oil Palm)
+    (4, 8, -12, -8, 'LR'),     # Liberia (Rubber)
+    (-29, -17, 12, 26, 'NA'),  # Namibia (Cattle)
+    # South Asia
+    (8, 37, 68, 97, 'IN'),     # India (Rubber, Coffee)
+    # Southeast Asia — specific countries before generic Indonesia
+    (5, 22, 97, 106, 'TH'),    # Thailand (Rubber)
+    (8, 24, 102, 110, 'VN'),   # Vietnam (Rubber, Coffee)
+    (10, 29, 92, 102, 'MM'),   # Myanmar (Rubber)
+    (0, 8, 109, 120, 'MY'),    # Malaysia (Oil Palm, Sabah)
+    (1, 8, 99, 109, 'MY'),     # Malaysia (Oil Palm, Peninsular)
+    (-5, 6, 95, 141, 'ID'),    # Indonesia (Oil Palm) — after MY
+    # East Asia
+    (18, 54, 73, 135, 'CN'),   # China
     # South America
-    (-25, -5, -75, -50, 'BR'),  # Brazil (Soy, Coffee, Cocoa)
-    (-5, 0, -80, -65, 'CO'),    # Colombia (Coffee)
-    (-10, -5, -70, -60, 'PE'),  # Peru (Coffee, Cocoa)
-    (-42, -20, -74, -53, 'AR'), # Argentina (Cattle)
+    (-5, 13, -80, -67, 'CO'),  # Colombia (Coffee) — expanded north
+    (7, 10, -83, -77, 'PA'),   # Panama (Coffee)
+    (8, 12, -86, -83, 'CR'),   # Costa Rica (Coffee)
+    (-33, -5, -75, -50, 'BR'), # Brazil (Soy, Coffee, Cocoa)
+    (-10, -5, -80, -60, 'PE'), # Peru (Coffee, Cocoa)
+    (-56, -20, -74, -53, 'AR'),# Argentina (Cattle)
     # North America
-    (35, 50, -105, -66, 'US'),  # USA (Soy, Cattle)
-    (14, 33, -118, -86, 'MX'),  # Mexico (Cattle)
+    (25, 50, -125, -66, 'US'), # USA (Soy, Cattle)
+    (14, 33, -118, -86, 'MX'), # Mexico (Cattle)
     # Oceania
-    (-44, -10, 112, 154, 'AU'), # Australia (Cattle)
+    (-47, -34, 166, 178, 'NZ'),# New Zealand (Cattle)
+    (-44, -10, 112, 154, 'AU'),# Australia (Cattle)
     # Europe
-    (42, 46, 7, 12, 'IT'),      # Italy (Rice)
-    (45, 50, 5, 8, 'FR'),       # France
-    (48, 53, 5, 15, 'DE'),      # Germany
+    (36, 48, 6, 19, 'IT'),     # Italy (Rice) — expanded
+    (43, 49, 22, 30, 'RO'),    # Romania (Soy)
+    (45, 52, 5, 8, 'FR'),      # France
+    (47, 55, 5, 15, 'DE'),     # Germany
+    (36, 44, -9, -6, 'PT'),    # Portugal
+    (36, 44, -10, 4, 'ES'),    # Spain
 ]
 
 def infer_country_iso2(lat, lon):
@@ -51,17 +67,7 @@ def infer_country_iso2(lat, lon):
         if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
             return iso2
 
-    # Default fallback based on major regions
-    if -20 <= lat <= 5 and lon > 20:
-        return 'ZA'  # Africa (generic)
-    if lat > 35 and lon > -10 and lon < 50:
-        return 'IT'  # Europe (generic)
-    if lat > 0 and 90 < lon < 140:
-        return 'ID'  # Asia (generic)
-    if -30 < lat < 5 and -80 < lon < -35:
-        return 'BR'  # South America (generic)
-
-    return ''  # Unknown
+    return ''  # Unknown — do not guess
 
 
 def enrich_with_heuristic(df):
