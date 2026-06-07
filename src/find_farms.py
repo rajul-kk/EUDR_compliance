@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 # Use a reliable Overpass mirror — overpass-api.de times out frequently
-ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
+ox.settings.overpass_url = "https://overpass.openstreetmap.ru/api/interpreter"
 
 # CONFIGURATION
 # Extensive list of regions to ensure we fill the dataset
@@ -18,8 +18,8 @@ ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
 TARGETS = {
     "Oil Palm": [
         {"region": "Minas, Siak, Riau, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Duri, Bengkalis, Riau, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Pangkalan Bun, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Mandau, Bengkalis, Riau, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Kotawaringin Barat, Kalimantan Tengah, Indonesia", "tags": {"landuse": "farmland"}},
         {"region": "Muaro Jambi, Jambi, Indonesia", "tags": {"landuse": "farmland"}},
         {"region": "Ujung Batu, Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
         {"region": "Keningau, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
