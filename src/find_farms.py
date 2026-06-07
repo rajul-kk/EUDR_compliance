@@ -16,6 +16,33 @@ ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
 # Optimized regions (Town/Municipality level) to avoid timeouts
 # and ensuring better OSM data availability
 TARGETS = {
+    "Oil Palm": [
+        {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Kotawaringin Barat, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
+        {"region": "Keningau, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
+        {"region": "Beaufort, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
+    ],
+    "Cocoa": [
+        {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Soubre, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Issia, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Kumasi Metropolitan, Ashanti, Ghana", "tags": {"landuse": "farmland"}},
+        {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
+    ],
+    "Coffee": [
+        {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
+        {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
+        {"region": "Buon Ho, Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
+        {"region": "Armenia, Quindio, Colombia", "tags": {"landuse": "orchard"}},
+        {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
+        {"region": "Coorg, India", "tags": {"landuse": "plantation"}},
+        {"region": "Boquete, Panama", "tags": {"landuse": "farmland"}},
+        {"region": "Alajuela, Costa Rica", "tags": {"landuse": "farmland"}},
+        {"region": "Nyeri, Kenya", "tags": {"landuse": "farmland"}},
+        {"region": "Bener Meriah, Aceh, Indonesia", "tags": {"landuse": "farmland"}}
+    ],
     "Cattle": [
         {"region": "Alta Floresta, Mato Grosso, Brazil", "tags": {"landuse": "meadow"}},
         {"region": "Ji-Parana, Rondonia, Brazil", "tags": {"landuse": "meadow"}},
@@ -56,41 +83,11 @@ TARGETS = {
         {"region": "Toledo, Parana, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Braila, Romania", "tags": {"landuse": "farmland"}},
     ],
-    "Coffee": [
-        {"region": "Manhuaçu, Minas Gerais, Brazil", "tags": {"landuse": "farmland"}},
-        {"region": "Pitalito, Huila, Colombia", "tags": {"landuse": "farmland"}},
-        {"region": "Buon Ho, Dak Lak, Vietnam", "tags": {"landuse": "farmland"}},
-        {"region": "Armenia, Quindio, Colombia", "tags": {"landuse": "orchard"}},
-        {"region": "Jimma, Ethiopia", "tags": {"landuse": "farmland"}},
-        # New Regions
-        {"region": "Coorg, India", "tags": {"landuse": "plantation"}}, # Often plantation
-        {"region": "Boquete, Panama", "tags": {"landuse": "farmland"}},
-        {"region": "Alajuela, Costa Rica", "tags": {"landuse": "farmland"}},
-        {"region": "Nyeri, Kenya", "tags": {"landuse": "farmland"}},
-        {"region": "Bener Meriah, Aceh, Indonesia", "tags": {"landuse": "farmland"}}
-    ],
-    "Cocoa": [
-        # Keeping existing
-        {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Soubre, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Issia, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Kumasi Metropolitan, Ashanti, Ghana", "tags": {"landuse": "farmland"}},
-        {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
-    ],
-    "Oil Palm": [
-        # Keeping existing
-        {"region": "Pekanbaru, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Jambi, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Rokan Hulu, Riau, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Kotawaringin Barat, Central Kalimantan, Indonesia", "tags": {"landuse": "farmland"}},
-        {"region": "Keningau, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
-        {"region": "Beaufort, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
-    ]
 }
 
 TARGET_COUNT_PER_CROP = 700
 OUTPUT_FILE = "inputs/farms_osm.csv"
-GLOBAL_TIMEOUT_SEC = 600 # 10 Minutes Limit
+GLOBAL_TIMEOUT_SEC = 1200 # 20 Minutes Limit
 
 def build_farm_csv():
     logger.info("Starting multi-crop scouting")
