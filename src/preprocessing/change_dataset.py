@@ -28,6 +28,10 @@ CLOUD_SCL_CLASSES = {0, 1, 3, 8, 9, 10}
 FOREST_CLASS = 1
 IGNORE_INDEX = 255
 
+# Hansen GFC label values (generate_labels.py)
+HANSEN_FOREST_2020 = 1    # was forest as of 31 Dec 2020
+HANSEN_POST_EUDR_LOSS = 2  # loss detected 2021-2023
+
 
 def _load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     """Return (image float32 (C,H,W), scl uint8 (H,W))."""
@@ -60,10 +64,23 @@ def _cloud_ignore(mask: np.ndarray, scl: np.ndarray) -> np.ndarray:
 class ChangeDetectionDataset(Dataset):
     """Paired (t1, t2) Sentinel-2 dataset with binary forest-loss change masks.
 
+    Supports two label backends:
+
+    Hansen mode (default, recommended):
+        mask_dir contains single-file labels named ``{farm_id}_hansen_label.tif``
+        with pixel values: 1 = forest in 2020, 2 = post-EUDR loss 2021-2023.
+        The change mask is derived directly: value 2 → change=1, value 1 → change=0.
+
+    Hybrid mode (legacy):
+        mask_dir contains per-year files named ``{farm_id}_{year}_hybrid.tif``
+        with pixel values: 1 = forest, 2 = crops/plantation, 3 = shrub, 0 = other.
+        Change is derived by comparing the two per-year masks.
+
     Args:
         t1_dir:    Directory of baseline (e.g. 2020) composites.
         t2_dir:    Directory of current (e.g. 2024) composites.
-        mask_dir:  Directory of hybrid segmentation masks.
+        mask_dir:  Directory of label masks.
+        label_backend: ``"hansen"`` (default) or ``"hybrid"``.
         histogram_match: If True, normalise t2 histogram to match t1 before returning.
     """
 
@@ -72,16 +89,20 @@ class ChangeDetectionDataset(Dataset):
         t1_dir: str,
         t2_dir: str,
         mask_dir: str,
+        label_backend: str = "hansen",
         histogram_match: bool = True,
     ) -> None:
+        if label_backend not in ("hansen", "hybrid"):
+            raise ValueError(f"label_backend must be 'hansen' or 'hybrid', got {label_backend!r}")
         self.t1_dir = t1_dir
         self.t2_dir = t2_dir
         self.mask_dir = mask_dir
+        self.label_backend = label_backend
         self.histogram_match = histogram_match
 
-        self.pairs: List[Tuple[str, str, str, str]] = []  # (t1_img, t2_img, mask_t1, mask_t2)
+        self.pairs: List[Tuple[str, str, str, Optional[str]]] = []  # (t1, t2, label, label_t2_or_None)
         self._build_pairs()
-        logger.info("ChangeDetectionDataset: %d paired samples", len(self.pairs))
+        logger.info("ChangeDetectionDataset[%s]: %d paired samples", label_backend, len(self.pairs))
 
     @staticmethod
     def _is_zero_image(path: str) -> bool:
@@ -99,25 +120,19 @@ class ChangeDetectionDataset(Dataset):
         skipped_zero = 0
 
         for f in sorted(t1_files):
-            m = re.match(r"((relation|way)_(\d+))_(\d{4})_.*\.tiff?", f)
+            # Match both filename formats:
+            #   old: {farm_key}_{year}_{date}.tiff
+            #   new: {farm_key}_{year}.tiff
+            m = re.match(r"(.+?)_(2020|2024)(?:_|\.tiff?)", f)
             if not m:
                 continue
-            farm_key, _, _, year_t1 = m.group(1), m.group(2), m.group(3), m.group(4)
+            farm_key = m.group(1)
 
-            # Find a matching t2 file for the same farm
             t2_match = next(
-                (g for g in t2_files if g.startswith(farm_key + "_") and g != f), None
+                (g for g in t2_files if re.match(rf"^{re.escape(farm_key)}_(2020|2024)", g) and g != f),
+                None,
             )
             if t2_match is None:
-                continue
-
-            mt2 = re.match(r"(relation|way)_\d+_(\d{4})_.*\.tiff?", t2_match)
-            year_t2 = mt2.group(2) if mt2 else "2024"
-
-            mask_t1 = os.path.join(self.mask_dir, f"{farm_key}_{year_t1}_hybrid.tif")
-            mask_t2 = os.path.join(self.mask_dir, f"{farm_key}_{year_t2}_hybrid.tif")
-
-            if not os.path.exists(mask_t1) or not os.path.exists(mask_t2):
                 continue
 
             t1_path = os.path.join(self.t1_dir, f)
@@ -126,7 +141,22 @@ class ChangeDetectionDataset(Dataset):
                 skipped_zero += 1
                 continue
 
-            self.pairs.append((t1_path, t2_path, mask_t1, mask_t2))
+            if self.label_backend == "hansen":
+                label_path = os.path.join(self.mask_dir, f"{farm_key}_hansen_label.tif")
+                if not os.path.exists(label_path):
+                    continue
+                self.pairs.append((t1_path, t2_path, label_path, None))
+            else:
+                # Legacy hybrid: need per-year masks
+                mt1 = re.match(r".+?_(2020|2024)", f)
+                mt2 = re.match(r".+?_(2020|2024)", t2_match)
+                year_t1 = mt1.group(1) if mt1 else "2020"
+                year_t2 = mt2.group(1) if mt2 else "2024"
+                mask_t1 = os.path.join(self.mask_dir, f"{farm_key}_{year_t1}_hybrid.tif")
+                mask_t2 = os.path.join(self.mask_dir, f"{farm_key}_{year_t2}_hybrid.tif")
+                if not os.path.exists(mask_t1) or not os.path.exists(mask_t2):
+                    continue
+                self.pairs.append((t1_path, t2_path, mask_t1, mask_t2))
 
         if skipped_zero:
             logger.warning("Skipped %d pairs with all-zero images (corrupted tiles)", skipped_zero)
@@ -135,7 +165,7 @@ class ChangeDetectionDataset(Dataset):
         return len(self.pairs)
 
     def __getitem__(self, idx: int):
-        t1_path, t2_path, mask_t1_path, mask_t2_path = self.pairs[idx]
+        t1_path, t2_path, label_path, label_t2_path = self.pairs[idx]
 
         img_t1, scl_t1 = _load_image(t1_path)
         img_t2, scl_t2 = _load_image(t2_path)
@@ -143,19 +173,37 @@ class ChangeDetectionDataset(Dataset):
         if self.histogram_match:
             img_t2 = match_histogram(img_t2, img_t1)
 
-        # Crop to common spatial extent
         h = min(img_t1.shape[1], img_t2.shape[1])
         w = min(img_t1.shape[2], img_t2.shape[2])
         img_t1, img_t2 = img_t1[:, :h, :w], img_t2[:, :h, :w]
         scl_t1, scl_t2 = scl_t1[:h, :w], scl_t2[:h, :w]
 
-        mask_t1 = _cloud_ignore(_load_mask(mask_t1_path)[:h, :w], scl_t1)
-        mask_t2 = _cloud_ignore(_load_mask(mask_t2_path)[:h, :w], scl_t2)
+        if self.label_backend == "hansen":
+            # Hansen label encodes both years in one file.
+            # Resize label to match satellite tile if needed (Hansen is 30m, Sentinel is 10m).
+            raw = _load_mask(label_path)
+            if raw.shape != (h, w):
+                from PIL import Image as PILImage
+                raw = np.array(
+                    PILImage.fromarray(raw.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
+                    dtype=np.int64,
+                )
 
-        # Binary change mask: 1 = forest loss, 0 = no change; 255 where either year is cloudy
-        change = np.zeros((h, w), dtype=np.int64)
-        change[(mask_t1 == FOREST_CLASS) & (mask_t2 != FOREST_CLASS) & (mask_t2 != IGNORE_INDEX)] = 1
-        change[(mask_t1 == IGNORE_INDEX) | (mask_t2 == IGNORE_INDEX)] = IGNORE_INDEX
+            # value 2 = post-EUDR loss → change=1; value 1 = forest in 2020 → change=0
+            change = np.zeros((h, w), dtype=np.int64)
+            change[raw == HANSEN_POST_EUDR_LOSS] = 1
+
+            # Cloud masking: ignore pixels cloudy in either image
+            cloud = np.isin(scl_t1, list(CLOUD_SCL_CLASSES)) | np.isin(scl_t2, list(CLOUD_SCL_CLASSES))
+            change[cloud] = IGNORE_INDEX
+
+        else:
+            # Hybrid legacy: derive change from two per-year masks
+            mask_t1 = _cloud_ignore(_load_mask(label_path)[:h, :w], scl_t1)
+            mask_t2 = _cloud_ignore(_load_mask(label_t2_path)[:h, :w], scl_t2)
+            change = np.zeros((h, w), dtype=np.int64)
+            change[(mask_t1 == FOREST_CLASS) & (mask_t2 != FOREST_CLASS) & (mask_t2 != IGNORE_INDEX)] = 1
+            change[(mask_t1 == IGNORE_INDEX) | (mask_t2 == IGNORE_INDEX)] = IGNORE_INDEX
 
         return (
             torch.from_numpy(img_t1),
