@@ -26,9 +26,11 @@ TARGETS = {
         {"region": "Beaufort, Sabah, Malaysia", "tags": {"landuse": "farmland"}},
     ],
     "Cocoa": [
-        {"region": "San Pedro, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Soubre, Ivory Coast", "tags": {"landuse": "farmland"}},
-        {"region": "Issia, Ivory Coast", "tags": {"landuse": "farmland"}},
+        {"region": "Gagnoa, Côte d'Ivoire", "tags": {"landuse": "farmland"}},
+        {"region": "Divo, Côte d'Ivoire", "tags": {"landuse": "farmland"}},
+        {"region": "Daloa, Côte d'Ivoire", "tags": {"landuse": "farmland"}},
+        {"region": "San-Pédro, Côte d'Ivoire", "tags": {"landuse": "farmland"}},
+        {"region": "Soubré, Côte d'Ivoire", "tags": {"landuse": "farmland"}},
         {"region": "Kumasi Metropolitan, Ashanti, Ghana", "tags": {"landuse": "farmland"}},
         {"region": "Ilheus, Bahia, Brazil", "tags": {"landuse": "farmland"}}
     ],
@@ -50,9 +52,10 @@ TARGETS = {
         {"region": "Amarillo, Texas, USA", "tags": {"landuse": "meadow"}},
         {"region": "Rockhampton, Queensland, Australia", "tags": {"landuse": "meadow"}},
         {"region": "La Pampa, Argentina", "tags": {"landuse": "meadow"}},
+        {"region": "Corrientes, Argentina", "tags": {"landuse": "meadow"}},
+        {"region": "Entre Rios, Argentina", "tags": {"landuse": "meadow"}},
         {"region": "Cork, Ireland", "tags": {"landuse": "meadow"}},
-        # New Regions
-        {"region": "Greeley, Colorado, USA", "tags": {"landuse": "farm"}}, # Feedlots often marked as farm/industrial
+        {"region": "Greeley, Colorado, USA", "tags": {"landuse": "farm"}},
         {"region": "Garden City, Kansas, USA", "tags": {"landuse": "meadow"}},
         {"region": "Uberaba, Minas Gerais, Brazil", "tags": {"landuse": "meadow"}},
         {"region": "Waikato, New Zealand", "tags": {"landuse": "meadow"}},
@@ -72,10 +75,11 @@ TARGETS = {
         {"region": "Edo State, Nigeria", "tags": {"landuse": "plantation"}}
     ],
     "Soy": [
-        # Keeping existing
         {"region": "Sorriso, Mato Grosso, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Rio Verde, Goias, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Casilda, Santa Fe, Argentina", "tags": {"landuse": "farmland"}},
+        {"region": "Cordoba, Argentina", "tags": {"landuse": "farmland"}},
+        {"region": "Pergamino, Buenos Aires, Argentina", "tags": {"landuse": "farmland"}},
         {"region": "Ames, Iowa, USA", "tags": {"landuse": "farmland"}},
         {"region": "Toledo, Parana, Brazil", "tags": {"landuse": "farmland"}},
         {"region": "Braila, Romania", "tags": {"landuse": "farmland"}},
@@ -84,10 +88,10 @@ TARGETS = {
 
 TARGET_COUNT_PER_CROP = {
     "Oil Palm": 200,
-    "Cocoa":    250,
+    "Cocoa":    350,  # headroom for ~100 CI farms
     "Coffee":   250,
-    "Soy":      200,
-    "Cattle":   200,
+    "Soy":      270,  # headroom for ~70 AR soy farms
+    "Cattle":   270,  # headroom for ~70 AR cattle farms
     "Rubber":   150,
 }
 OUTPUT_FILE = "inputs/farms_osm.csv"

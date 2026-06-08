@@ -40,7 +40,7 @@ COUNTRY_BOUNDS = [
     (-5, 13, -80, -67, 'CO'),  # Colombia (Coffee) — expanded north
     (7, 10, -83, -77, 'PA'),   # Panama (Coffee)
     (8, 12, -86, -83, 'CR'),   # Costa Rica (Coffee)
-    (-33, -5, -75, -50, 'BR'), # Brazil (Soy, Coffee, Cocoa)
+    (-33, 5, -74, -34, 'BR'), # Brazil — full extent incl. Bahia coast
     (-10, -5, -80, -60, 'PE'), # Peru (Coffee, Cocoa)
     (-56, -20, -74, -53, 'AR'),# Argentina (Cattle)
     # North America
