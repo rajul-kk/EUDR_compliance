@@ -3,7 +3,7 @@ Configuration file for GEE assets.
 """
 
 # GEE Asset IDs
-HANSEN_ASSET_ID = 'UMD/hansen/global_forest_change_2023_v1_11'
+HANSEN_ASSET_ID = 'UMD/hansen/global_forest_change_2025_v1_13'
 DYNAMIC_WORLD_ASSET_ID = 'GOOGLE/DYNAMICWORLD/V1'      # kept for reference
 CANOPY_HEIGHT_ASSET_ID = 'users/nlang/ETH_GlobalCanopyHeight_2020_10m_v1'  # kept for reference
 

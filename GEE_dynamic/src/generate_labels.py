@@ -33,7 +33,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-HANSEN_ASSET = "UMD/hansen/global_forest_change_2023_v1_11"
+HANSEN_ASSET = "UMD/hansen/global_forest_change_2025_v1_13"
 TREECOVER_THRESHOLD = 10    # % canopy cover in 2000 to count as forest
 BUFFER_METERS = 2500        # 5km × 5km tile around centroid
 OUTPUT_SCALE = 30           # Hansen native resolution (metres)
@@ -104,8 +104,8 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
         # Was this pixel forested in 2000?
         was_forest = treecover.gte(TREECOVER_THRESHOLD)
 
-        # Post-EUDR loss: lossyear 21, 22, or 23 (2021, 2022, 2023)
-        post_eudr_loss = lossyear.gte(21).And(lossyear.lte(23))
+        # Post-EUDR loss: lossyear 21-24 (2021-2024)
+        post_eudr_loss = lossyear.gte(21).And(lossyear.lte(24))
 
         # Forest in 2020: was forested in 2000 AND not lost by end of 2020
         # lossyear 0 = no loss; lossyear >= 21 = loss after 2020

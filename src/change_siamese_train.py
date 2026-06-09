@@ -42,6 +42,7 @@ def train(args: argparse.Namespace) -> None:
         t1_dir=args.t1_dir,
         t2_dir=args.t2_dir,
         mask_dir=args.mask_dir,
+        label_backend=args.label_backend,
         histogram_match=True,
     )
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
@@ -80,11 +81,7 @@ def train(args: argparse.Namespace) -> None:
             t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
             optimizer.zero_grad()
             with torch.autocast("cuda", enabled=_cuda):
-                # DataParallel wraps forward() — pass both inputs via a tuple trick
-                if isinstance(model, torch.nn.DataParallel):
-                    logits = model.module.forward(t1, t2)["out"]
-                else:
-                    logits = model(t1, t2)["out"]
+                logits = model(t1, t2)["out"]
                 loss = criterion(logits, change)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
@@ -99,10 +96,7 @@ def train(args: argparse.Namespace) -> None:
             for t1, t2, change in val_loader:
                 t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
                 with torch.autocast("cuda", enabled=_cuda):
-                    if isinstance(model, torch.nn.DataParallel):
-                        logits = model.module.forward(t1, t2)["out"]
-                    else:
-                        logits = model(t1, t2)["out"]
+                    logits = model(t1, t2)["out"]
                     loss = criterion(logits, change)
                 val_loss += loss.item()
                 val_f1 += _change_f1(logits, change)
@@ -136,6 +130,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--t1-dir", required=True, help="Baseline (t1) satellite image directory")
     parser.add_argument("--t2-dir", required=True, help="Current (t2) satellite image directory")
     parser.add_argument("--mask-dir", required=True)
+    parser.add_argument("--label-backend", default="hansen", choices=["hansen", "hybrid"])
     parser.add_argument("--output-model-path", required=True)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=4)
