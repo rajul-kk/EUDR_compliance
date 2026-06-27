@@ -103,3 +103,61 @@ jobs:
           ruff check GEE_dynamic/ NDVI_pred/ \
             --output-format=github \
             --exit-zero
+
+  type-check:
+    name: Mypy type check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install mypy + stubs
+        run: pip install mypy numpy pandas
+
+      - name: Run mypy on src/
+        run: |
+          mypy src/ \
+            --ignore-missing-imports \
+            --no-strict-optional \
+            --exclude 'src/__init__\.py' \
+            --output=github
+
+  test:
+    name: pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install test dependencies
+        run: pip install pytest numpy pillow
+
+      - name: Run tests
+        run: pytest tests/ -q --tb=short
+
+  notebook-lint:
+    name: Notebook static validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install nbformat
+        run: pip install nbformat
+
+      - name: Validate notebooks
+        run: python scripts/validate_notebooks.py notebooks/
