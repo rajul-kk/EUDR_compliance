@@ -140,7 +140,9 @@ jobs:
           cache: pip
 
       - name: Install test dependencies
-        run: pip install pytest numpy pillow
+        run: |
+          pip install pytest numpy pillow
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu -q
 
       - name: Run tests
         run: pytest tests/ -q --tb=short
