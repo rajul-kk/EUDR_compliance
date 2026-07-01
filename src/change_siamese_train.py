@@ -48,11 +48,15 @@ def train(args: argparse.Namespace) -> None:
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
 
     _cuda = torch.cuda.is_available()
+    if _cuda:
+        torch.backends.cudnn.benchmark = True
     _workers = min(4, os.cpu_count() or 1)
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True,
-                              num_workers=_workers, pin_memory=_cuda)
+                              num_workers=_workers, pin_memory=_cuda,
+                              persistent_workers=_workers > 0)
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False,
-                            num_workers=_workers, pin_memory=_cuda)
+                            num_workers=_workers, pin_memory=_cuda,
+                            persistent_workers=_workers > 0)
 
     model = get_siamese_model().to(DEVICE)
     if torch.cuda.device_count() > 1:
@@ -79,7 +83,7 @@ def train(args: argparse.Namespace) -> None:
 
         for t1, t2, change in train_loader:
             t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
                 logits = model(t1, t2)["out"]
                 loss = criterion(logits, change)

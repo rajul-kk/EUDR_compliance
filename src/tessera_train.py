@@ -50,10 +50,14 @@ def train_tessera_head(
     train_subset, val_subset = split_dataset(dataset, val_ratio=val_ratio, seed=seed)
 
     _cuda = torch.cuda.is_available()
+    if _cuda:
+        torch.backends.cudnn.benchmark = True
     train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=_cuda)
+                              num_workers=num_workers, pin_memory=_cuda,
+                              persistent_workers=num_workers > 0)
     val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False,
-                            num_workers=num_workers, pin_memory=_cuda)
+                            num_workers=num_workers, pin_memory=_cuda,
+                            persistent_workers=num_workers > 0)
 
     model = TesseraSegmentationModel(in_channels=7, num_classes=4, freeze_encoder=True).to(DEVICE)
     if torch.cuda.device_count() > 1:
@@ -76,7 +80,7 @@ def train_tessera_head(
             images = images.to(DEVICE)
             masks = masks.to(DEVICE)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
                 logits = model(images)["out"]
                 loss = criterion(logits, masks)

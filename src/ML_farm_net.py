@@ -65,11 +65,15 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     logger.info("Dataset: %d train, %d val", len(train_subset), len(val_subset))
 
     _cuda = torch.cuda.is_available()
+    if _cuda:
+        torch.backends.cudnn.benchmark = True
     _workers = min(4, os.cpu_count() or 1)
     train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True,
-                              num_workers=_workers, pin_memory=_cuda)
+                              num_workers=_workers, pin_memory=_cuda,
+                              persistent_workers=_workers > 0)
     val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False,
-                            num_workers=_workers, pin_memory=_cuda)
+                            num_workers=_workers, pin_memory=_cuda,
+                            persistent_workers=_workers > 0)
 
     model = get_deeplab_model().to(DEVICE)
     if torch.cuda.device_count() > 1:
@@ -96,7 +100,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
             images = images.to(DEVICE)
             masks = masks.to(DEVICE)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
                 outputs = model(images)['out']
                 loss = criterion(outputs, masks)
