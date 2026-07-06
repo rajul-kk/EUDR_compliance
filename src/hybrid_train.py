@@ -24,11 +24,12 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class HybridDataset(Dataset):
-    """FarmSegmentationDataset extended with per-sample tessera-embed vectors.
+    """Single-image dataset for M6 hybrid training.
 
-    For each farm tile it loads the Sentinel-2 image (7 channels), the
-    segmentation mask, and the corresponding GeoTESSERA embedding averaged to
-    a single 128-dim context vector.
+    Wraps FarmSegmentationDataset (single 2020 baseline image → 4-class mask)
+    and attaches a per-farm GeoTESSERA embedding as a 128-dim context vector.
+    Intentionally uses single-image segmentation, not change-detection pairs —
+    M6 is a richer M1a, not a replacement for M3 (Siamese).
     """
 
     def __init__(self, raw_dir: str, mask_dir: str, embeddings_dir: str, training: bool = False) -> None:
@@ -85,11 +86,15 @@ def train(args: argparse.Namespace) -> None:
     logger.info("Dataset: %d train, %d val", len(train_set), len(val_set))
 
     _cuda = torch.cuda.is_available()
+    if _cuda:
+        torch.backends.cudnn.benchmark = True
     _workers = min(4, os.cpu_count() or 1)
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True,
-                              num_workers=_workers, pin_memory=_cuda)
+                              num_workers=_workers, pin_memory=_cuda,
+                              persistent_workers=_workers > 0)
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False,
-                            num_workers=_workers, pin_memory=_cuda)
+                            num_workers=_workers, pin_memory=_cuda,
+                            persistent_workers=_workers > 0)
 
     model = get_hybrid_model().to(DEVICE)
     if torch.cuda.device_count() > 1:
@@ -113,7 +118,7 @@ def train(args: argparse.Namespace) -> None:
 
         for images, masks, embeds in train_loader:
             images, masks, embeds = images.to(DEVICE), masks.to(DEVICE), embeds.to(DEVICE)
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
                 if isinstance(model, torch.nn.DataParallel):
                     logits = model.module.forward(images, embeds)["out"]
