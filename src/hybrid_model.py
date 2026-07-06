@@ -45,7 +45,7 @@ class DeepLabWithEmbedContext(nn.Module):
     Args:
         in_channels:   Number of Sentinel-2 input channels (default 7 with NDWI).
         embed_channels: Dimension of tessera-embed vector (default 128).
-        num_classes:   Number of segmentation classes (default 4).
+        num_classes:   Number of segmentation classes (default 3 for Hansen: non-forest/forest-2020/post-loss).
         dropout_p:     Dropout probability in ASPP head (used for MC Dropout).
     """
 
@@ -53,7 +53,7 @@ class DeepLabWithEmbedContext(nn.Module):
         self,
         in_channels: int = 7,
         embed_channels: int = 128,
-        num_classes: int = 4,
+        num_classes: int = 3,
         dropout_p: float = 0.2,
     ) -> None:
         super().__init__()
@@ -125,6 +125,6 @@ class DeepLabWithEmbedContext(nn.Module):
 
 
 def get_hybrid_model(in_channels: int = 7, embed_channels: int = 128,
-                     num_classes: int = 4, dropout_p: float = 0.2) -> DeepLabWithEmbedContext:
+                     num_classes: int = 3, dropout_p: float = 0.2) -> DeepLabWithEmbedContext:
     return DeepLabWithEmbedContext(in_channels=in_channels, embed_channels=embed_channels,
                                    num_classes=num_classes, dropout_p=dropout_p)

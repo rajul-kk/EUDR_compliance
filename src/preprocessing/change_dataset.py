@@ -33,7 +33,7 @@ HANSEN_FOREST_2020 = 1    # was forest as of 31 Dec 2020
 HANSEN_POST_EUDR_LOSS = 2  # loss detected 2021-2023
 
 
-def _load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
+def load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     """Return (image float32 (C,H,W), scl uint8 (H,W))."""
     with rasterio.open(path) as src:
         img = src.read().astype(np.float32)
@@ -49,9 +49,15 @@ def _load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     return img, scl
 
 
-def _load_mask(path: str) -> np.ndarray:
+_load_image = load_image  # private alias kept for internal use
+
+
+def load_mask(path: str) -> np.ndarray:
     with rasterio.open(path) as src:
         return src.read(1).astype(np.int64)
+
+
+_load_mask = load_mask  # private alias kept for internal use
 
 
 def _cloud_ignore(mask: np.ndarray, scl: np.ndarray) -> np.ndarray:

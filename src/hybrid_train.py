@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import re
 import sys
 
 logger = logging.getLogger(__name__)
@@ -18,46 +19,77 @@ if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
 from hybrid_model import get_hybrid_model
+from preprocessing.change_dataset import load_image, load_mask
 from train_utils import compute_miou, load_embedding, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+_FARM_RE = re.compile(r"(.+?)_(2020|2024)(?:_|\.tiff?)")
+_KEY_RE = re.compile(r"((relation|way)_\d+)")
+
 
 class HybridDataset(Dataset):
-    """Single-image dataset for M6 hybrid training.
+    """Single-image dataset for M6 hybrid training using Hansen GFC labels.
 
-    Wraps FarmSegmentationDataset (single 2020 baseline image → 4-class mask)
-    and attaches a per-farm GeoTESSERA embedding as a 128-dim context vector.
-    Intentionally uses single-image segmentation, not change-detection pairs —
-    M6 is a richer M1a, not a replacement for M3 (Siamese).
+    Loads the 2020 baseline Sentinel-2 composite, the corresponding Hansen GFC
+    label (``{farm_key}_hansen_label.tif``, values 0=non-forest/1=forest-2020/2=post-loss),
+    and a GeoTESSERA regional embedding as a 128-dim context vector.
+
+    Intentionally single-image (not paired) — M6 is a richer M1a: it predicts
+    Hansen land-cover class from the 2020 image + landscape context, not change
+    detection. For change detection use M3 (change_siamese_train.py).
     """
 
-    def __init__(self, raw_dir: str, mask_dir: str, embeddings_dir: str, training: bool = False) -> None:
-        import re
-        import rasterio
-
-        _gee_dir = os.path.join(os.path.dirname(_src_dir), "GEE_dynamic")
-        if _gee_dir not in sys.path:
-            sys.path.append(_gee_dir)
-        from preprocessing.dataset_loader import FarmSegmentationDataset
-
-        self._base = FarmSegmentationDataset(raw_dir, mask_dir, cache_aligned_masks=True, training=training)
+    def __init__(self, t1_dir: str, mask_dir: str, embeddings_dir: str, training: bool = False) -> None:
+        self._training = training
         self.embeddings_dir = embeddings_dir
-        self._re = re.compile(r"((relation|way)_(\d+))")
+        self.samples: list = []
+
+        for f in sorted(os.listdir(t1_dir)):
+            if not f.endswith((".tif", ".tiff")):
+                continue
+            m = _FARM_RE.match(f)
+            if not m:
+                continue
+            label_path = os.path.join(mask_dir, f"{m.group(1)}_hansen_label.tif")
+            if os.path.exists(label_path):
+                self.samples.append((os.path.join(t1_dir, f), label_path))
+
+        logger.info("HybridDataset: %d samples (Hansen labels)", len(self.samples))
 
     def __len__(self) -> int:
-        return len(self._base)
+        return len(self.samples)
 
     def __getitem__(self, idx: int):
-        image, mask = self._base[idx]
-        img_path = self._base.image_paths[idx]
+        import random
+        from PIL import Image as PILImage
 
-        # Locate embedding for this farm (use mean over tiles if multiple match)
-        m = self._re.search(os.path.basename(img_path))
-        farm_key = m.group(0) if m else ""
+        img_path, label_path = self.samples[idx]
+        img, _ = load_image(img_path)     # (7, H, W) float32
+        label = load_mask(label_path)     # raw Hansen values 0/1/2
 
-        embed_vec = self._find_embed(farm_key)
-        return image, mask, embed_vec
+        h, w = img.shape[1], img.shape[2]
+        if label.shape != (h, w):
+            label = np.array(
+                PILImage.fromarray(label.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
+                dtype=np.int64,
+            )
+
+        if self._training:
+            if random.random() < 0.5:
+                img = img[:, :, ::-1].copy(); label = label[:, ::-1].copy()
+            if random.random() < 0.5:
+                img = img[:, ::-1, :].copy(); label = label[::-1, :].copy()
+            k = random.randint(0, 3)
+            if k > 0:
+                img = np.rot90(img, k=k, axes=(1, 2)).copy()
+                label = np.rot90(label, k=k, axes=(0, 1)).copy()
+            factor = random.uniform(0.9, 1.1)
+            img[[0, 1, 2, 3, 5, 6]] = np.clip(img[[0, 1, 2, 3, 5, 6]] * factor, 0, None)
+
+        km = _KEY_RE.search(os.path.basename(img_path))
+        embed_vec = self._find_embed(km.group(0) if km else "")
+        return torch.from_numpy(img), torch.from_numpy(label), embed_vec
 
     def _find_embed(self, farm_key: str) -> torch.Tensor:
         if farm_key and os.path.isdir(self.embeddings_dir):
@@ -65,11 +97,8 @@ class HybridDataset(Dataset):
                           if farm_key in f and f.endswith(".npy")]
             if candidates:
                 arrays = [load_embedding(os.path.join(self.embeddings_dir, c)) for c in candidates]
-                # Average over spatial dims to get a single 128-dim context vector
                 vec = np.mean([a.mean(axis=(1, 2)) for a in arrays], axis=0)
                 return torch.from_numpy(vec.astype(np.float32))
-
-        # Fallback: zero embedding (model learns without context for this sample)
         return torch.zeros(128, dtype=torch.float32)
 
 
@@ -77,7 +106,7 @@ def train(args: argparse.Namespace) -> None:
     seed_everything(args.seed)
 
     dataset = HybridDataset(
-        raw_dir=args.raw_dir,
+        t1_dir=args.t1_dir,
         mask_dir=args.mask_dir,
         embeddings_dir=args.embeddings_dir,
         training=True,
@@ -144,7 +173,7 @@ def train(args: argparse.Namespace) -> None:
                         logits = model(images, embeds)["out"]
                     loss = criterion(logits, masks)
                 val_loss += loss.item()
-                val_miou += compute_miou(logits, masks, num_classes=4)
+                val_miou += compute_miou(logits, masks, num_classes=3)
 
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou / max(1, len(val_loader))
@@ -172,7 +201,7 @@ def train(args: argparse.Namespace) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train M6 hybrid DeepLabV3 + embed context model.")
-    parser.add_argument("--raw-dir", required=True)
+    parser.add_argument("--t1-dir", required=True, help="2020 baseline Sentinel-2 image directory")
     parser.add_argument("--mask-dir", required=True)
     parser.add_argument("--embeddings-dir", required=True, help="Directory containing farm-level .npy embeddings")
     parser.add_argument("--output-model-path", required=True)
