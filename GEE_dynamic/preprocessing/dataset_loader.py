@@ -9,9 +9,12 @@ import sys
 import torch
 from torch.utils.data import Dataset
 
-# Add parent dir to path if needed to find preprocessing
+# Ensure src/ is on the path so preprocessing.aligner resolves to src/preprocessing/aligner.py
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
+_src_dir = os.path.normpath(os.path.join(parent_dir, "..", "src"))
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
