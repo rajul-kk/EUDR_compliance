@@ -28,8 +28,9 @@ from train_utils import compute_miou, seed_everything, split_dataset
 try:
     from preprocessing.dataset_loader import FarmSegmentationDataset
 except ImportError:
-    # Fallback if running from root
-    sys.path.append(os.path.abspath('GEE_dynamic'))
+    _gee_dir = os.path.join(parent_dir, "GEE_dynamic")
+    if _gee_dir not in sys.path:
+        sys.path.insert(0, _gee_dir)
     from preprocessing.dataset_loader import FarmSegmentationDataset
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

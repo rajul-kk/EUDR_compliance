@@ -25,7 +25,8 @@ if _gee_dir not in sys.path:
 try:
     from preprocessing.dataset_loader import FarmSegmentationDataset
 except ImportError:
-    sys.path.append(os.path.abspath("GEE_dynamic"))
+    if _gee_dir not in sys.path:
+        sys.path.insert(0, _gee_dir)
     from preprocessing.dataset_loader import FarmSegmentationDataset
 
 
