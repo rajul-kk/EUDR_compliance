@@ -43,22 +43,26 @@ def train_tessera_head(
     val_ratio: float = 0.15,
     patience: int = 3,
     seed: int = 42,
-    num_workers: int = 0,
+    num_workers: int = -1,
 ) -> Dict[str, float]:
     seed_everything(seed)
 
-    dataset = FarmSegmentationDataset(raw_dir, mask_dir, cache_aligned_masks=True)
-    train_subset, val_subset = split_dataset(dataset, val_ratio=val_ratio, seed=seed)
+    _common = dict(cache_aligned_masks=True)
+    train_dataset = FarmSegmentationDataset(raw_dir, mask_dir, training=True,  **_common)
+    val_dataset   = FarmSegmentationDataset(raw_dir, mask_dir, training=False, **_common)
+    train_subset, _ = split_dataset(train_dataset, val_ratio=val_ratio, seed=seed)
+    _, val_subset   = split_dataset(val_dataset,   val_ratio=val_ratio, seed=seed)
 
     _cuda = torch.cuda.is_available()
     if _cuda:
         torch.backends.cudnn.benchmark = True
+    _workers = num_workers if num_workers >= 0 else min(4, os.cpu_count() or 1)
     train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=_cuda,
-                              persistent_workers=num_workers > 0)
+                              num_workers=_workers, pin_memory=_cuda,
+                              persistent_workers=_workers > 0)
     val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False,
-                            num_workers=num_workers, pin_memory=_cuda,
-                            persistent_workers=num_workers > 0)
+                            num_workers=_workers, pin_memory=_cuda,
+                            persistent_workers=_workers > 0)
 
     model = TesseraSegmentationModel(in_channels=7, num_classes=4, freeze_encoder=True).to(DEVICE)
     if torch.cuda.device_count() > 1:
@@ -156,7 +160,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--val-ratio", type=float, default=0.15)
     parser.add_argument("--patience", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--num-workers", type=int, default=-1, help="-1 = auto (min(4, cpu_count))")
     return parser.parse_args()
 
 
