@@ -12,6 +12,7 @@ import sys
 
 import numpy as np
 from torch.utils.data import DataLoader
+from torchvision.models import ResNet50_Weights, resnet50
 from torchvision.models.segmentation import deeplabv3_resnet50
 
 # Add parent directory and GEE_dynamic to path for imports
@@ -37,16 +38,11 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def get_deeplab_model(num_classes=4, in_channels=7):
     model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-    original_conv1 = model.backbone.conv1
-    new_conv1 = nn.Conv2d(
-        in_channels,
-        original_conv1.out_channels,
-        kernel_size=original_conv1.kernel_size,
-        stride=original_conv1.stride,
-        padding=original_conv1.padding,
-        bias=original_conv1.bias,
-    )
+    pretrained = resnet50(weights=ResNet50_Weights.DEFAULT)
+    new_conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
     nn.init.kaiming_normal_(new_conv1.weight, mode='fan_out', nonlinearity='relu')
+    with torch.no_grad():
+        new_conv1.weight[:, :3] = pretrained.conv1.weight
     model.backbone.conv1 = new_conv1
     return model
 
