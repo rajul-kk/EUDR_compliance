@@ -67,7 +67,8 @@ def train_tessera_head(
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam([p for p in model.parameters() if p.requires_grad], lr=learning_rate)
-    scaler = torch.cuda.amp.GradScaler(enabled=_cuda)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", patience=2, factor=0.5)
+    scaler = torch.amp.GradScaler("cuda", enabled=_cuda)
 
     best_miou = -1.0
     best_epoch = -1
@@ -110,9 +111,11 @@ def train_tessera_head(
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou_running / max(1, len(val_loader))
 
+        scheduler.step(avg_val_miou)
         logger.info(
-            "Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f",
+            "Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f lr=%.2e",
             epoch + 1, epochs, avg_train_loss, avg_val_loss, avg_val_miou,
+            optimizer.param_groups[0]["lr"],
         )
 
         if avg_val_miou > best_miou:

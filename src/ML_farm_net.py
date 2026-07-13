@@ -77,7 +77,8 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scaler = torch.cuda.amp.GradScaler(enabled=_cuda)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", patience=2, factor=0.5)
+    scaler = torch.amp.GradScaler("cuda", enabled=_cuda)
 
     os.makedirs(os.path.dirname(output_model_path) or ".", exist_ok=True)
 
@@ -127,8 +128,10 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou_sum / max(1, len(val_loader))
 
-        logger.info("Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f",
-                    epoch + 1, epochs, avg_train_loss, avg_val_loss, avg_val_miou)
+        scheduler.step(avg_val_miou)
+        logger.info("Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f lr=%.2e",
+                    epoch + 1, epochs, avg_train_loss, avg_val_loss, avg_val_miou,
+                    optimizer.param_groups[0]["lr"])
 
         _state = model.module.state_dict() if isinstance(model, torch.nn.DataParallel) else model.state_dict()
 

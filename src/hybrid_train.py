@@ -132,7 +132,8 @@ def train(args: argparse.Namespace) -> None:
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
-    scaler = torch.cuda.amp.GradScaler(enabled=_cuda)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", patience=2, factor=0.5)
+    scaler = torch.amp.GradScaler("cuda", enabled=_cuda)
 
     best_miou = -1.0
     best_epoch = -1
@@ -178,8 +179,10 @@ def train(args: argparse.Namespace) -> None:
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_miou = val_miou / max(1, len(val_loader))
 
-        logger.info("Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f",
-                    epoch + 1, args.epochs, avg_train_loss, avg_val_loss, avg_val_miou)
+        scheduler.step(avg_val_miou)
+        logger.info("Epoch [%d/%d] train_loss=%.4f val_loss=%.4f val_mIoU=%.4f lr=%.2e",
+                    epoch + 1, args.epochs, avg_train_loss, avg_val_loss, avg_val_miou,
+                    optimizer.param_groups[0]["lr"])
 
         _state = model.module.state_dict() if isinstance(model, torch.nn.DataParallel) else model.state_dict()
 
