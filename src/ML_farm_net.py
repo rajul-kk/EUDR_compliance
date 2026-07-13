@@ -56,13 +56,11 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=10, batch_size=4, l
     seed_everything(seed)
 
     logger.info("Initializing dataset from %s", raw_dir)
-    dataset = FarmSegmentationDataset(
-        raw_dir, mask_dir,
-        cache_aligned_masks=True,
-        exclude_crops=exclude_crops,
-        exclude_regions=exclude_regions
-    )
-    train_subset, val_subset = split_dataset(dataset, val_ratio=val_ratio, seed=seed)
+    _common = dict(cache_aligned_masks=True, exclude_crops=exclude_crops, exclude_regions=exclude_regions)
+    train_dataset = FarmSegmentationDataset(raw_dir, mask_dir, training=True,  **_common)
+    val_dataset   = FarmSegmentationDataset(raw_dir, mask_dir, training=False, **_common)
+    train_subset, _ = split_dataset(train_dataset, val_ratio=val_ratio, seed=seed)
+    _, val_subset   = split_dataset(val_dataset,   val_ratio=val_ratio, seed=seed)
     logger.info("Dataset: %d train, %d val", len(train_subset), len(val_subset))
 
     _cuda = torch.cuda.is_available()
