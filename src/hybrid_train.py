@@ -150,10 +150,7 @@ def train(args: argparse.Namespace) -> None:
             images, masks, embeds = images.to(DEVICE), masks.to(DEVICE), embeds.to(DEVICE)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
-                if isinstance(model, torch.nn.DataParallel):
-                    logits = model.module.forward(images, embeds)["out"]
-                else:
-                    logits = model(images, embeds)["out"]
+                logits = model(images, embeds)["out"]
                 loss = criterion(logits, masks)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
@@ -168,10 +165,7 @@ def train(args: argparse.Namespace) -> None:
             for images, masks, embeds in val_loader:
                 images, masks, embeds = images.to(DEVICE), masks.to(DEVICE), embeds.to(DEVICE)
                 with torch.autocast("cuda", enabled=_cuda):
-                    if isinstance(model, torch.nn.DataParallel):
-                        logits = model.module.forward(images, embeds)["out"]
-                    else:
-                        logits = model(images, embeds)["out"]
+                    logits = model(images, embeds)["out"]
                     loss = criterion(logits, masks)
                 val_loss += loss.item()
                 val_miou += compute_miou(logits, masks, num_classes=3)
