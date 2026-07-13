@@ -43,6 +43,7 @@ class HybridDataset(Dataset):
     def __init__(self, t1_dir: str, mask_dir: str, embeddings_dir: str, training: bool = False) -> None:
         self._training = training
         self.embeddings_dir = embeddings_dir
+        self._embed_files: list = os.listdir(embeddings_dir) if os.path.isdir(embeddings_dir) else []
         self.samples: list = []
 
         for f in sorted(os.listdir(t1_dir)):
@@ -92,9 +93,8 @@ class HybridDataset(Dataset):
         return torch.from_numpy(img), torch.from_numpy(label), embed_vec
 
     def _find_embed(self, farm_key: str) -> torch.Tensor:
-        if farm_key and os.path.isdir(self.embeddings_dir):
-            candidates = [f for f in os.listdir(self.embeddings_dir)
-                          if farm_key in f and f.endswith(".npy")]
+        if farm_key:
+            candidates = [f for f in self._embed_files if farm_key in f and f.endswith(".npy")]
             if candidates:
                 arrays = [load_embedding(os.path.join(self.embeddings_dir, c)) for c in candidates]
                 vec = np.mean([a.mean(axis=(1, 2)) for a in arrays], axis=0)
