@@ -92,8 +92,8 @@ class SiameseDeepLabV3(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        # Change head operates on |f(t1) - f(t2)|
-        self.change_head = _ChangeASPP(in_channels=2048, num_classes=num_classes, dropout_p=dropout_p)
+        # Change head operates on cat([f1, f2, |f1-f2|]) — retains direction of change
+        self.change_head = _ChangeASPP(in_channels=2048 * 3, num_classes=num_classes, dropout_p=dropout_p)
 
     def _encode(self, x: torch.Tensor) -> torch.Tensor:
         x = self.stem(x)
@@ -108,8 +108,9 @@ class SiameseDeepLabV3(nn.Module):
         f1 = self._encode(t1)
         f2 = self._encode(t2)
 
-        # Absolute difference: symmetric, shift-invariant change signal
-        diff = torch.abs(f1 - f2)
+        # Concatenate both feature maps and their absolute difference:
+        # f1 and f2 supply directionality (gain vs. loss); |f1-f2| supplies magnitude.
+        diff = torch.cat([f1, f2, torch.abs(f1 - f2)], dim=1)  # (B, 6144, H', W')
 
         logits = self.change_head(diff)
         logits = F.interpolate(logits, size=input_size, mode="bilinear", align_corners=False)
