@@ -1,15 +1,24 @@
 """M3: Siamese-DeepLabV3 change detection model (Late Fusion).
 
 Shared ResNet50 encoder processes t1 and t2 independently.
-Element-wise feature difference at the ASPP bottleneck captures change in
-feature space — more robust to cross-year radiometric shift than early fusion.
+Change features are computed at three scales (layer2/3/4) as
+cat([f1, f2, |f1-f2|]) and fused top-down via a lightweight FPN before
+feeding into an ASPP change head.
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import ResNet50_Weights, resnet50
-from torchvision.models.segmentation import deeplabv3_resnet50
+from torchvision.models.segmentation import deeplabv3_resnet50  # noqa: F401
+
+
+def _proj(in_ch: int, out_ch: int) -> nn.Sequential:
+    return nn.Sequential(
+        nn.Conv2d(in_ch, out_ch, 1, bias=False),
+        nn.BatchNorm2d(out_ch),
+        nn.ReLU(inplace=True),
+    )
 
 
 class _ASPPConv(nn.Sequential):
@@ -36,7 +45,7 @@ class _ASPPPooling(nn.Module):
 
 
 class _ChangeASPP(nn.Module):
-    """ASPP operating on the feature-difference tensor."""
+    """ASPP operating on the fused change feature tensor."""
 
     def __init__(self, in_channels: int, num_classes: int, dropout_p: float) -> None:
         super().__init__()
@@ -61,16 +70,43 @@ class _ChangeASPP(nn.Module):
         return self.classifier(self.project(torch.cat([c(x) for c in self.convs], dim=1)))
 
 
+class _FPNDiff(nn.Module):
+    """Multi-scale change features fused via a top-down FPN.
+
+    At each scale the change feature is cat([f1, f2, |f1-f2|]):
+      layer2 → 3×512  = 1536 ch  at H/8
+      layer3 → 3×1024 = 3072 ch  at H/16
+      layer4 → 3×2048 = 6144 ch  at H/32
+
+    Each scale is projected to 256 ch, then fused top-down (l4→l3→l2).
+    A smoothing conv stabilises the summed feature map.
+    Output: 256 ch at H/8 (layer2 resolution).
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.proj4 = _proj(3 * 2048, 256)
+        self.proj3 = _proj(3 * 1024, 256)
+        self.proj2 = _proj(3 * 512,  256)
+        self.smooth = nn.Sequential(
+            nn.Conv2d(256, 256, 3, padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, c2: torch.Tensor, c3: torch.Tensor, c4: torch.Tensor) -> torch.Tensor:
+        p4 = self.proj4(c4)
+        p3 = self.proj3(c3) + F.interpolate(p4, size=c3.shape[-2:], mode="bilinear", align_corners=False)
+        p2 = self.proj2(c2) + F.interpolate(p3, size=c2.shape[-2:], mode="bilinear", align_corners=False)
+        return self.smooth(p2)  # (B, 256, H/8, W/8)
+
+
 class SiameseDeepLabV3(nn.Module):
     """Siamese DeepLabV3 for binary forest-loss change detection.
 
-    A single shared ResNet50 encoder (pretrained, weights shared) processes
-    t1 and t2 separately. The element-wise absolute difference of their deep
-    features feeds into an ASPP change head that outputs a 2-class change map.
-
-    The shared-weight constraint means the same semantic "eye" looks at both
-    time periods — the feature difference is invariant to per-image scale and
-    captures genuine semantic change rather than style differences.
+    Shared ResNet50 encoder extracts features at three scales (layer2/3/4).
+    Per-scale change features cat([f1, f2, |f1-f2|]) are fused top-down via
+    a lightweight FPN, then decoded by an ASPP change head.
     """
 
     def __init__(self, in_channels: int = 7, num_classes: int = 2, dropout_p: float = 0.2) -> None:
@@ -78,41 +114,42 @@ class SiameseDeepLabV3(nn.Module):
 
         backbone = resnet50(weights=ResNet50_Weights.DEFAULT)
 
-        # Replace first conv to handle in_channels input bands
         new_conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         nn.init.kaiming_normal_(new_conv1.weight, mode="fan_out", nonlinearity="relu")
         with torch.no_grad():
             new_conv1.weight[:, :3] = backbone.conv1.weight
         backbone.conv1 = new_conv1
 
-        # Shared encoder — single module, called twice per forward pass
-        self.stem = nn.Sequential(backbone.conv1, backbone.bn1, backbone.relu, backbone.maxpool)
+        self.stem   = nn.Sequential(backbone.conv1, backbone.bn1, backbone.relu, backbone.maxpool)
         self.layer1 = backbone.layer1
         self.layer2 = backbone.layer2
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
 
-        # Change head operates on cat([f1, f2, |f1-f2|]) — retains direction of change
-        self.change_head = _ChangeASPP(in_channels=2048 * 3, num_classes=num_classes, dropout_p=dropout_p)
+        self.fpn         = _FPNDiff()
+        self.change_head = _ChangeASPP(in_channels=256, num_classes=num_classes, dropout_p=dropout_p)
 
-    def _encode(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.stem(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-        return x  # (B, 2048, H/8, W/8) with dilated conv not applied — simple stride
+    def _encode(self, x: torch.Tensor):
+        x  = self.stem(x)
+        x  = self.layer1(x)
+        l2 = self.layer2(x)   # (B, 512,  H/8,  W/8)
+        l3 = self.layer3(l2)  # (B, 1024, H/16, W/16)
+        l4 = self.layer4(l3)  # (B, 2048, H/32, W/32)
+        return l2, l3, l4
 
     def forward(self, t1: torch.Tensor, t2: torch.Tensor):
         input_size = t1.shape[-2:]
-        f1 = self._encode(t1)
-        f2 = self._encode(t2)
 
-        # Concatenate both feature maps and their absolute difference:
-        # f1 and f2 supply directionality (gain vs. loss); |f1-f2| supplies magnitude.
-        diff = torch.cat([f1, f2, torch.abs(f1 - f2)], dim=1)  # (B, 6144, H', W')
+        l2_1, l3_1, l4_1 = self._encode(t1)
+        l2_2, l3_2, l4_2 = self._encode(t2)
 
-        logits = self.change_head(diff)
+        # Per-scale change features: cat([f1, f2, |f1-f2|])
+        c2 = torch.cat([l2_1, l2_2, torch.abs(l2_1 - l2_2)], dim=1)  # 1536 ch
+        c3 = torch.cat([l3_1, l3_2, torch.abs(l3_1 - l3_2)], dim=1)  # 3072 ch
+        c4 = torch.cat([l4_1, l4_2, torch.abs(l4_1 - l4_2)], dim=1)  # 6144 ch
+
+        fused  = self.fpn(c2, c3, c4)          # (B, 256, H/8, W/8)
+        logits = self.change_head(fused)
         logits = F.interpolate(logits, size=input_size, mode="bilinear", align_corners=False)
         return {"out": logits}
 
