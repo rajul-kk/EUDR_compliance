@@ -24,6 +24,35 @@ IGNORE_INDEX = 255
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+class FocalLoss(nn.Module):
+    """Binary focal loss for imbalanced change-detection.
+
+    Down-weights easy no-change pixels so training focuses on hard forest-loss
+    positives. alpha weights the positive (forest-loss) class; gamma controls
+    how aggressively easy negatives are down-weighted.
+    """
+
+    def __init__(self, gamma: float = 2.0, alpha: float = 0.75, ignore_index: int = 255) -> None:
+        super().__init__()
+        self.gamma = gamma
+        self.alpha = alpha
+        self.ignore_index = ignore_index
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        valid = targets != self.ignore_index
+        t = targets.clone()
+        t[~valid] = 0  # dummy value, masked out below
+
+        ce = F.cross_entropy(logits, t, reduction="none")           # (B, H, W)
+        pt = torch.softmax(logits, dim=1).gather(1, t.unsqueeze(1)).squeeze(1)
+
+        alpha_t = torch.where(t == 1,
+                              torch.full_like(pt, self.alpha),
+                              torch.full_like(pt, 1 - self.alpha))
+        loss = alpha_t * (1 - pt) ** self.gamma * ce
+        return (loss * valid).sum() / valid.sum().clamp(min=1)
+
+
 def _change_f1(logits: torch.Tensor, targets: torch.Tensor) -> float:
     preds = torch.argmax(logits, dim=1)
     valid = targets != IGNORE_INDEX
@@ -75,9 +104,7 @@ def train(args: argparse.Namespace) -> None:
             p.requires_grad_(False)
         logger.info("Encoder frozen for %d warmup epochs — only FPN+head training", args.warmup_epochs)
 
-    # Upweight the rare forest-loss class
-    weight = torch.tensor([0.3, 0.7]).to(DEVICE)
-    criterion = nn.CrossEntropyLoss(weight=weight, ignore_index=IGNORE_INDEX)
+    criterion = FocalLoss(gamma=args.focal_gamma, alpha=args.focal_alpha, ignore_index=IGNORE_INDEX)
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", patience=2, factor=0.5)
     scaler = torch.amp.GradScaler("cuda", enabled=_cuda)
@@ -163,6 +190,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--warmup-epochs", type=int, default=3,
                         help="Freeze encoder for this many epochs before end-to-end fine-tuning")
+    parser.add_argument("--focal-gamma", type=float, default=2.0,
+                        help="Focal loss gamma — higher values down-weight easy negatives more")
+    parser.add_argument("--focal-alpha", type=float, default=0.75,
+                        help="Focal loss alpha — weight for the positive (forest-loss) class")
     return parser.parse_args()
 
 
