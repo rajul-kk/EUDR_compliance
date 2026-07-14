@@ -63,6 +63,18 @@ def train(args: argparse.Namespace) -> None:
         logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)
 
+    # Collect encoder params for warmup freeze (unwrap DataParallel if needed)
+    _base = model.module if isinstance(model, torch.nn.DataParallel) else model
+    _encoder_params = (
+        list(_base.stem.parameters()) + list(_base.layer1.parameters()) +
+        list(_base.layer2.parameters()) + list(_base.layer3.parameters()) +
+        list(_base.layer4.parameters())
+    )
+    if args.warmup_epochs > 0:
+        for p in _encoder_params:
+            p.requires_grad_(False)
+        logger.info("Encoder frozen for %d warmup epochs — only FPN+head training", args.warmup_epochs)
+
     # Upweight the rare forest-loss class
     weight = torch.tensor([0.3, 0.7]).to(DEVICE)
     criterion = nn.CrossEntropyLoss(weight=weight, ignore_index=IGNORE_INDEX)
@@ -79,6 +91,10 @@ def train(args: argparse.Namespace) -> None:
     logger.info("Starting Siamese training on %s for %d epochs", DEVICE, args.epochs)
 
     for epoch in range(args.epochs):
+        if epoch == args.warmup_epochs and args.warmup_epochs > 0:
+            for p in _encoder_params:
+                p.requires_grad_(True)
+            logger.info("Encoder unfrozen at epoch %d — end-to-end fine-tuning", epoch + 1)
         model.train()
         train_loss = 0.0
 
@@ -145,6 +161,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--val-ratio", type=float, default=0.15)
     parser.add_argument("--patience", type=int, default=7)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--warmup-epochs", type=int, default=3,
+                        help="Freeze encoder for this many epochs before end-to-end fine-tuning")
     return parser.parse_args()
 
 
