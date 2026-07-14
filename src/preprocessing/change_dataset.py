@@ -33,6 +33,23 @@ HANSEN_FOREST_2020 = 1    # was forest as of 31 Dec 2020
 HANSEN_POST_EUDR_LOSS = 2  # loss detected 2021-2023
 
 
+_OPTICAL_BANDS = [0, 1, 2, 3]  # R, G, B, NIR — clip these; SCL is categorical, NDVI/NDWI are derived
+
+
+def _percentile_clip(img: np.ndarray, low: float = 2.0, high: float = 98.0) -> np.ndarray:
+    """Clip each optical band to its own [low, high] percentile.
+
+    Removes outliers from cloud edges and sensor saturation before histogram
+    matching so the distribution match is not pulled by extreme values.
+    Applied only to optical bands (R/G/B/NIR); SCL/NDVI/NDWI are unaffected.
+    """
+    out = img.copy()
+    for c in _OPTICAL_BANDS:
+        lo, hi = np.percentile(img[c], [low, high])
+        out[c] = np.clip(img[c], lo, hi)
+    return out
+
+
 def load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     """Return (image float32 (C,H,W), scl uint8 (H,W))."""
     with rasterio.open(path) as src:
@@ -42,6 +59,7 @@ def load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
         raise ValueError(f"Expected ≥5 bands, got {img.shape[0]} in {path}")
 
     scl = img[4].astype(np.uint8)
+    img = _percentile_clip(img)           # remove outliers before computing indices
     red, nir, green = img[0], img[3], img[1]
     ndvi = (nir - red) / (nir + red + 1e-8)
     ndwi = (green - nir) / (green + nir + 1e-8)
