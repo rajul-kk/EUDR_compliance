@@ -15,6 +15,12 @@ import rasterio
 import torch
 from torch.utils.data import Dataset
 
+try:
+    from osgeo import gdal as _gdal
+    _gdal.PushErrorHandler("CPLQuietErrorHandler")
+except ImportError:
+    pass
+
 _src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
