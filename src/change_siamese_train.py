@@ -193,7 +193,7 @@ def parse_args() -> argparse.Namespace:
                         help="Freeze encoder for this many epochs before end-to-end fine-tuning")
     parser.add_argument("--focal-gamma", type=float, default=2.0,
                         help="Focal loss gamma — higher values down-weight easy negatives more")
-    parser.add_argument("--focal-alpha", type=float, default=0.75,
+    parser.add_argument("--focal-alpha", type=float, default=0.97,
                         help="Focal loss alpha — weight for the positive (forest-loss) class")
     return parser.parse_args()
 
