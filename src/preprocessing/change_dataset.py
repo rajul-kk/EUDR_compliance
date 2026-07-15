@@ -10,16 +10,17 @@ import re
 import sys
 from typing import List, Optional, Tuple
 
+import warnings
+
 import numpy as np
 import rasterio
 import torch
 from torch.utils.data import Dataset
 
-try:
-    from osgeo import gdal as _gdal
-    _gdal.PushErrorHandler("CPLQuietErrorHandler")
-except ImportError:
-    pass
+# Suppress GDAL/libtiff TIFF metadata warnings that are harmless for multi-band GEE exports
+warnings.filterwarnings("ignore", message=".*TIFFReadDirectory.*")
+warnings.filterwarnings("ignore", message=".*SamplesPerPixel.*")
+warnings.filterwarnings("ignore", message=".*ExtraSamples.*")
 
 _src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _src_dir not in sys.path:
@@ -58,7 +59,7 @@ def _percentile_clip(img: np.ndarray, low: float = 2.0, high: float = 98.0) -> n
 
 def load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     """Return (image float32 (C,H,W), scl uint8 (H,W))."""
-    with rasterio.open(path) as src:
+    with rasterio.Env(), rasterio.open(path) as src:
         img = src.read().astype(np.float32)
 
     if img.shape[0] < 5:
@@ -77,7 +78,7 @@ _load_image = load_image  # private alias kept for internal use
 
 
 def load_mask(path: str) -> np.ndarray:
-    with rasterio.open(path) as src:
+    with rasterio.Env(), rasterio.open(path) as src:
         return src.read(1).astype(np.int64)
 
 
@@ -138,7 +139,7 @@ class ChangeDetectionDataset(Dataset):
     def _is_zero_image(path: str) -> bool:
         """Return True if all pixels in every band are zero (corrupted tile)."""
         try:
-            with rasterio.open(path) as src:
+            with rasterio.Env(), rasterio.open(path) as src:
                 data = src.read()
             return bool(np.all(data == 0))
         except Exception:
