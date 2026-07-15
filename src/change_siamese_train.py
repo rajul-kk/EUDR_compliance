@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 
 _src_dir = os.path.dirname(os.path.abspath(__file__))
 if _src_dir not in sys.path:
@@ -125,8 +126,9 @@ def train(args: argparse.Namespace) -> None:
             logger.info("Encoder unfrozen at epoch %d — end-to-end fine-tuning", epoch + 1)
         model.train()
         train_loss = 0.0
-
-        for t1, t2, change in train_loader:
+        train_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs} train",
+                         leave=False, unit="batch")
+        for t1, t2, change in train_bar:
             t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast("cuda", enabled=_cuda):
@@ -136,19 +138,24 @@ def train(args: argparse.Namespace) -> None:
             scaler.step(optimizer)
             scaler.update()
             train_loss += loss.item()
+            train_bar.set_postfix(loss=f"{loss.item():.4f}")
 
         avg_train_loss = train_loss / max(1, len(train_loader))
 
         model.eval()
         val_loss, val_f1 = 0.0, 0.0
+        val_bar = tqdm(val_loader, desc=f"Epoch {epoch+1}/{args.epochs} val  ",
+                       leave=False, unit="batch")
         with torch.no_grad():
-            for t1, t2, change in val_loader:
+            for t1, t2, change in val_bar:
                 t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
                 with torch.autocast("cuda", enabled=_cuda):
                     logits = model(t1, t2)["out"]
                     loss = criterion(logits, change)
                 val_loss += loss.item()
-                val_f1 += _change_f1(logits, change)
+                f1 = _change_f1(logits, change)
+                val_f1 += f1
+                val_bar.set_postfix(loss=f"{loss.item():.4f}", f1=f"{f1:.4f}")
 
         avg_val_loss = val_loss / max(1, len(val_loader))
         avg_val_f1 = val_f1 / max(1, len(val_loader))
