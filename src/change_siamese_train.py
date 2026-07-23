@@ -66,16 +66,35 @@ def _change_f1(logits: torch.Tensor, targets: torch.Tensor) -> float:
     return (2 * p * r / (p + r + 1e-8)).item()
 
 
+def _suppress_gdal_worker(worker_id: int) -> None:
+    """Redirect worker fd 2 → /dev/null to suppress GDAL/libtiff C-level stderr."""
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, 2)
+    os.close(devnull)
+
+
 def train(args: argparse.Namespace) -> None:
     seed_everything(args.seed)
 
-    dataset = ChangeDetectionDataset(
-        t1_dir=args.t1_dir,
-        t2_dir=args.t2_dir,
-        mask_dir=args.mask_dir,
-        label_backend=args.label_backend,
-        histogram_match=True,
-    )
+    # Suppress GDAL C-level stderr only during dataset scan (main process).
+    # Restoring fd 2 before training keeps tqdm/logging visible.
+    _devnull = os.open(os.devnull, os.O_WRONLY)
+    _old_fd2 = os.dup(2)
+    os.dup2(_devnull, 2)
+    os.close(_devnull)
+    try:
+        dataset = ChangeDetectionDataset(
+            t1_dir=args.t1_dir,
+            t2_dir=args.t2_dir,
+            mask_dir=args.mask_dir,
+            label_backend=args.label_backend,
+            histogram_match=True,
+        )
+    finally:
+        sys.stderr.flush()
+        os.dup2(_old_fd2, 2)
+        os.close(_old_fd2)
+
     train_set, val_set = split_dataset(dataset, val_ratio=args.val_ratio, seed=args.seed)
 
     _cuda = torch.cuda.is_available()
@@ -84,10 +103,12 @@ def train(args: argparse.Namespace) -> None:
     _workers = min(4, os.cpu_count() or 1)
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True,
                               num_workers=_workers, pin_memory=_cuda,
-                              persistent_workers=_workers > 0)
+                              persistent_workers=_workers > 0,
+                              worker_init_fn=_suppress_gdal_worker if _workers > 0 else None)
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False,
                             num_workers=_workers, pin_memory=_cuda,
-                            persistent_workers=_workers > 0)
+                            persistent_workers=_workers > 0,
+                            worker_init_fn=_suppress_gdal_worker if _workers > 0 else None)
 
     model = get_siamese_model().to(DEVICE)
     if torch.cuda.device_count() > 1:
