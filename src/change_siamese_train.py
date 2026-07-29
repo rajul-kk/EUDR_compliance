@@ -148,7 +148,7 @@ def train(args: argparse.Namespace) -> None:
         model.train()
         train_loss = 0.0
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs} train",
-                         leave=False, unit="batch", file=sys.stdout)
+                         leave=False, unit="batch")
         for t1, t2, change in train_bar:
             t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
             optimizer.zero_grad(set_to_none=True)
@@ -166,7 +166,7 @@ def train(args: argparse.Namespace) -> None:
         model.eval()
         val_loss, val_f1 = 0.0, 0.0
         val_bar = tqdm(val_loader, desc=f"Epoch {epoch+1}/{args.epochs} val  ",
-                       leave=False, unit="batch", file=sys.stdout)
+                       leave=False, unit="batch")
         with torch.no_grad():
             for t1, t2, change in val_bar:
                 t1, t2, change = t1.to(DEVICE), t2.to(DEVICE), change.to(DEVICE)
