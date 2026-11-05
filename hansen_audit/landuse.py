@@ -1,0 +1,150 @@
+"""Land-use classifier on Sentinel-2 cell features and the confusion-corrected decomposition of Hansen loss (PROTOCOL_S2 E1-E3)."""
+from __future__ import annotations
+
+import numpy as np
+
+from . import s2
+
+CLASSES = ("FOREST", "PLANT", "OTHER")  # 0, 1, 2 (reference.class_group order is remapped by group_index)
+BASE_FEATURES = ("B02", "B03", "B04", "B08", "B11", "B12", "NDVI", "NDMI", "NDVI_STD")
+NEIGH_FEATURES = ("NDVI", "NDMI", "B08")
+FEATURES = BASE_FEATURES + tuple(f"{c}_n3" for c in NEIGH_FEATURES)
+
+LGBM_PARAMS = dict(n_estimators=400, learning_rate=0.05, num_leaves=63, min_child_samples=200,
+                   class_weight="balanced", random_state=0, n_jobs=2, verbose=-1)
+MAX_TRAIN_PER_GRID = 20_000
+N_FOLDS = 6
+
+
+def nan_box_mean(x: np.ndarray, r: int = 1) -> np.ndarray:
+    """Mean over a (2r+1)^2 window ignoring NaN; NaN where the window has no finite value."""
+    H, W = x.shape
+    v = np.isfinite(x)
+    xp = np.pad(np.where(v, x, 0.0), r)
+    vp = np.pad(v.astype(np.float32), r)
+    s = np.zeros((H, W), np.float64)
+    n = np.zeros((H, W), np.float64)
+    for dy in range(2 * r + 1):
+        for dx in range(2 * r + 1):
+            s += xp[dy:dy + H, dx:dx + W]
+            n += vp[dy:dy + H, dx:dx + W]
+    with np.errstate(all="ignore"):
+        out = s / n
+    out[n == 0] = np.nan
+    return out.astype(np.float32)
+
+
+def cell_features(cells: np.ndarray, channels=s2.CHANNELS) -> np.ndarray:
+    """Composite (C, H, W) -> (len(FEATURES), H, W). Cells invalid in the composite stay NaN in every feature."""
+    ch = {c: i for i, c in enumerate(channels)}
+    base = [cells[ch[c]] for c in BASE_FEATURES]
+    neigh = [nan_box_mean(cells[ch[c]]) for c in NEIGH_FEATURES]
+    out = np.stack(base + neigh).astype(np.float32)
+    invalid = ~np.isfinite(cells[ch["NDVI"]])
+    out[:, invalid] = np.nan
+    return out
+
+
+def group_index(class_ids: np.ndarray) -> np.ndarray:
+    """Reference class_ID -> 0 FOREST, 1 PLANT, 2 OTHER (PROTOCOL.md groups)."""
+    from .reference import FOREST_IDS, PLANT_IDS
+
+    g = np.full(class_ids.shape, 2, np.int8)
+    g[np.isin(class_ids, list(PLANT_IDS))] = 1
+    g[np.isin(class_ids, list(FOREST_IDS))] = 0
+    return g
+
+
+def assign_folds(grid_ids, islands, k: int = N_FOLDS, seed: int = 0) -> dict:
+    """Grouped folds balanced by island: shuffle grids within each island, deal them round-robin, continuing across islands."""
+    rng = np.random.default_rng(seed)
+    folds, pos = {}, 0
+    for isl in sorted(set(islands)):
+        g = sorted(gid for gid, i in zip(grid_ids, islands) if i == isl)
+        rng.shuffle(g)
+        for gid in g:
+            folds[gid] = pos % k
+            pos += 1
+    return folds
+
+
+def confusion_counts(y_true: np.ndarray, y_pred: np.ndarray, k: int = 3) -> np.ndarray:
+    """C[i, j] = number of cells with true class i predicted as j."""
+    return np.bincount(y_true.astype(np.int64) * k + y_pred.astype(np.int64), minlength=k * k).reshape(k, k)
+
+
+def recall_precision(counts: np.ndarray):
+    with np.errstate(all="ignore"):
+        rec = np.diag(counts) / counts.sum(1)
+        prec = np.diag(counts) / counts.sum(0)
+    return rec, prec
+
+
+def balanced_accuracy(counts: np.ndarray) -> float:
+    rec, _ = recall_precision(counts)
+    return float(np.nanmean(rec))
+
+
+def corrected_shares(conf_counts: np.ndarray, pred_counts: np.ndarray):
+    """Invert misclassification: q = C^T pi, with C[i, j] = P(pred j | true i). Returns (pi, clipped)."""
+    C = conf_counts / conf_counts.sum(1, keepdims=True)
+    q = pred_counts / pred_counts.sum()
+    pi = np.linalg.solve(C.T, q)
+    clipped = bool((pi < 0).any())
+    pi = np.clip(pi, 0, None)
+    return pi / pi.sum(), clipped
+
+
+def cluster_bootstrap(conf_by_grid: np.ndarray, pred_by_grid: np.ndarray, n_boot: int = 2000, seed: int = 0):
+    """conf_by_grid (G, 3, 3), pred_by_grid (G, 3). Resample grids; returns dict of point estimates and percentile 95 % intervals."""
+    rng = np.random.default_rng(seed)
+    G = len(pred_by_grid)
+
+    def est(idx):
+        conf = conf_by_grid[idx].sum(0)
+        pred = pred_by_grid[idx].sum(0)
+        raw = pred / pred.sum()
+        cor, clipped = corrected_shares(conf, pred)
+        return raw, cor, clipped
+
+    raw0, cor0, clip0 = est(np.arange(G))
+    raws, cors, clips = [], [], 0
+    for _ in range(n_boot):
+        idx = rng.integers(0, G, G)
+        try:
+            r, c, cl = est(idx)
+        except np.linalg.LinAlgError:
+            continue
+        raws.append(r)
+        cors.append(c)
+        clips += cl
+    raws, cors = np.array(raws), np.array(cors)
+
+    def ci(a):
+        return np.nanpercentile(a, [2.5, 97.5], axis=0)
+
+    out = {"n_grids": int(G), "n_cells": int(pred_by_grid.sum()), "n_boot_ok": int(len(raws)),
+           "clipped_point": clip0, "clipped_boot_frac": clips / max(len(raws), 1)}
+    for name, p, a in (("raw", raw0, raws), ("corrected", cor0, cors)):
+        lo, hi = ci(a)
+        out[name] = {c: {"est": float(p[i]), "lo": float(lo[i]), "hi": float(hi[i])} for i, c in enumerate(CLASSES)}
+    return out
+
+
+def metric_bootstrap(conf_by_grid: np.ndarray, n_boot: int = 2000, seed: int = 0):
+    """Recall, precision and balanced accuracy with grid-cluster bootstrap intervals."""
+    rng = np.random.default_rng(seed)
+    G = len(conf_by_grid)
+
+    def stats(c):
+        rec, prec = recall_precision(c)
+        return np.concatenate([rec, prec, [balanced_accuracy(c)]])
+
+    p = stats(conf_by_grid.sum(0))
+    bs = np.array([stats(conf_by_grid[rng.integers(0, G, G)].sum(0)) for _ in range(n_boot)])
+    lo, hi = np.nanpercentile(bs, [2.5, 97.5], axis=0)
+    names = [f"recall_{c}" for c in CLASSES] + [f"precision_{c}" for c in CLASSES] + ["balanced_accuracy"]
+    res = {n: {"est": float(p[i]), "lo": float(lo[i]), "hi": float(hi[i])} for i, n in enumerate(names)}
+    res["confusion"] = conf_by_grid.sum(0).tolist()
+    res["n_grids"] = int(G)
+    return res
