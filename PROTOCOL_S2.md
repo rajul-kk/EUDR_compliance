@@ -6,7 +6,7 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
 ## Data rules
 - Grids: all 72 reference grids. Periods: `2020` = 2020-01-01..2020-12-31 (EUDR cut-off year) and `ref` = the grid's label_year (calendar year).
   For the one grid with label_year 2020 the same composite serves both.
-- Scenes: STAC `sentinel-2-l2a`, tile cloud cover < 80 %, ranked by clear fraction inside the grid (SCL not in {0,1,3,8,9,10}); median of the best 6.
+- Scenes: STAC `sentinel-2-l2a`, tile cloud cover < 80 %, ranked by clear fraction inside the grid (SCL not in {0,1,3,8,9,10}); median of the best 4 (deviation 2).
   DN - 1000 when processing baseline >= 04.00; reflectance = DN / 10000.
 - A cell is valid in a period if it has >= 2 clear observations at >= 50 % of its 10 m pixels. Invalid cells are dropped and their share reported per grid.
 - Download stops at 4.5 GB (system-wide received bytes since start, conservative). If it stops early, the analysis runs on the grids completed and says so.
@@ -48,3 +48,10 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
 - Every reported number comes from a logged command with a results file in `results/s2/`.
 
 ## Deviations
+1. 2026-11-05, before any result (only download cost measured). A trial on grid 03 (2020) took 44 MB and 80 s. Ranking all 30 candidate scenes by SCL
+   dominated the cost, which projects to ~6.3 GB for 143 grid-periods, above the 4.5 GB guard. Change: only the 12 items with the lowest tile cloud cover
+   are ranked by in-grid clear fraction (items are pre-sorted by `eo:cloud_cover`); still the best 6 of those are composited. The grid 03 trial file
+   (made with all 30 candidates) is deleted and rebuilt under the new rule so every grid follows one rule.
+2. 2026-11-05, before any result. After deviation 1, trials on grids 03 and 04 (three grid-periods) still used 37-42 MB each, mostly band reads
+   (~0.9 MB per band per scene), projecting to ~5.6 GB. Change: the composite uses the best **4** scenes (was 6). In the trials the 4th-best scene
+   still had >= 0.83 in-grid clear fraction, and the >= 2 clear observations rule is unchanged. Trial files are rebuilt under the final rule.
