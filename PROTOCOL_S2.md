@@ -6,7 +6,7 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
 ## Data rules
 - Grids: all 72 reference grids. Periods: `2020` = 2020-01-01..2020-12-31 (EUDR cut-off year) and `ref` = the grid's label_year (calendar year).
   For the one grid with label_year 2020 the same composite serves both.
-- Scenes: STAC `sentinel-2-l2a`, tile cloud cover < 80 %, ranked by clear fraction inside the grid (SCL not in {0,1,3,8,9,10}); median of the best 4 (deviation 2).
+- Scenes: STAC `sentinel-2-l2a`, tile cloud cover < 80 %, ranked by clear fraction inside the grid (SCL not in {0,1,3,8,9,10}); median of the best 6.
   DN - 1000 when processing baseline >= 04.00; reflectance = DN / 10000.
 - A cell is valid in a period if it has >= 2 clear observations at >= 50 % of its 10 m pixels. Invalid cells are dropped and their share reported per grid.
 - Download stops at 4.5 GB (system-wide received bytes since start, conservative). If it stops early, the analysis runs on the grids completed and says so.
