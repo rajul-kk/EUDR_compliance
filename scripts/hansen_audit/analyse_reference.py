@@ -64,6 +64,16 @@ def main(npz, gi, out, n_boot=2000):
             boots[k].append(mm[k])
     res["ci95"] = {k: [float(np.nanpercentile(v, 2.5)), float(np.nanpercentile(v, 97.5))] for k, v in boots.items()}
     res["by_island"] = {isl: metrics(sum(per[g] for g in gids if gi.loc[g, "island"] == isl)) for isl in sorted(gi.island.unique())}
+    res["by_label_year"] = {}
+    for lab, cond in (("<=2021", lambda y: y <= 2021), (">=2022", lambda y: y >= 2022)):
+        gg = [g for g in gids if cond(int(gi.loc[g, "label_year"]))]
+        tt = sum(per[g] for g in gg)
+        bs = []
+        for _ in range(n_boot):
+            pick = rng.integers(0, len(gg), len(gg)); bs.append(metrics(sum(per[gg[i]] for i in pick)))
+        m = metrics(tt)
+        res["by_label_year"][lab] = {"n_grids": len(gg), "pooled": m,
+            "ci95": {k: [float(np.nanpercentile([b[k] for b in bs], 2.5)), float(np.nanpercentile([b[k] for b in bs], 97.5))] for k in m}}
     res["by_grid"] = {g: {"table_hansen_rows_ref_cols_FPO": per[g].tolist(), "label_year": int(gi.loc[g, "label_year"]), "province": gi.loc[g, "province"]} for g in gids}
     # grids with >0 loss cells: share where PLANT is the majority reference
     lc = [(g, per[g][2]) for g in gids if per[g][2].sum() > 0]

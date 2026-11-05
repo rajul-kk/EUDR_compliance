@@ -27,3 +27,11 @@ Folder `D:/Work/eudr-satellite-upload` (read-only). All numbers below were compu
   393 of 415 farms contain at least one class-1/2 pixel; 22 contain none; 393 contain at least one loss pixel; 86 of 94 Indonesian oil palm farms contain loss pixels.
   Such a high loss share inside OSM farm polygons of established crops is itself a warning sign for plantation harvest/replanting being counted as loss (hypothesis, tested in the reference step).
 - The class balance is extremely skewed toward class 0, and within forest pixels toward loss, so accuracy is not a usable metric.
+
+## Inside the image footprint (what the models can actually use; `results/features.npz`, not committed)
+The label box is ~5 km but the image tile ~1.1 km, so only the central 37 x 37 cells (1,369 per farm) pair with imagery.
+- 415 farms x 1,369 cells: class 0 96.5 %, class 1 0.86 %, class 2 2.69 % (loss = 75.8 % of class 1+2 cells).
+- After requiring SCL-valid pixels in both years (>= 50 % of a cell, cloud/shadow/nodata classes {0,1,3,8,9,10} excluded) only **54.7 % of cells are usable**.
+- Usable class 1/2 cells: 7,586 total (1,902 stable, 5,684 loss) from 227 farms (the other farms have none). Per group (usable stable / loss cells, farms with any loss):
+  ID Oil Palm 225 / 783 (33 of 94 farms); CM Cocoa 742 / 2,153 (49 of 72); TH Rubber 119 / 976; BR Cattle 20 / 954; BR Soy 45 / 304; BR Coffee 169 / 274; VN Coffee 582 / 240; US Cattle 0 / 0.
+  So ID oil palm has ~1,000 labelled cells and 33 farms with any loss: sample size for farm-level conclusions is small.

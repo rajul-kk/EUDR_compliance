@@ -46,4 +46,16 @@ from this reference except as baseline omission. Claims are limited accordingly.
 - If reference cells contain fewer than 5,000 FOREST+loss cells in total, or the reference download fails, the reference-based analysis is dropped and stated as unrun.
 
 ## Deviations
-(none yet)
+1. 2026-11-05 (after seeing reference_metrics.json, so this is a post-hoc correction, not a blind one). The framing above says the reference is a
+   "2019/2020 snapshot". Reading the full `grid_index.csv` label_year column afterwards shows: 2019: 2 grids, 2020: 1, 2021: 4, 2022: 3, 2023: 44,
+   2024: 15, 2025: 3. Most reference imagery is from 2023-24, i.e. after the 2021-24 loss window. Consequence: a loss cell that is PLANT in the
+   reference is ambiguous (replanting/harvest = false flag, or forest cleared then planted = a true EUDR violation). "Pixel false-flag" is therefore NOT
+   identified from all grids. Changes: (a) the false-flag-related composition P(PLANT | loss) is reported for all grids as "ambiguous composition" and
+   separately for the 7 grids with reference year <= 2021 (closest to the baseline) as the nearer-to-false-flag estimate; (b) baseline commission
+   P(PLANT | Hansen stable forest) and P(Hansen >= 1 | PLANT) are unaffected in interpretation (PLANT present in 2023-24 on a pixel with no loss since 2001 is
+   an old plantation or unflagged conversion) and are reported for all grids; (c) experiment D in `run_experiments.py` (strict/lenient precision from all
+   grids) is discarded: its output key `expD_transported_false_flag_sensitivity` in results/experiments.json must not be cited; it is replaced by
+   `scripts/hansen_audit/run_sensitivity.py` (precision swept 0.2-0.9, reference values marked). (d) the 5,000-cell stopping rule: the <=2021 subset has
+   49,790 reference-FOREST cells, so the rule is met.
+2. Data reality (also known before results): only ~7.6k usable labelled cells exist in the image footprint (see docs/data_inventory.md), 94 ID oil palm
+   farms (33 with loss). The CPU experiments therefore use the protocol's settings unchanged (15 epochs, 5 seeds) and the farm-level results have wide intervals.
