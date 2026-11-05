@@ -1,0 +1,1627 @@
+{
+ "n_grids": 72,
+ "pooled": {
+  "loss_cells": 177104,
+  "P(PLANT|loss)": 0.5092544493630861,
+  "P(FOREST|loss)": 0.14962959616948235,
+  "P(OTHER|loss)": 0.3411159544674316,
+  "stable_cells": 1170972,
+  "P(PLANT|stable_forest)": 0.48108836078061645,
+  "P(FOREST|stable_forest)": 0.2770356592642693,
+  "P(hansen>=1|PLANT)": 0.35668276708964386,
+  "P(loss|PLANT)": 0.049224177923318325,
+  "P(hansen=0|FOREST)": 0.319913172405105,
+  "forest_ref_cells": 515965,
+  "plant_ref_cells": 1832250
+ },
+ "ci95": {
+  "loss_cells": [
+   137974.95,
+   217813.5749999999
+  ],
+  "P(PLANT|loss)": [
+   0.4171789809536105,
+   0.6018317944411665
+  ],
+  "P(FOREST|loss)": [
+   0.09778605659827462,
+   0.20946386792022398
+  ],
+  "P(OTHER|loss)": [
+   0.2585024314546642,
+   0.42842888684938996
+  ],
+  "stable_cells": [
+   1008941.025,
+   1332042.525
+  ],
+  "P(PLANT|stable_forest)": [
+   0.378283968908752,
+   0.5861294651600218
+  ],
+  "P(FOREST|stable_forest)": [
+   0.1853608806700574,
+   0.37621988025563174
+  ],
+  "P(hansen>=1|PLANT)": [
+   0.2932552399550041,
+   0.42356625836123385
+  ],
+  "P(loss|PLANT)": [
+   0.03541071248367016,
+   0.0643112504199293
+  ],
+  "P(hansen=0|FOREST)": [
+   0.24593471236528286,
+   0.4060650009455749
+  ],
+  "forest_ref_cells": [
+   359555.975,
+   688824.525
+  ],
+  "plant_ref_cells": [
+   1592199.925,
+   2062245.7
+  ]
+ },
+ "by_island": {
+  "Kalimantan": {
+   "loss_cells": 43910,
+   "P(PLANT|loss)": 0.38952402641767253,
+   "P(FOREST|loss)": 0.22145297198815758,
+   "P(OTHER|loss)": 0.3890230015941699,
+   "stable_cells": 283222,
+   "P(PLANT|stable_forest)": 0.20895975595116198,
+   "P(FOREST|stable_forest)": 0.5176080954163166,
+   "P(hansen>=1|PLANT)": 0.3032348334883573,
+   "P(loss|PLANT)": 0.0679879478801466,
+   "P(hansen=0|FOREST)": 0.27864479986710106,
+   "forest_ref_cells": 216706,
+   "plant_ref_cells": 251574
+  },
+  "Sulawesi": {
+   "loss_cells": 42090,
+   "P(PLANT|loss)": 0.5065336184366833,
+   "P(FOREST|loss)": 0.13901164172012354,
+   "P(OTHER|loss)": 0.35445473984319315,
+   "stable_cells": 387971,
+   "P(PLANT|stable_forest)": 0.47986318565047387,
+   "P(FOREST|stable_forest)": 0.23761827559276338,
+   "P(hansen>=1|PLANT)": 0.5814963035204834,
+   "P(loss|PLANT)": 0.059749009321069656,
+   "P(hansen=0|FOREST)": 0.15382822816602368,
+   "forest_ref_cells": 115863,
+   "plant_ref_cells": 356826
+  },
+  "Sumatra": {
+   "loss_cells": 91104,
+   "P(PLANT|loss)": 0.5682187390235336,
+   "P(FOREST|loss)": 0.11991789603090973,
+   "P(OTHER|loss)": 0.3118633649455567,
+   "stable_cells": 499779,
+   "P(PLANT|stable_forest)": 0.6362532239249749,
+   "P(FOREST|stable_forest)": 0.17130371624257923,
+   "P(hansen>=1|PLANT)": 0.30212280916779016,
+   "P(loss|PLANT)": 0.042298484291375574,
+   "P(hansen=0|FOREST)": 0.4736035682348579,
+   "forest_ref_cells": 183396,
+   "plant_ref_cells": 1223850
+  }
+ },
+ "by_grid": {
+  "01": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1232,
+     19166,
+     4889
+    ],
+    [
+     4296,
+     2763,
+     8206
+    ],
+    [
+     971,
+     3644,
+     1058
+    ]
+   ],
+   "label_year": 2019,
+   "province": "South Kalimantan"
+  },
+  "02": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2410,
+     7811,
+     2911
+    ],
+    [
+     22093,
+     2379,
+     1179
+    ],
+    [
+     3083,
+     4446,
+     341
+    ]
+   ],
+   "label_year": 2019,
+   "province": "South Kalimantan"
+  },
+  "03": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     59,
+     29859,
+     4871
+    ],
+    [
+     0,
+     8760,
+     1819
+    ],
+    [
+     1,
+     398,
+     673
+    ]
+   ],
+   "label_year": 2020,
+   "province": "Riau"
+  },
+  "04": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     15570,
+     9053
+    ],
+    [
+     0,
+     18335,
+     2515
+    ],
+    [
+     0,
+     636,
+     331
+    ]
+   ],
+   "label_year": 2021,
+   "province": "Riau"
+  },
+  "05": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     34431,
+     2426
+    ],
+    [
+     0,
+     6865,
+     267
+    ],
+    [
+     0,
+     2609,
+     56
+    ]
+   ],
+   "label_year": 2021,
+   "province": "Riau"
+  },
+  "06": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     16082,
+     3330
+    ],
+    [
+     0,
+     21098,
+     3575
+    ],
+    [
+     0,
+     1987,
+     583
+    ]
+   ],
+   "label_year": 2021,
+   "province": "Riau"
+  },
+  "07": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     4724,
+     23669,
+     2070
+    ],
+    [
+     7984,
+     1914,
+     1064
+    ],
+    [
+     2937,
+     2145,
+     148
+    ]
+   ],
+   "label_year": 2021,
+   "province": "Riau"
+  },
+  "08": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     21002,
+     7182
+    ],
+    [
+     0,
+     14396,
+     3347
+    ],
+    [
+     0,
+     228,
+     501
+    ]
+   ],
+   "label_year": 2022,
+   "province": "Jambi"
+  },
+  "09": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     10943,
+     3833
+    ],
+    [
+     0,
+     25341,
+     4893
+    ],
+    [
+     0,
+     920,
+     510
+    ]
+   ],
+   "label_year": 2022,
+   "province": "Jambi"
+  },
+  "10": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     924,
+     29923,
+     925
+    ],
+    [
+     6,
+     13220,
+     279
+    ],
+    [
+     207,
+     837,
+     119
+    ]
+   ],
+   "label_year": 2022,
+   "province": "West Sumatra"
+  },
+  "11": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     6773,
+     3704,
+     14904
+    ],
+    [
+     11582,
+     559,
+     4550
+    ],
+    [
+     1990,
+     120,
+     2472
+    ]
+   ],
+   "label_year": 2023,
+   "province": "East Kalimantan"
+  },
+  "12": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2996,
+     8440,
+     23034
+    ],
+    [
+     10772,
+     352,
+     650
+    ],
+    [
+     12,
+     42,
+     142
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Kalimantan"
+  },
+  "13": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     349,
+     14931,
+     13200
+    ],
+    [
+     171,
+     5604,
+     9210
+    ],
+    [
+     298,
+     314,
+     2148
+    ]
+   ],
+   "label_year": 2023,
+   "province": "East Kalimantan"
+  },
+  "14": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2655,
+     7095,
+     8464
+    ],
+    [
+     6412,
+     1396,
+     12333
+    ],
+    [
+     1639,
+     1981,
+     4250
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Kalimantan"
+  },
+  "15": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     6634,
+     26154,
+     2370
+    ],
+    [
+     2840,
+     5580,
+     799
+    ],
+    [
+     631,
+     1189,
+     243
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "16": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     9147,
+     9247,
+     1024
+    ],
+    [
+     14103,
+     5064,
+     1464
+    ],
+    [
+     962,
+     4750,
+     464
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Jambi"
+  },
+  "17": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     18189,
+     10618,
+     1969
+    ],
+    [
+     7541,
+     6498,
+     1197
+    ],
+    [
+     199,
+     335,
+     108
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Jambi"
+  },
+  "18": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     3295,
+     6392,
+     6881
+    ],
+    [
+     13432,
+     8651,
+     5190
+    ],
+    [
+     1557,
+     204,
+     1053
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "19": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1158,
+     9817,
+     6143
+    ],
+    [
+     3715,
+     14347,
+     7434
+    ],
+    [
+     1323,
+     638,
+     2074
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "20": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1305,
+     34232,
+     4465
+    ],
+    [
+     385,
+     3799,
+     1865
+    ],
+    [
+     0,
+     59,
+     115
+    ]
+   ],
+   "label_year": 2023,
+   "province": "South Sumatra"
+  },
+  "21": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     429,
+     27490,
+     10036
+    ],
+    [
+     5876,
+     1368,
+     317
+    ],
+    [
+     6,
+     529,
+     388
+    ]
+   ],
+   "label_year": 2023,
+   "province": "South Sumatra"
+  },
+  "22": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1255,
+     21051,
+     7063
+    ],
+    [
+     7570,
+     1505,
+     181
+    ],
+    [
+     90,
+     6068,
+     1657
+    ]
+   ],
+   "label_year": 2023,
+   "province": "South Sumatra"
+  },
+  "23": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     20551,
+     8331
+    ],
+    [
+     0,
+     11285,
+     4471
+    ],
+    [
+     0,
+     1017,
+     570
+    ]
+   ],
+   "label_year": 2023,
+   "province": "South Sumatra"
+  },
+  "24": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2979,
+     22744,
+     4911
+    ],
+    [
+     8690,
+     2900,
+     1034
+    ],
+    [
+     1263,
+     786,
+     1133
+    ]
+   ],
+   "label_year": 2023,
+   "province": "East Kalimantan"
+  },
+  "25": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     5311,
+     12277,
+     5984
+    ],
+    [
+     13130,
+     5689,
+     1666
+    ],
+    [
+     1344,
+     538,
+     501
+    ]
+   ],
+   "label_year": 2023,
+   "province": "South Sumatra"
+  },
+  "26": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     45055,
+     450
+    ],
+    [
+     0,
+     758,
+     5
+    ],
+    [
+     0,
+     159,
+     13
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "27": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     7521,
+     33439,
+     1350
+    ],
+    [
+     2037,
+     830,
+     78
+    ],
+    [
+     399,
+     654,
+     348
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "28": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1021,
+     35331,
+     3844
+    ],
+    [
+     701,
+     1613,
+     1790
+    ],
+    [
+     611,
+     670,
+     859
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "29": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     3215,
+     32880,
+     4075
+    ],
+    [
+     2823,
+     845,
+     482
+    ],
+    [
+     1033,
+     754,
+     118
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "30": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     14141,
+     526,
+     2160
+    ],
+    [
+     28462,
+     61,
+     912
+    ],
+    [
+     112,
+     5,
+     61
+    ]
+   ],
+   "label_year": 2023,
+   "province": "East Kalimantan"
+  },
+  "31": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     7599,
+     668,
+     1015
+    ],
+    [
+     35769,
+     100,
+     937
+    ],
+    [
+     95,
+     2,
+     40
+    ]
+   ],
+   "label_year": 2023,
+   "province": "East Kalimantan"
+  },
+  "32": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     426,
+     4757,
+     18713
+    ],
+    [
+     2693,
+     13960,
+     5195
+    ],
+    [
+     108,
+     377,
+     426
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "33": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     7033,
+     13576
+    ],
+    [
+     0,
+     19604,
+     5632
+    ],
+    [
+     0,
+     557,
+     247
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "34": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     3088,
+     74,
+     4317
+    ],
+    [
+     31731,
+     143,
+     5032
+    ],
+    [
+     1010,
+     39,
+     1221
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "35": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     4768,
+     8224,
+     2854
+    ],
+    [
+     9196,
+     15896,
+     4091
+    ],
+    [
+     789,
+     425,
+     412
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "36": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     515,
+     6265,
+     25496
+    ],
+    [
+     1390,
+     6825,
+     3626
+    ],
+    [
+     393,
+     585,
+     1559
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "37": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     72,
+     1773,
+     28124
+    ],
+    [
+     2335,
+     4819,
+     9017
+    ],
+    [
+     4,
+     88,
+     208
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "38": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     204,
+     464,
+     35557
+    ],
+    [
+     3473,
+     2838,
+     3340
+    ],
+    [
+     16,
+     56,
+     233
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "39": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     435,
+     1859,
+     19677
+    ],
+    [
+     7668,
+     7759,
+     8546
+    ],
+    [
+     94,
+     123,
+     279
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "40": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     663,
+     20975,
+     12456
+    ],
+    [
+     744,
+     1782,
+     1668
+    ],
+    [
+     1619,
+     2280,
+     4253
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "41": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2493,
+     2463,
+     11294
+    ],
+    [
+     13826,
+     4558,
+     11185
+    ],
+    [
+     200,
+     189,
+     446
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "42": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     20816,
+     1131
+    ],
+    [
+     0,
+     17921,
+     1204
+    ],
+    [
+     0,
+     4379,
+     989
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  },
+  "43": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1258,
+     14230,
+     3500
+    ],
+    [
+     2493,
+     17590,
+     2972
+    ],
+    [
+     309,
+     2659,
+     1644
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Sulawesi"
+  },
+  "44": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     24921,
+     755
+    ],
+    [
+     0,
+     11429,
+     637
+    ],
+    [
+     0,
+     8761,
+     152
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Sulawesi"
+  },
+  "45": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     11452,
+     1585
+    ],
+    [
+     0,
+     28019,
+     3851
+    ],
+    [
+     0,
+     1481,
+     51
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Sulawesi"
+  },
+  "46": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     9520,
+     12106
+    ],
+    [
+     0,
+     13992,
+     10447
+    ],
+    [
+     0,
+     151,
+     438
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Kalimantan"
+  },
+  "47": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     13805,
+     14966
+    ],
+    [
+     0,
+     5289,
+     8490
+    ],
+    [
+     0,
+     1021,
+     2654
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Kalimantan"
+  },
+  "48": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2387,
+     11605,
+     12336
+    ],
+    [
+     4241,
+     4573,
+     7764
+    ],
+    [
+     169,
+     2107,
+     1258
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Central Kalimantan"
+  },
+  "49": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     49,
+     54,
+     15832
+    ],
+    [
+     77,
+     1304,
+     22775
+    ],
+    [
+     0,
+     671,
+     5463
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Bengkulu"
+  },
+  "50": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     11251,
+     12235,
+     9196
+    ],
+    [
+     5897,
+     1235,
+     3497
+    ],
+    [
+     68,
+     2250,
+     811
+    ]
+   ],
+   "label_year": 2024,
+   "province": "South Kalimantan"
+  },
+  "51": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     18179,
+     2525
+    ],
+    [
+     0,
+     17845,
+     7204
+    ],
+    [
+     0,
+     221,
+     251
+    ]
+   ],
+   "label_year": 2024,
+   "province": "South Kalimantan"
+  },
+  "52": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     561,
+     29322,
+     3248
+    ],
+    [
+     988,
+     9912,
+     1781
+    ],
+    [
+     197,
+     279,
+     152
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Jambi"
+  },
+  "53": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     4,
+     6221,
+     425
+    ],
+    [
+     38,
+     36450,
+     549
+    ],
+    [
+     0,
+     2863,
+     105
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "54": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     4283,
+     753
+    ],
+    [
+     0,
+     40020,
+     352
+    ],
+    [
+     0,
+     664,
+     368
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "55": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     111,
+     11407,
+     2593
+    ],
+    [
+     96,
+     19975,
+     1778
+    ],
+    [
+     7,
+     5977,
+     4711
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "56": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     25384,
+     1031
+    ],
+    [
+     0,
+     18551,
+     419
+    ],
+    [
+     0,
+     1251,
+     18
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "57": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     186,
+     25851,
+     625
+    ],
+    [
+     6674,
+     8064,
+     1098
+    ],
+    [
+     116,
+     3939,
+     101
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Bengkulu"
+  },
+  "58": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     403,
+     7680,
+     35975
+    ],
+    [
+     418,
+     1308,
+     392
+    ],
+    [
+     9,
+     252,
+     3
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Bengkulu"
+  },
+  "59": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     315,
+     26252,
+     2113
+    ],
+    [
+     500,
+     11777,
+     1633
+    ],
+    [
+     80,
+     3129,
+     426
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Bengkulu"
+  },
+  "60": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     5612,
+     24859,
+     6530
+    ],
+    [
+     8213,
+     134,
+     1029
+    ],
+    [
+     24,
+     14,
+     25
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Central Kalimantan"
+  },
+  "61": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     15814,
+     12487,
+     2934
+    ],
+    [
+     36,
+     108,
+     152
+    ],
+    [
+     41,
+     18,
+     15
+    ]
+   ],
+   "label_year": 2025,
+   "province": "Riau"
+  },
+  "62": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     1711,
+     5316,
+     32055
+    ],
+    [
+     1,
+     392,
+     4659
+    ],
+    [
+     121,
+     27,
+     2158
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "63": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     0,
+     29921
+    ],
+    [
+     0,
+     0,
+     1523
+    ],
+    [
+     0,
+     0,
+     306
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "64": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     68,
+     19573,
+     19414
+    ],
+    [
+     70,
+     3751,
+     3212
+    ],
+    [
+     60,
+     227,
+     280
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "65": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     180,
+     30322,
+     3911
+    ],
+    [
+     277,
+     7570,
+     1753
+    ],
+    [
+     5,
+     2264,
+     373
+    ]
+   ],
+   "label_year": 2023,
+   "province": "Riau"
+  },
+  "66": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     0,
+     26828
+    ],
+    [
+     0,
+     0,
+     18668
+    ],
+    [
+     0,
+     0,
+     944
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "67": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     285,
+     43150,
+     1572
+    ],
+    [
+     43,
+     1474,
+     49
+    ],
+    [
+     1,
+     59,
+     6
+    ]
+   ],
+   "label_year": 2025,
+   "province": "Riau"
+  },
+  "68": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     2779,
+     36526,
+     2910
+    ],
+    [
+     1870,
+     175,
+     1061
+    ],
+    [
+     120,
+     772,
+     227
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "69": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     3698,
+     23625,
+     7327
+    ],
+    [
+     8784,
+     372,
+     432
+    ],
+    [
+     129,
+     596,
+     181
+    ]
+   ],
+   "label_year": 2024,
+   "province": "Riau"
+  },
+  "70": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     296,
+     35865,
+     9854
+    ],
+    [
+     2,
+     238,
+     151
+    ],
+    [
+     0,
+     17,
+     17
+    ]
+   ],
+   "label_year": 2025,
+   "province": "Riau"
+  },
+  "71": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     111,
+     216,
+     11275
+    ],
+    [
+     237,
+     121,
+     31024
+    ],
+    [
+     48,
+     9,
+     3614
+    ]
+   ],
+   "label_year": 2024,
+   "province": "West Sulawesi"
+  },
+  "72": {
+   "table_hansen_rows_ref_cols_FPO": [
+    [
+     0,
+     28577,
+     3476
+    ],
+    [
+     0,
+     11693,
+     1633
+    ],
+    [
+     0,
+     750,
+     311
+    ]
+   ],
+   "label_year": 2023,
+   "province": "West Sulawesi"
+  }
+ },
+ "grids_with_loss": 72,
+ "grids_loss_majority_plant": 35
+}
