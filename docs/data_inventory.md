@@ -15,7 +15,7 @@ Folder `D:/Work/eudr-satellite-upload` (read-only). All numbers below were compu
 
 ## Imagery
 - Dates: baseline all in 2020-06 (range 2020-06-01..30), current all 2024-06 (2024-06-01..30). One composite scene date per farm-year (4 farms two baseline dates).
-- 5 bands float32. Band order inferred from the repo code (`change_dataset.py`): R, G, B, NIR, SCL. Verified by values: bands 1-4 in 0.0-1.56 (reflectance), band 5 integers 0-10 (Sentinel-2 SCL classes; 0 = no data). Sampled 40 farms x 2 years: no NaN; SCL classes present: 4 (vegetation) 10.4 M px, 5 3.8 M, 8/9/10 (cloud medium/high/cirrus) 4.9 M px (~19 % of sampled pixels), 0 262k.
+- 5 bands float32. Band order inferred from the repo code (`change_dataset.py`): R, G, B, NIR, SCL. Verified by values: bands 1-4 in 0.0-1.56 (reflectance), band 5 integers 0-10 (Sentinel-2 SCL classes; 0 = no data). Sampled 40 farms x 2 years: no NaN; SCL classes present: 4 (vegetation) 10.4 M px, 5 3.8 M, 8/9/10 (cloud medium/high/cirrus) 4.9 M px (~23 % of sampled pixels; class 3 cloud shadow adds 1.3 M), 0 262k.
 - Size 512 x 512, EPSG:4326, pixel 1.953e-5 deg (~2.17 m at the equator, i.e. an upsampled/resampled grid, not native 10 m), tile ~0.01 deg (~1.1 km). Single raster signature across all 415 complete farms. nodata tag: None.
 - Tile is centred on the CSV farm point (median offset 0.0 m, measured on all 415).
 
