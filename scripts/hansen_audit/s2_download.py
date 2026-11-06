@@ -76,7 +76,9 @@ def main():
             cells, meta = s2.build_composite(origin, shape, start, end, tok, log=lambda m: print(m, flush=True))
             meta.update(seconds=round(time.time() - t0, 1), bytes_recv=psutil.net_io_counters().bytes_recv - b0)
             if cells is not None:
-                np.savez_compressed(f, cells=cells, channels=np.array(s2.CHANNELS), origin=origin)
+                tmp = f[:-4] + ".part.npz"  # write then rename: a killed run never leaves a truncated file that resume would skip
+                np.savez_compressed(tmp, cells=cells, channels=np.array(s2.CHANNELS), origin=origin)
+                os.replace(tmp, f)
                 vf = float(np.mean(cells[s2.CHANNELS.index("VALID_FRAC")] >= s2.MIN_VALID_FRAC))
                 meta["valid_cell_frac"] = vf
             manifest["grids"][f"{gid}_{pname}"] = meta
