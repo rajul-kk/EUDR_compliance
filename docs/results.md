@@ -24,3 +24,8 @@ Experiment C ran but is degenerate: 7 evaluation farms, 3 calibration farms, so 
 
 ## 5. Not run
 GPU Siamese DeepLab with robust loss; Kaggle notebook (notebooks/kaggle_hansen_audit.ipynb) re-runs the CPU pipeline with 20 seeds and was not executed. Experiment D key in experiments.json is discarded (PROTOCOL deviation 1).
+
+## 6. Land use at the 2020 cut-off under Hansen loss (Sentinel-2 + Sentinel-1; REPORT_S2.md)
+Addresses the caveat in section 1. Third registered attempt (S2C) passed the quality gate: of Hansen 2021-24 loss cells in the 72 grids,
+0.49 [0.31-0.65] were plantation in 2020 (not EUDR deforestation), 0.31 [0.15-0.50] forest, 0.21 other (confusion-corrected, grid bootstrap).
+The <= 2021 grids give 0.61, matching the reference. First two attempts (optical only) failed the gate. Details and caveats in REPORT_S2.md.

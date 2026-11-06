@@ -199,6 +199,11 @@ python main_audit.py \
 
 ---
 
+## Hansen label audit
+How noisy are Hansen loss labels as an EUDR deforestation signal? `PROTOCOL.md` and `docs/results.md` (reference comparison, farm-level
+sensitivity, noise-robust training); `REPORT_S2.md` (Sentinel-2/-1 land use at the 2020 cut-off under Hansen 2021-24 loss: about half is
+plantation in 2020, a third forest).
+
 ## Requirements
 
 - Python 3.10+
