@@ -63,3 +63,17 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
 4. 2026-11-06, before any result. With the project owner's approval the guard is raised again, to 9 GB (`--budget-gb 9`), so that all 144
    grid-periods can finish and the analysed set does not depend on download order. The 6 GB run (deviation 3) is allowed to reach its own guard
    and is then resumed under the new limit, so the byte count stays continuous. Composite rule unchanged.
+5. 2026-11-07, before any farm data was downloaded or any farm result computed. E4 (farm application) is run with the owner's approval,
+   replacing its ">= 1.5 GB left" condition, and uses the S2C classifier because only S2C passed its quality gate (results/s2c). Rules:
+   - Farms: the 94 Indonesian oil palm farms of `results/features.npz` (as in E4). Footprint: the farm image box (0.01 deg). Farms are
+     grouped greedily (input order) into windows whose union box is <= 0.05 deg per side; each window gets a 0.00025 deg grid from its
+     (west, north) corner, and a farm's cells are the window cells whose centres fall inside its box (overlapping farms share cells).
+   - Hansen label: the farm's label raster resampled nearest onto the window grid, as in the first audit; 2 = loss.
+   - 2020 composites: S2 rule as in S2 deviations 1-2 (12 candidates, best 4) and the S1 rule of PROTOCOL_S2C, period 2020 only.
+     Own byte guard 2 GB (trial on one farm: 24 MB S2 + 22 MB S1; ~1.3 GB projected for 19 windows).
+   - Classifier: S2C features and LightGBM settings, fit once on all 72 grids (annotated, valid at ref year, <= 20,000 cells per grid,
+     seed 0). No CV, no tuning; its out-of-fold quality is the S2C result.
+   - Reported (descriptive, transported; no reference covers these farms): per farm, Hansen loss cells and how many are predicted FOREST /
+     PLANT / OTHER in 2020 (S2-valid cells only). A farm is Hansen-flagged at >= 6 loss cells; its flag is *plantation-driven* if fewer than
+     6 of its loss cells are predicted FOREST in 2020. Share of flagged farms that are plantation-driven, with a farm bootstrap
+     (2000 resamples, seed 0). Raw predictions only: the per-cell correction does not transfer to a farm-level threshold rule.
