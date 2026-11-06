@@ -60,3 +60,6 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
    mean 62 MB. Stopping there would leave a subset chosen by download order. Change, with the project owner's approval: the guard is raised to
    6 GB (`--budget-gb 6`). At ~44-62 MB per remaining grid-period this is expected to cover roughly 25-35 more, not all 71; finishing would need
    about 9 GB on the same counter, and any further raise is logged as its own deviation. The composite rule (deviations 1-2) is unchanged.
+4. 2026-11-06, before any result. With the project owner's approval the guard is raised again, to 9 GB (`--budget-gb 9`), so that all 144
+   grid-periods can finish and the analysed set does not depend on download order. The 6 GB run (deviation 3) is allowed to reach its own guard
+   and is then resumed under the new limit, so the byte count stays continuous. Composite rule unchanged.
