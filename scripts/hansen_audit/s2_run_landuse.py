@@ -1,6 +1,7 @@
 """PROTOCOL_S2 E1-E3: land-use classifier (grouped CV), temporal check, decomposition of Hansen loss by predicted 2020 land use.
 
-usage: python -I s2_run_landuse.py <reference_cells.npz> <grid_index.csv> <s2_dir> <out_dir>
+usage: python -I s2_run_landuse.py <reference_cells.npz> <grid_index.csv> <s2_dir> <out_dir> [s2|s2b]
+The optional last argument picks the feature set (default s2 = PROTOCOL_S2; s2b = PROTOCOL_S2B context features).
 Writes <out_dir>/landuse.json (E1), <out_dir>/decompose.json (E2, E3) and <out_dir>/pred_2020.npz (per-grid predicted class map, -1 = invalid).
 Breakdowns (island, label_year <= 2021) re-estimate the confusion matrix from the same subset of grids.
 """
@@ -18,13 +19,13 @@ from hansen_audit import landuse as L  # noqa: E402
 N_BOOT = 2000
 
 
-def load_grid(gid, label_year, ref, s2_dir):
+def load_grid(gid, label_year, ref, s2_dir, feature_set="s2"):
     def comp(p):
         f = os.path.join(s2_dir, f"grid_{gid}_{p}.npz")
         if not os.path.exists(f):
             return None
         z = np.load(f)
-        return L.cell_features(z["cells"], tuple(z["channels"].tolist()))
+        return L.cell_features(z["cells"], tuple(z["channels"].tolist()), feature_set)
 
     f2020 = comp("2020")
     fref = f2020 if label_year == 2020 else comp("ref")
@@ -40,8 +41,10 @@ def flat(F, mask):
     return F[:, mask].T
 
 
-def main(ref_npz, grid_index, s2_dir, out_dir):
+def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2"):
     t0 = time.time()
+    n_feat = len(L.FEATURE_SETS[feature_set])
+    print(f"feature set {feature_set}: {n_feat} features", flush=True)
     os.makedirs(out_dir, exist_ok=True)
     import lightgbm as lgb
 
@@ -49,7 +52,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir):
     ref = np.load(ref_npz)
     grids, missing = {}, []
     for gid, r in rows.items():
-        g = load_grid(gid, int(r["label_year"]), ref, s2_dir)
+        g = load_grid(gid, int(r["label_year"]), ref, s2_dir, feature_set)
         if g is None:
             missing.append(gid)
         else:
@@ -71,7 +74,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir):
             idx = np.flatnonzero(m.ravel())
             if len(idx) > L.MAX_TRAIN_PER_GRID:
                 idx = rng.choice(idx, L.MAX_TRAIN_PER_GRID, replace=False)
-            X.append(d["fref"].reshape(len(L.FEATURES), -1)[:, idx].T)
+            X.append(d["fref"].reshape(n_feat, -1)[:, idx].T)
             Y.append(d["y"].ravel()[idx])
         X, Y = np.concatenate(X), np.concatenate(Y)
         clf = lgb.LGBMClassifier(**L.LGBM_PARAMS).fit(X, Y)
@@ -111,6 +114,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir):
 
     # ---- E1
     e1 = {
+        "feature_set": feature_set, "features": list(L.FEATURE_SETS[feature_set]),
         "grids": gids, "missing_grids": missing, "folds": folds,
         "all_annotated": L.metric_bootstrap(stack("conf_all", gids), N_BOOT),
         "tree_covered": L.metric_bootstrap(stack("conf_tree", gids), N_BOOT),
@@ -158,4 +162,4 @@ def main(ref_npz, grid_index, s2_dir, out_dir):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:5])
+    main(*sys.argv[1:6])
