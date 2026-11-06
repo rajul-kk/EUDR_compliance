@@ -61,6 +61,19 @@ Checks:
   application (PROTOCOL_S2 E4) is transported model output and is reported separately.
 - Three attempts were made; the gate and headline rule never changed, but the feature set was chosen after seeing failures.
 
+## E4: the 94 Indonesian oil palm farms (transported, descriptive; PROTOCOL_S2 deviation 5, `results/e4/`)
+S2C classifier fit once on all 72 grids (1.43M cells), applied to 2020 Sentinel-2/-1 composites over 21 shared windows (0.96 GB).
+- Footprint: the full 0.01 deg farm box (40 x 40 cells). 79 of 94 farms carry >= 6 Hansen loss cells in that box (median 29 loss cells).
+  This is not the 26 of the first audit, which counted only the usable 37 x 37 image-patch footprint; the boxes here are larger and
+  neighbouring farms overlap (shared cells), so farms are not independent and the farm bootstrap is optimistic.
+- **Flags that are plantation-driven** (fewer than 6 of the farm's loss cells predicted FOREST in 2020): **46 of 79, 0.58 [0.48-0.70]**.
+  Robust to the flag threshold: 43 of 82 at >= 3 cells, 43 of 71 at >= 12.
+- Loss cells on all farms by predicted 2020 class: FOREST 0.37, PLANT 0.26, OTHER 0.37 (raw).
+- **Warning sign for transport:** these are oil palm farms, yet only 0.13 of their Hansen stable-forest cells are predicted PLANT
+  (0.55 FOREST), against 0.53 PLANT in the reference grids. Either the farm boxes include real forest outside the plantation, or the
+  classifier under-calls mature palm away from the grids it was trained on. Nothing here can tell which; no reference covers the farms.
+  Treat the 0.58 as a model output with unknown error, not as a measured false-flag rate.
+
 ## Run record
 - S2 download: stopped twice at its guard; raised to 6 GB then 9 GB with the owner's approval (PROTOCOL_S2 deviations 3-4); one truncated
   file from a killed run was re-fetched and the downloader made atomic (`00e9fa3`). 143 grid-periods (72 grids, one shares 2020 and ref).
