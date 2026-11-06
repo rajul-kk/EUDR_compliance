@@ -71,3 +71,44 @@ def test_cluster_bootstrap_identity_confusion():
     assert out["corrected"]["PLANT"]["est"] == pytest.approx(0.5)
     assert out["corrected"]["PLANT"]["lo"] == pytest.approx(0.5)
     assert out["n_cells"] == 1000
+
+
+def _brute_window(x, r, fn):
+    H, W = x.shape
+    out = np.full((H, W), np.nan, np.float64)
+    for i in range(H):
+        for j in range(W):
+            w = x[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1]
+            w = w[np.isfinite(w)]
+            if w.size:
+                out[i, j] = fn(w)
+    return out
+
+
+def test_nan_window_stats_matches_brute_force():
+    rng = np.random.default_rng(1)
+    x = rng.normal(size=(23, 17)).astype(np.float32)
+    x[rng.random(x.shape) < 0.3] = np.nan
+    x[:9, :9] = np.nan  # a block larger than the r=3 window, so some windows are empty
+    for r in (1, 3):
+        m, s = L.nan_window_stats(x, r)
+        np.testing.assert_allclose(m, _brute_window(x, r, np.mean), atol=1e-5, equal_nan=True)
+        np.testing.assert_allclose(s, _brute_window(x, r, np.std), atol=1e-4, equal_nan=True)
+    np.testing.assert_allclose(L.nan_window_stats(x, 1)[0], L.nan_box_mean(x, 1), atol=1e-5, equal_nan=True)
+
+
+def test_s2b_features_shape_names_and_invalid_propagation():
+    rng = np.random.default_rng(0)
+    cells = rng.uniform(0.01, 0.5, size=(len(s2.CHANNELS), 20, 30)).astype(np.float32)
+    ndvi = s2.CHANNELS.index("NDVI")
+    cells[ndvi, 3, 4] = np.nan
+    F = L.cell_features(cells, s2.CHANNELS, "s2b")
+    assert F.shape == (len(L.S2B_FEATURES), 20, 30) == (41, 20, 30)
+    assert np.isnan(F[:, 3, 4]).all()
+    assert np.isfinite(F[:, 10, 10]).all()
+    names = list(L.S2B_FEATURES)
+    np.testing.assert_allclose(F[names.index("NDVI")], cells[ndvi], equal_nan=True)
+    b08, b12 = cells[s2.CHANNELS.index("B08")], cells[s2.CHANNELS.index("B12")]
+    np.testing.assert_allclose(F[names.index("NBR"), 10, 10], (b08 - b12)[10, 10] / (b08 + b12)[10, 10], rtol=1e-5)
+    # the default feature set is unchanged by S2B
+    assert L.cell_features(cells, s2.CHANNELS).shape[0] == len(L.FEATURES) == 12

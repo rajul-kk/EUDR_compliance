@@ -10,6 +10,16 @@ BASE_FEATURES = ("B02", "B03", "B04", "B08", "B11", "B12", "NDVI", "NDMI", "NDVI
 NEIGH_FEATURES = ("NDVI", "NDMI", "B08")
 FEATURES = BASE_FEATURES + tuple(f"{c}_n3" for c in NEIGH_FEATURES)
 
+# PROTOCOL_S2B: block-scale context
+S2B_INDICES = ("NBR", "NBR2")
+S2B_CONTEXT = ("NDVI", "NDMI", "NBR", "B08", "B11", "NDVI_STD")
+S2B_MEAN_R = (1, 3, 7)
+S2B_STD_R = (3, 7)
+S2B_FEATURES = (BASE_FEATURES + S2B_INDICES
+                + tuple(f"{c}_m{r}" for c in S2B_CONTEXT for r in S2B_MEAN_R)
+                + tuple(f"{c}_s{r}" for c in S2B_CONTEXT for r in S2B_STD_R))
+FEATURE_SETS = {"s2": FEATURES, "s2b": S2B_FEATURES}
+
 LGBM_PARAMS = dict(n_estimators=400, learning_rate=0.05, num_leaves=63, min_child_samples=200,
                    class_weight="balanced", random_state=0, n_jobs=2, verbose=-1)
 MAX_TRAIN_PER_GRID = 20_000
@@ -34,14 +44,50 @@ def nan_box_mean(x: np.ndarray, r: int = 1) -> np.ndarray:
     return out.astype(np.float32)
 
 
-def cell_features(cells: np.ndarray, channels=s2.CHANNELS) -> np.ndarray:
-    """Composite (C, H, W) -> (len(FEATURES), H, W). Cells invalid in the composite stay NaN in every feature."""
+def nan_window_stats(x: np.ndarray, r: int):
+    """NaN-aware mean and standard deviation over a (2r+1)^2 window; NaN where the window has no finite value."""
+    from scipy.ndimage import uniform_filter
+
+    v = np.isfinite(x)
+    x0 = np.where(v, x, 0.0).astype(np.float64)
+    size, kw = 2 * r + 1, dict(mode="constant", cval=0.0)
+    n = uniform_filter(v.astype(np.float64), size, **kw)
+    with np.errstate(all="ignore"):
+        mean = uniform_filter(x0, size, **kw) / n
+        var = uniform_filter(x0 * x0, size, **kw) / n - mean * mean
+    empty = n < 0.5 / size ** 2
+    mean[empty] = np.nan
+    std = np.sqrt(np.clip(var, 0, None))
+    std[empty] = np.nan
+    return mean.astype(np.float32), std.astype(np.float32)
+
+
+def cell_features(cells: np.ndarray, channels=s2.CHANNELS, feature_set: str = "s2") -> np.ndarray:
+    """Composite (C, H, W) -> (len(FEATURE_SETS[feature_set]), H, W). Cells invalid in the composite stay NaN in every feature."""
     ch = {c: i for i, c in enumerate(channels)}
+    if feature_set == "s2b":
+        return _s2b_features(cells, ch)
     base = [cells[ch[c]] for c in BASE_FEATURES]
     neigh = [nan_box_mean(cells[ch[c]]) for c in NEIGH_FEATURES]
     out = np.stack(base + neigh).astype(np.float32)
     invalid = ~np.isfinite(cells[ch["NDVI"]])
     out[:, invalid] = np.nan
+    return out
+
+
+
+def _s2b_features(cells: np.ndarray, ch: dict) -> np.ndarray:
+    layers = {c: cells[ch[c]].astype(np.float32) for c in BASE_FEATURES}
+    layers["NBR"] = s2.nd(layers["B08"], layers["B12"])
+    layers["NBR2"] = s2.nd(layers["B11"], layers["B12"])
+    out = [layers[c] for c in BASE_FEATURES + S2B_INDICES]
+    means, stds = [], []
+    for c in S2B_CONTEXT:
+        stats = {r: nan_window_stats(layers[c], r) for r in sorted(set(S2B_MEAN_R) | set(S2B_STD_R))}
+        means += [stats[r][0] for r in S2B_MEAN_R]
+        stds += [stats[r][1] for r in S2B_STD_R]
+    out = np.stack(out + means + stds).astype(np.float32)
+    out[:, ~np.isfinite(cells[ch["NDVI"]])] = np.nan
     return out
 
 
