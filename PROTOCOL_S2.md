@@ -55,3 +55,8 @@ Design and rejected alternatives: docs/s2_design.md. Deviations are appended at 
 2. 2026-11-05, before any result. After deviation 1, trials on grids 03 and 04 (three grid-periods) still used 37-42 MB each, mostly band reads
    (~0.9 MB per band per scene), projecting to ~5.6 GB. Change: the composite uses the best **4** scenes (was 6). In the trials the 4th-best scene
    still had >= 0.83 in-grid clear fraction, and the >= 2 clear observations rule is unchanged. Trial files are rebuilt under the final rule.
+3. 2026-11-06, before any result (no land-use model has been fit; only download cost seen). The first two download runs stopped at the 4.5 GB
+   guard with 73 of 144 grid-periods done. The guard counts all traffic on the machine, so it over-counts: the median grid-period cost 44 MB, the
+   mean 62 MB. Stopping there would leave a subset chosen by download order. Change, with the project owner's approval: the guard is raised to
+   6 GB (`--budget-gb 6`). At ~44-62 MB per remaining grid-period this is expected to cover roughly 25-35 more, not all 71; finishing would need
+   about 9 GB on the same counter, and any further raise is logged as its own deviation. The composite rule (deviations 1-2) is unchanged.
