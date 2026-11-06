@@ -112,3 +112,20 @@ def test_s2b_features_shape_names_and_invalid_propagation():
     np.testing.assert_allclose(F[names.index("NBR"), 10, 10], (b08 - b12)[10, 10] / (b08 + b12)[10, 10], rtol=1e-5)
     # the default feature set is unchanged by S2B
     assert L.cell_features(cells, s2.CHANNELS).shape[0] == len(L.FEATURES) == 12
+
+
+def test_s2c_features_appends_s1_and_handles_missing():
+    from hansen_audit import s1
+
+    rng = np.random.default_rng(0)
+    cells = rng.uniform(0.01, 0.5, size=(len(s2.CHANNELS), 12, 15)).astype(np.float32)
+    cells[s2.CHANNELS.index("NDVI"), 2, 2] = np.nan
+    s1c = rng.normal(-12, 2, size=(len(s1.CHANNELS), 12, 15)).astype(np.float32)
+    F = L.s2c_features(cells, s2.CHANNELS, s1c, s1.CHANNELS)
+    assert F.shape[0] == len(L.S2C_FEATURES) == 54
+    names = list(L.S2C_FEATURES)
+    np.testing.assert_allclose(F[names.index("VH_med"), 5, 5], s1c[s1.CHANNELS.index("VH_med"), 5, 5])
+    assert np.isnan(F[:, 2, 2]).all()
+    np.testing.assert_allclose(F[:41], L.cell_features(cells, s2.CHANNELS, "s2b"), equal_nan=True)
+    G = L.s2c_features(cells, s2.CHANNELS, None, None)
+    assert np.isnan(G[41:]).all() and np.isfinite(G[:41, 5, 5]).all()

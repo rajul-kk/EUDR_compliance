@@ -1,6 +1,6 @@
 """PROTOCOL_S2 E1-E3: land-use classifier (grouped CV), temporal check, decomposition of Hansen loss by predicted 2020 land use.
 
-usage: python -I s2_run_landuse.py <reference_cells.npz> <grid_index.csv> <s2_dir> <out_dir> [s2|s2b]
+usage: python -I s2_run_landuse.py <reference_cells.npz> <grid_index.csv> <s2_dir> <out_dir> [s2|s2b|s2c] [s1_dir]
 The optional last argument picks the feature set (default s2 = PROTOCOL_S2; s2b = PROTOCOL_S2B context features).
 Writes <out_dir>/landuse.json (E1), <out_dir>/decompose.json (E2, E3) and <out_dir>/pred_2020.npz (per-grid predicted class map, -1 = invalid).
 Breakdowns (island, label_year <= 2021) re-estimate the confusion matrix from the same subset of grids.
@@ -19,12 +19,21 @@ from hansen_audit import landuse as L  # noqa: E402
 N_BOOT = 2000
 
 
-def load_grid(gid, label_year, ref, s2_dir, feature_set="s2"):
+def load_grid(gid, label_year, ref, s2_dir, feature_set="s2", s1_dir=None, s1_missing=None):
     def comp(p):
         f = os.path.join(s2_dir, f"grid_{gid}_{p}.npz")
         if not os.path.exists(f):
             return None
         z = np.load(f)
+        if feature_set == "s2c":
+            f1 = os.path.join(s1_dir, f"grid_{gid}_{p}.npz")
+            if os.path.exists(f1):
+                z1 = np.load(f1)
+                c1, ch1 = z1["cells"], tuple(z1["channels"].tolist())
+            else:
+                c1, ch1 = None, None
+                s1_missing.append(f"{gid}_{p}")
+            return L.s2c_features(z["cells"], tuple(z["channels"].tolist()), c1, ch1)
         return L.cell_features(z["cells"], tuple(z["channels"].tolist()), feature_set)
 
     f2020 = comp("2020")
@@ -41,7 +50,7 @@ def flat(F, mask):
     return F[:, mask].T
 
 
-def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2"):
+def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2", s1_dir=None):
     t0 = time.time()
     n_feat = len(L.FEATURE_SETS[feature_set])
     print(f"feature set {feature_set}: {n_feat} features", flush=True)
@@ -50,9 +59,9 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2"):
 
     rows = {r["grid_id"]: r for r in csv.DictReader(open(grid_index))}
     ref = np.load(ref_npz)
-    grids, missing = {}, []
+    grids, missing, s1_missing = {}, [], []
     for gid, r in rows.items():
-        g = load_grid(gid, int(r["label_year"]), ref, s2_dir, feature_set)
+        g = load_grid(gid, int(r["label_year"]), ref, s2_dir, feature_set, s1_dir, s1_missing)
         if g is None:
             missing.append(gid)
         else:
@@ -115,7 +124,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2"):
     # ---- E1
     e1 = {
         "feature_set": feature_set, "features": list(L.FEATURE_SETS[feature_set]),
-        "grids": gids, "missing_grids": missing, "folds": folds,
+        "grids": gids, "missing_grids": missing, "s1_missing_grid_periods": s1_missing, "folds": folds,
         "all_annotated": L.metric_bootstrap(stack("conf_all", gids), N_BOOT),
         "tree_covered": L.metric_bootstrap(stack("conf_tree", gids), N_BOOT),
         "temporal_check_le2021": {
@@ -162,4 +171,4 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2"):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:6])
+    main(*sys.argv[1:7])

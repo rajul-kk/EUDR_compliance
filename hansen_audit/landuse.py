@@ -18,7 +18,13 @@ S2B_STD_R = (3, 7)
 S2B_FEATURES = (BASE_FEATURES + S2B_INDICES
                 + tuple(f"{c}_m{r}" for c in S2B_CONTEXT for r in S2B_MEAN_R)
                 + tuple(f"{c}_s{r}" for c in S2B_CONTEXT for r in S2B_STD_R))
-FEATURE_SETS = {"s2": FEATURES, "s2b": S2B_FEATURES}
+# PROTOCOL_S2C: S2B + Sentinel-1 annual statistics
+S1_BASE = ("VV_med", "VH_med", "RATIO_med", "VV_tstd", "VH_tstd")
+S1_CONTEXT = ("VH_med", "RATIO_med")
+S1_R = (3, 7)
+S2C_FEATURES = (S2B_FEATURES + S1_BASE + tuple(f"{c}_m{r}" for c in S1_CONTEXT for r in S1_R)
+                + tuple(f"{c}_s{r}" for c in S1_CONTEXT for r in S1_R))
+FEATURE_SETS = {"s2": FEATURES, "s2b": S2B_FEATURES, "s2c": S2C_FEATURES}
 
 LGBM_PARAMS = dict(n_estimators=400, learning_rate=0.05, num_leaves=63, min_child_samples=200,
                    class_weight="balanced", random_state=0, n_jobs=2, verbose=-1)
@@ -89,6 +95,24 @@ def _s2b_features(cells: np.ndarray, ch: dict) -> np.ndarray:
     out = np.stack(out + means + stds).astype(np.float32)
     out[:, ~np.isfinite(cells[ch["NDVI"]])] = np.nan
     return out
+
+
+
+def s2c_features(cells: np.ndarray, channels, s1_cells, s1_channels) -> np.ndarray:
+    """S2B features plus Sentinel-1 features. s1_cells None (grid-period not downloaded) -> S1 features all NaN.
+    The valid population is S2's: cells invalid in the S2 composite stay NaN everywhere."""
+    f2b = cell_features(cells, channels, "s2b")
+    H, W = f2b.shape[1:]
+    if s1_cells is None:
+        f1 = np.full((len(S2C_FEATURES) - len(S2B_FEATURES), H, W), np.nan, np.float32)
+    else:
+        ch = {c: i for i, c in enumerate(s1_channels)}
+        base = [s1_cells[ch[c]].astype(np.float32) for c in S1_BASE]
+        stats = {(c, r): nan_window_stats(s1_cells[ch[c]].astype(np.float32), r) for c in S1_CONTEXT for r in S1_R}
+        f1 = np.stack(base + [stats[(c, r)][0] for c in S1_CONTEXT for r in S1_R]
+                      + [stats[(c, r)][1] for c in S1_CONTEXT for r in S1_R]).astype(np.float32)
+        f1[:, ~np.isfinite(f2b[0])] = np.nan
+    return np.concatenate([f2b, f1])
 
 
 def group_index(class_ids: np.ndarray) -> np.ndarray:
