@@ -80,9 +80,8 @@ def mc_dropout_predict(
         uncertainty: (B, H, W) float32 — pixel-wise Shannon entropy (nats).
     """
     import torch
-    import torch.nn.functional as F
-
     import torch.nn as nn
+    import torch.nn.functional as F
 
     previous = {m: m.training for m in model.modules()}
     model.eval()
