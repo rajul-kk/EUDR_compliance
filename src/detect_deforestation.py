@@ -12,6 +12,7 @@ import re
 import pandas as pd
 import rasterio.features
 
+from src.change_detector import classify_forest_loss
 from src.postprocessing.refiner import refine_mask
 
 
@@ -70,17 +71,8 @@ def compute_deforestation_metrics(mask_2020, mask_2024, forest_class=1):
     total_pixels = mask_2020.size
     forest_lost = max(0, forest_2020 - forest_2024)
 
-    if forest_2020 == 0:
-        deforestation_pct = 0.0
-        alert_level = 'NO_BASELINE_FOREST'
-    else:
-        deforestation_pct = (forest_lost / forest_2020) * 100
-        if deforestation_pct > 10:
-            alert_level = 'VIOLATION'
-        elif deforestation_pct > 5:
-            alert_level = 'WARNING'
-        else:
-            alert_level = 'COMPLIANT'
+    deforestation_pct, level = classify_forest_loss(forest_2020, forest_lost)
+    alert_level = level.value
 
     metrics = {
         'forest_pixels_2020': forest_2020,
@@ -122,17 +114,14 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
         logger.error("Analysis failed for %s: %s", farm_id, e)
         return None
 
-def analyze_farm_change(change_mask_path: str, farm_id: str, output_vector_dir=None):
-    """Analyze deforestation from a pre-computed binary change mask.
+def analyze_farm_change(change_mask_path: str, baseline_mask_path: str, farm_id: str, output_vector_dir=None,
+                        forest_class: int = 1):
+    """Analyze deforestation from a pre-computed binary change mask (1 = forest loss).
 
-    For use with change-detection models (M3 Siamese, M5 embed-change) that
-    directly output a change map (1=forest-loss, 0=no-change) rather than
-    requiring a two-mask comparison.
-
-    Args:
-        change_mask_path: Path to GeoTIFF where 1 = predicted forest loss.
-        farm_id:          Farm identifier string for output labelling.
-        output_vector_dir: Optional directory to write a GeoJSON vector output.
+    For change-detection models (M3 Siamese, M5 embed-change). Loss is counted inside the farm's 2020 forest (from
+    the baseline mask) and classified by the same rule as the two-mask path (classify_forest_loss), so a farm gets
+    the same alert level whichever model produced it. Before, the percentage was of the whole image, so a farm that
+    is mostly not forest could lose most of its forest and still come out COMPLIANT.
 
     Returns:
         Dict with change metrics, or None on failure.
@@ -142,24 +131,21 @@ def analyze_farm_change(change_mask_path: str, farm_id: str, output_vector_dir=N
             change_mask = src.read(1)
             transform = src.transform
             crs = src.crs
+        baseline, _, _ = load_mask(baseline_mask_path)
+        if baseline.shape != change_mask.shape:
+            raise ValueError(f"Dimensions mismatch: {baseline.shape} vs {change_mask.shape}")
 
-        total_pixels = change_mask.size
-        change_pixels = int(np.sum(change_mask == 1))
-        deforestation_pct = (change_pixels / total_pixels) * 100 if total_pixels > 0 else 0.0
-
-        if deforestation_pct > 10:
-            alert_level = 'VIOLATION'
-        elif deforestation_pct > 5:
-            alert_level = 'WARNING'
-        else:
-            alert_level = 'COMPLIANT'
+        forest_2020 = baseline == forest_class
+        lost = int(np.sum((change_mask == 1) & forest_2020))
+        deforestation_pct, level = classify_forest_loss(int(forest_2020.sum()), lost)
 
         metrics = {
             'farm_id': farm_id,
-            'change_pixels': change_pixels,
-            'total_pixels': total_pixels,
+            'forest_pixels_2020': int(forest_2020.sum()),
+            'forest_pixels_lost': lost,
+            'change_pixels_outside_forest': int(np.sum((change_mask == 1) & ~forest_2020)),
             'deforestation_percent': round(deforestation_pct, 2),
-            'alert_level': alert_level,
+            'alert_level': level.value,
         }
 
         if output_vector_dir:

@@ -256,6 +256,11 @@ def run_pipeline(
                      '--reference-image-dir', ref_dir],
                     cwd=project_root,
                 )
+            elif model_type not in ('deeplab', 'tessera'):
+                # inference.py and step 7 only handle per-year segmentation masks; change models output change maps
+                logger.error("Inference for model type %r is not implemented in the pipeline; "
+                             "use --skip-inference to train only", model_type)
+                return False
             else:
                 if not os.path.exists(inference_script):
                     raise FileNotFoundError(f"Script not found: {inference_script}")

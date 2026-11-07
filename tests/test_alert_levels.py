@@ -43,3 +43,58 @@ def test_dds_never_carries_an_undefined_conclusion(tmp_path):
     assert "manual review" in by_farm["c"].notes
     assert by_farm["e"].risk_level == "INCONCLUSIVE"
     assert "garbled" in by_farm["e"].notes
+
+
+def test_every_path_classifies_the_same_loss_the_same_way(tmp_path, monkeypatch):
+    import detect_deforestation as dd
+    from change_detector import ChangeDetector, classify_forest_loss
+
+    # a farm that is 20% forest and loses half of it: 10% of the image, 50% of its forest
+    base = np.zeros((10, 10), dtype=np.uint8)
+    base[:2, :] = 1
+    now = base.copy()
+    now[0, :] = 0
+    change = ((base == 1) & (now != 1)).astype(np.uint8)
+
+    assert classify_forest_loss(20, 10)[1].value == "VIOLATION"
+    assert dd.compute_deforestation_metrics(base, now)["alert_level"] == "VIOLATION"
+    assert ChangeDetector().analyze(base, now).alert_level.value == "VIOLATION"
+
+    masks = {"change.tif": change, "base.tif": base}
+    monkeypatch.setattr(dd, "load_mask", lambda p: (masks[p], None, None))
+
+    class Src:
+        def __init__(self, p):
+            self.p = p
+        def __enter__(self):
+            return self
+        def __exit__(self, *a):
+            return False
+        def read(self, band):
+            return masks[self.p]
+        transform = crs = None
+
+    monkeypatch.setattr(dd.rasterio, "open", lambda p: Src(p))
+    m = dd.analyze_farm_change("change.tif", "base.tif", "f")
+    assert m["alert_level"] == "VIOLATION" and m["deforestation_percent"] == 50.0
+
+
+def test_no_baseline_forest_is_the_same_on_the_change_path(monkeypatch):
+    import detect_deforestation as dd
+
+    masks = {"c": np.ones((4, 4), np.uint8), "b": np.zeros((4, 4), np.uint8)}
+    monkeypatch.setattr(dd, "load_mask", lambda p: (masks[p], None, None))
+
+    class Src:
+        def __init__(self, p):
+            self.p = p
+        def __enter__(self):
+            return self
+        def __exit__(self, *a):
+            return False
+        def read(self, band):
+            return masks[self.p]
+        transform = crs = None
+
+    monkeypatch.setattr(dd.rasterio, "open", lambda p: Src(p))
+    assert dd.analyze_farm_change("c", "b", "f")["alert_level"] == "NO_BASELINE_FOREST"

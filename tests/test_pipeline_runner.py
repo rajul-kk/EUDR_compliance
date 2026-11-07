@@ -57,3 +57,9 @@ def test_change_dataset_refuses_identical_year_folders(tmp_path):
     with pytest.raises(ValueError, match="same folder"):
         check_year_dirs(str(tmp_path), str(tmp_path / "." ))
     check_year_dirs(str(tmp_path / "a"), str(tmp_path / "b"))
+
+
+def test_inference_for_change_models_is_refused_clearly(tmp_path):
+    with patch.object(pr.subprocess, "check_call", return_value=0), \
+            patch.object(pr.os.path, "exists", return_value=True):
+        assert pr.main(["--model-type", "siamese"]) == 1
