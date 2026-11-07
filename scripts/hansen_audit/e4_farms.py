@@ -48,52 +48,38 @@ def farms_and_windows(root, features_npz):
 
 
 def download(a):
-    import psutil
+    from hansen_audit.budget import DownloadBudget
 
     os.makedirs(a.out_dir, exist_ok=True)
     keys, boxes, wins = farms_and_windows(a.data_root, a.features)
     json.dump({"farms": keys, "boxes": boxes.tolist(), "windows": wins}, open(os.path.join(a.out_dir, "windows.json"), "w"), indent=1)
-    man_path = os.path.join(a.out_dir, "manifest.json")
-    man = json.load(open(man_path)) if os.path.exists(man_path) else {"runs": [], "windows": {}}
-    used_before = sum(r.get("bytes_recv", 0) for r in man["runs"])
-    net0 = psutil.net_io_counters().bytes_recv
-    run = {"start": time.strftime("%Y-%m-%d %H:%M:%S"), "bytes_recv": 0, "stopped_by_budget": False}
-    man["runs"].append(run)
-
-    def used():
-        return used_before + psutil.net_io_counters().bytes_recv - net0
-
-    def save():
-        run["bytes_recv"] = psutil.net_io_counters().bytes_recv - net0
-        json.dump(man, open(man_path + ".part", "w"), indent=1)
-        os.replace(man_path + ".part", man_path)
+    budget = DownloadBudget(a.out_dir, a.budget_gb, "windows", retry_failed=a.retry_failed)
 
     t2, t1 = s2.Token(), s1.Token()
     print(f"{len(keys)} farms in {len(wins)} windows", flush=True)
     for w in wins:
         f = os.path.join(a.out_dir, f"win_{w['id']}.npz")
-        if os.path.exists(f):
+        if budget.done(w["id"], f):
             continue
-        if used() > a.budget_gb * 1e9:
-            print(f"budget reached ({used() / 1e9:.2f} GB), stopping", flush=True)
-            run["stopped_by_budget"] = True
-            save()
+        if budget.exhausted():
+            print(f"budget reached ({budget.used() / 1e9:.2f} GB used, next ~{budget.next_item_estimate() / 1e9:.2f} GB), "
+                  "stopping", flush=True)
+            budget.close()
             return
-        t0, b0 = time.time(), psutil.net_io_counters().bytes_recv
+        t0, b0 = time.time(), budget.used()
         origin, shape = np.array(w["origin"]), tuple(w["shape"])
         print(f"window {w['id']}: {len(w['farms'])} farms, shape {shape}", flush=True)
         c2, m2 = s2.build_composite(origin, shape, "2020-01-01", "2020-12-31", t2, log=lambda m: print(m, flush=True))
         c1, m1 = s1.build_s1(origin, shape, "2020-01-01", "2020-12-31", t1, log=lambda m: print(m, flush=True))
-        meta = {"s2": m2, "s1": m1, "seconds": round(time.time() - t0, 1), "bytes_recv": psutil.net_io_counters().bytes_recv - b0}
+        meta = {"s2": m2, "s1": m1, "seconds": round(time.time() - t0, 1), "bytes_recv": budget.used() - b0}
         if c2 is not None:
             tmp = f[:-4] + ".part.npz"
             np.savez_compressed(tmp, s2=c2, s2_channels=np.array(s2.CHANNELS),
                                 s1=c1 if c1 is not None else np.zeros(0), s1_channels=np.array(s1.CHANNELS), origin=origin)
             os.replace(tmp, f)
-        man["windows"][w["id"]] = meta
-        print(f"  done in {meta['seconds']} s, {meta['bytes_recv'] / 1e6:.0f} MB; total {used() / 1e9:.2f} GB", flush=True)
-        save()
-    save()
+        budget.record(w["id"], meta, failed=c2 is None)
+        print(f"  done in {meta['seconds']} s, {meta['bytes_recv'] / 1e6:.0f} MB; total {budget.used() / 1e9:.2f} GB", flush=True)
+    budget.close()
     print("all done", flush=True)
 
 
@@ -179,6 +165,7 @@ def main():
     for n in ("data_root", "features", "out_dir"):
         d.add_argument(n)
     d.add_argument("--budget-gb", type=float, default=2.0)
+    d.add_argument("--retry-failed", action="store_true")
     r = sub.add_parser("run")
     for n in ("data_root", "features", "out_dir", "ref_npz", "grid_index", "s2_dir", "s1_dir", "results_dir"):
         r.add_argument(n)
