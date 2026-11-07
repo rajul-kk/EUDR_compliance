@@ -46,9 +46,21 @@ def run_pipeline(
     commodity_description="",
     commodity_quantity=0.0,
     commodity_unit="kg",
+    embeddings_dir_2020=None,
+    embeddings_dir_2024=None,
 ):
     logger.info("Starting EUDR compliance pipeline | root=%s model=%s", project_root, model_type)
     python_exe = sys.executable
+
+    if model_type == 'embed-change':
+        # The change model learns from emb_2020 - emb_2024; the pipeline only downloads one year of embeddings, so
+        # both years must be given. Passing one folder twice made every input difference zero.
+        if not embeddings_dir_2020 or not embeddings_dir_2024:
+            logger.error("embed-change needs --embeddings-dir-2020 and --embeddings-dir-2024")
+            return False
+        if os.path.realpath(embeddings_dir_2020) == os.path.realpath(embeddings_dir_2024):
+            logger.error("embed-change: the 2020 and 2024 embedding folders are the same (%s)", embeddings_dir_2020)
+            return False
 
     # --- Step 1: Find Farms from OSM ---
     if not skip_farm_discovery:
@@ -195,8 +207,8 @@ def run_pipeline(
             mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
             subprocess.check_call(
                 [python_exe, training_script,
-                 '--embeddings-dir-t1', embeddings_dir,
-                 '--embeddings-dir-t2', embeddings_dir,
+                 '--embeddings-dir-t1', embeddings_dir_2020,
+                 '--embeddings-dir-t2', embeddings_dir_2024,
                  '--mask-dir', mask_dir, '--output-model-path', model_path,
                  '--device', 'cpu'],
                 cwd=project_root,
@@ -399,6 +411,8 @@ def parse_args(argv=None):
                                  'siamese', 'embed-change', 'hybrid'],
                         default='deeplab')
     parser.add_argument('--model-path', default=None)
+    parser.add_argument('--embeddings-dir-2020', default=None, help='embed-change only: 2020 embeddings')
+    parser.add_argument('--embeddings-dir-2024', default=None, help='embed-change only: 2024 embeddings')
 
     dds = parser.add_argument_group('DDS export (requires --export-dds)')
     dds.add_argument('--export-dds', action='store_true')
@@ -426,6 +440,8 @@ def main(argv=None) -> int:
         skip_baseline_metrics=args.skip_baseline_metrics,
         model_type=args.model_type,
         model_path=args.model_path,
+        embeddings_dir_2020=args.embeddings_dir_2020,
+        embeddings_dir_2024=args.embeddings_dir_2024,
         export_dds=args.export_dds,
         operator_name=args.operator_name,
         operator_address=args.operator_address,
