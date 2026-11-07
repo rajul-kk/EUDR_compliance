@@ -96,7 +96,7 @@ class DDSRecord:
     baseline_year: int
     assessment_year: int
     model_version: str
-    risk_level: str                  # COMPLIANT | WARNING | VIOLATION
+    risk_level: str                  # COMPLIANT | WARNING | VIOLATION | INCONCLUSIVE
     deforestation_pct: float
     evidence_hash: str               # sha256 of input imagery / audit entry
     notes: str = ""
@@ -174,8 +174,16 @@ class DDSExporter:
                     f"Significant deforestation detected ({defor_pct:.1f}%). "
                     "Product cannot be placed on the EU market under Regulation 2023/1115."
                 )
+            elif risk == "NO_BASELINE_FOREST":
+                risk = "INCONCLUSIVE"
+                notes = (
+                    "No forest was detected in the baseline-year imagery. This can mean the plot was not forest at "
+                    "the cut-off date or that the baseline segmentation failed; manual review required before "
+                    "market placement."
+                )
             else:
-                notes = risk
+                notes = f"Unrecognised assessment result {risk!r}; manual review required before market placement."
+                risk = "INCONCLUSIVE"
 
             records.append(
                 DDSRecord(
@@ -371,7 +379,7 @@ class DDSExporter:
             story.append(Spacer(1, 0.5 * cm))
 
         # Summary counts
-        counts = {"COMPLIANT": 0, "WARNING": 0, "VIOLATION": 0}
+        counts = {"COMPLIANT": 0, "WARNING": 0, "VIOLATION": 0, "INCONCLUSIVE": 0}
         for r in records:
             counts[r.risk_level] = counts.get(r.risk_level, 0) + 1
 
@@ -382,6 +390,7 @@ class DDSExporter:
             ["Compliant", str(counts.get("COMPLIANT", 0))],
             ["Warning", str(counts.get("WARNING", 0))],
             ["Violation", str(counts.get("VIOLATION", 0))],
+            ["Inconclusive (manual review)", str(counts.get("INCONCLUSIVE", 0))],
         ]
         summary_table = Table(summary_data, colWidths=[10 * cm, 4 * cm])
         summary_table.setStyle(TableStyle([
@@ -405,6 +414,7 @@ class DDSExporter:
             "COMPLIANT": colors.HexColor("#D4EDDA"),
             "WARNING": colors.HexColor("#FFF3CD"),
             "VIOLATION": colors.HexColor("#F8D7DA"),
+            "INCONCLUSIVE": colors.HexColor("#E2E3E5"),
         }
 
         row_colors = []

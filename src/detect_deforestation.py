@@ -223,6 +223,9 @@ def generate_summary_stats(report_df, output_json_path):
         'violations': int(len(report_df[report_df['alert_level'] == 'VIOLATION'])),
         'warnings': int(len(report_df[report_df['alert_level'] == 'WARNING'])),
         'compliant': int(len(report_df[report_df['alert_level'] == 'COMPLIANT'])),
+        'no_baseline_forest': int(len(report_df[report_df['alert_level'] == 'NO_BASELINE_FOREST'])),
+        'other': int((~report_df['alert_level'].isin(
+            ['VIOLATION', 'WARNING', 'COMPLIANT', 'NO_BASELINE_FOREST'])).sum()),  # counts sum to total_farms
         'avg_deforestation_pct': float(report_df['deforestation_percent'].mean()),
         'worst_offender': report_df.iloc[0]['farm_id'] if len(report_df) > 0 else None
     }
