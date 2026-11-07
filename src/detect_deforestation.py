@@ -160,9 +160,20 @@ def analyze_farm_change(change_mask_path: str, baseline_mask_path: str, farm_id:
         return None
 
 
+UNASSESSED = 'UNASSESSED'
+
+
+def _unassessed(farm_id, reason):
+    return {'farm_id': farm_id, 'alert_level': UNASSESSED, 'deforestation_percent': float('nan'), 'reason': reason}
+
+
 def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path, vector_dir=None):
     """
     Compare all pairs and generate reports.
+
+    Every farm that has a 2024 prediction or a 2020 baseline mask gets a row. Farms that could not be assessed (no
+    baseline, no prediction, or the analysis failed) are reported as UNASSESSED with a reason instead of being left
+    out, so they cannot disappear from the summary and the due-diligence export.
     """
     logger.info("Starting deforestation detection with refinement")
     predicted_files = glob.glob(os.path.join(prediction_dir, "*_predicted.tif"))
@@ -175,7 +186,8 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
         os.makedirs(vector_dir, exist_ok=True)
 
     results = []
-    for pred_path in predicted_files:
+    predicted_farms = set()
+    for pred_path in sorted(predicted_files):
         filename = os.path.basename(pred_path)
         match = re.match(r"(relation|way)_(\d+)_(\d{4})_.*_predicted\.tif", filename)
         if not match:
@@ -183,25 +195,35 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
 
         obj_type, obj_id, year = match.groups()
         farm_id = f"{obj_type}_{obj_id}"
+        predicted_farms.add(farm_id)
         baseline_path = os.path.join(baseline_dir, f"{obj_type}_{obj_id}_2020_hybrid.tif")
 
         if not os.path.exists(baseline_path):
+            results.append(_unassessed(farm_id, "no 2020 baseline mask"))
             continue
 
         result = analyze_farm_pair(baseline_path, pred_path, farm_id, vector_dir)
-        if result:
-            results.append(result)
+        results.append(result if result else _unassessed(farm_id, "analysis failed (see log)"))
 
+    for base_path in sorted(glob.glob(os.path.join(baseline_dir, "*_2020_hybrid.tif"))):
+        m = re.match(r"(relation|way)_(\d+)_2020_hybrid\.tif", os.path.basename(base_path))
+        if m and f"{m.group(1)}_{m.group(2)}" not in predicted_farms:
+            results.append(_unassessed(f"{m.group(1)}_{m.group(2)}", "no 2024 prediction"))
+
+    n_unassessed = sum(r['alert_level'] == UNASSESSED for r in results)
+    if n_unassessed:
+        logger.warning("%d of %d farms could not be assessed (alert_level UNASSESSED)", n_unassessed, len(results))
     if not results:
         return None
 
     report_df = pd.DataFrame(results)
-    report_df = report_df.sort_values('deforestation_percent', ascending=False)
+    report_df = report_df.sort_values('deforestation_percent', ascending=False, na_position='last')
     os.makedirs(os.path.dirname(output_report_path), exist_ok=True)
     report_df.to_csv(output_report_path, index=False)
 
     logger.info("Deforestation report saved to %s", output_report_path)
     return report_df
+
 
 def generate_summary_stats(report_df, output_json_path):
     summary = {
@@ -210,9 +232,10 @@ def generate_summary_stats(report_df, output_json_path):
         'warnings': int(len(report_df[report_df['alert_level'] == 'WARNING'])),
         'compliant': int(len(report_df[report_df['alert_level'] == 'COMPLIANT'])),
         'no_baseline_forest': int(len(report_df[report_df['alert_level'] == 'NO_BASELINE_FOREST'])),
+        'unassessed': int(len(report_df[report_df['alert_level'] == UNASSESSED])),
         'other': int((~report_df['alert_level'].isin(
-            ['VIOLATION', 'WARNING', 'COMPLIANT', 'NO_BASELINE_FOREST'])).sum()),  # counts sum to total_farms
-        'avg_deforestation_pct': float(report_df['deforestation_percent'].mean()),
+            ['VIOLATION', 'WARNING', 'COMPLIANT', 'NO_BASELINE_FOREST', UNASSESSED])).sum()),  # counts sum to total_farms
+        'avg_deforestation_pct': float(report_df['deforestation_percent'].mean()),  # assessed farms only (NaN skipped)
         'worst_offender': report_df.iloc[0]['farm_id'] if len(report_df) > 0 else None
     }
     with open(output_json_path, 'w') as f:

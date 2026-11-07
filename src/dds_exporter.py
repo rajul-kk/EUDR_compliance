@@ -161,6 +161,8 @@ class DDSExporter:
 
             risk = str(row.get("alert_level", "UNKNOWN"))
             defor_pct = float(row.get("deforestation_percent", 0.0))
+            if defor_pct != defor_pct:  # NaN: not assessed
+                defor_pct = 0.0
 
             if risk == "COMPLIANT":
                 notes = "No significant deforestation detected since baseline year."
@@ -173,6 +175,12 @@ class DDSExporter:
                 notes = (
                     f"Significant deforestation detected ({defor_pct:.1f}%). "
                     "Product cannot be placed on the EU market under Regulation 2023/1115."
+                )
+            elif risk == "UNASSESSED":
+                risk = "INCONCLUSIVE"
+                notes = (
+                    f"Not assessed: {row.get('reason', 'reason not recorded')}. No conclusion can be drawn for this "
+                    "plot; manual review required before market placement."
                 )
             elif risk == "NO_BASELINE_FOREST":
                 risk = "INCONCLUSIVE"
