@@ -75,10 +75,10 @@ def run_pipeline(
             logger.info("Image download complete")
         except subprocess.CalledProcessError as e:
             logger.error("Image download failed (exit %d)", e.returncode)
-            return
+            return False
         except Exception as e:
             logger.error("Image download error: %s", e)
-            return
+            return False
     else:
         logger.info("[2/8] Skipping image download")
 
@@ -91,10 +91,10 @@ def run_pipeline(
         logger.info("Mask generation complete")
     except subprocess.CalledProcessError as e:
         logger.error("Mask generation failed (exit %d)", e.returncode)
-        return
+        return False
     except Exception as e:
         logger.error("Mask generation error: %s", e)
-        return
+        return False
 
     # --- Step 3b: Download embeddings (tessera-embed only) ---
     tessera_embed_gen_script = os.path.join(current_dir, 'tessera_embedding_generation.py')
@@ -120,10 +120,10 @@ def run_pipeline(
                 logger.info("Embedding download complete")
             except subprocess.CalledProcessError as e:
                 logger.error("Embedding download failed (exit %d)", e.returncode)
-                return
+                return False
             except Exception as e:
                 logger.error("Embedding download error: %s", e)
-                return
+                return False
 
     # --- Step 4: Train Model ---
     logger.info("[4/8] Training %s model", model_type.upper())
@@ -216,10 +216,10 @@ def run_pipeline(
         logger.info("Training complete — model: %s", model_path)
     except subprocess.CalledProcessError as e:
         logger.error("Training failed (exit %d)", e.returncode)
-        return
+        return False
     except Exception as e:
         logger.error("Training error: %s", e)
-        return
+        return False
 
     inference_seconds = None
 
@@ -259,10 +259,10 @@ def run_pipeline(
             logger.info("Inference complete (%.1fs)", inference_seconds)
         except subprocess.CalledProcessError as e:
             logger.error("Inference failed (exit %d)", e.returncode)
-            return
+            return False
         except Exception as e:
             logger.error("Inference error: %s", e)
-            return
+            return False
     else:
         logger.info("[5/8] Skipping inference")
 
@@ -289,10 +289,10 @@ def run_pipeline(
             logger.info("Baseline metrics written to %s", metrics_csv)
         except subprocess.CalledProcessError as e:
             logger.error("Baseline metrics failed (exit %d)", e.returncode)
-            return
+            return False
         except Exception as e:
             logger.error("Baseline metrics error: %s", e)
-            return
+            return False
     else:
         logger.info("[6/8] Skipping baseline metrics")
 
@@ -308,10 +308,10 @@ def run_pipeline(
             logger.info("Deforestation detection complete")
         except subprocess.CalledProcessError as e:
             logger.error("Detection failed (exit %d)", e.returncode)
-            return
+            return False
         except Exception as e:
             logger.error("Detection error: %s", e)
-            return
+            return False
     else:
         logger.info("[7/8] Skipping deforestation detection")
 
@@ -378,14 +378,17 @@ def run_pipeline(
                     logger.warning("PDF export skipped — reportlab not installed")
 
         except Exception as e:
-            logger.warning("Audit/DDS step failed (non-fatal): %s", e)
+            # the audit entry is the run's compliance record; a run without one has not finished
+            logger.error("Audit/DDS step failed: %s", e)
+            return False
 
     logger.info("Pipeline finished | model=%s", model_path)
     if not skip_inference:
         logger.info("Outputs: predictions=data/predictions_2024_%s  report=reports/deforestation_report.csv  audit=reports/audit_log.jsonl", model_type)
+    return True
 
 
-def parse_args():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='Run the EUDR pipeline with selectable model backend.')
     parser.add_argument('--run-farm-discovery', action='store_true')
     parser.add_argument('--run-image-download', action='store_true')
@@ -407,12 +410,16 @@ def parse_args():
     dds.add_argument('--commodity-description', default='')
     dds.add_argument('--commodity-quantity', type=float, default=0.0)
     dds.add_argument('--commodity-unit', default='kg')
-    return parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.export_dds and not args.operator_name:
+        parser.error("--export-dds needs --operator-name (the operator named on every statement)")
+    return args
 
 
-def main() -> None:
-    args = parse_args()
-    run_pipeline(
+def main(argv=None) -> int:
+    """Exit status 0 only when every stage that ran succeeded."""
+    args = parse_args(argv)
+    ok = run_pipeline(
         skip_farm_discovery=not args.run_farm_discovery,
         skip_image_download=not args.run_image_download,
         skip_inference=args.skip_inference,
@@ -429,7 +436,10 @@ def main() -> None:
         commodity_quantity=args.commodity_quantity,
         commodity_unit=args.commodity_unit,
     )
+    if not ok:
+        logger.error("Pipeline stopped at a failed stage")
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
