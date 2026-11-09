@@ -1,0 +1,17 @@
+training on 1433669 cells from 72 grids
+{
+ "n_farms": 94,
+ "n_flagged": 79,
+ "n_plantation_driven": 46,
+ "share_plantation_driven": {
+  "est": 0.5822784810126582,
+  "lo": 0.4810126582278481,
+  "hi": 0.6962025316455697
+ },
+ "flagged_farms_loss_cells_by_2020_class": {
+  "FOREST": 1327,
+  "PLANT": 911,
+  "OTHER": 1325
+ }
+}
+done in 681 s

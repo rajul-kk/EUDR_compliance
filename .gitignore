@@ -80,3 +80,5 @@ Thumbs.db
 src/sentinel_client2.py
 # unncessary .md files
 TESSERA_EMBEDDING_GUIDE.md
+results/*.npz
+__pycache__/

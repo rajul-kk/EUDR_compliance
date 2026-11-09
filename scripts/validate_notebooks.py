@@ -1,12 +1,12 @@
-"""Static validation for Kaggle training notebooks.
+"""Static validation for the Kaggle notebooks.
 
 Checks:
 1. Valid JSON / parseable notebook format
 2. No stale path references to replaced pipeline components
 3. Required dataset variables are defined
 """
-import sys
 import re
+import sys
 from pathlib import Path
 
 import nbformat
@@ -40,6 +40,10 @@ def validate_notebook(path: Path) -> list[str]:
         if re.search(pattern, all_source):
             errors.append(f"Stale reference — {message}")
 
+    # the dataset variables belong to the model training notebooks; other notebooks (e.g. the Hansen audit) have
+    # their own inputs and only get the parse and stale-reference checks
+    if not path.name.endswith("_training.ipynb"):
+        return errors
     required = SIAMESE_REQUIRED_VARS if "siamese" in path.name else REQUIRED_VARS
     for var in required:
         if var not in all_source:

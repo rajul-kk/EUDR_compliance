@@ -1,0 +1,82 @@
+01 (217, 217) annotated 0.9816517658051774
+02 (216, 216) annotated 0.9999356995884774
+03 (217, 216) annotated 0.9907834101382489
+04 (217, 217) annotated 0.9862175879717131
+05 (216, 217) annotated 0.9953490356716164
+06 (217, 217) annotated 0.9907834101382489
+07 (216, 216) annotated 0.9999785665294925
+08 (216, 216) annotated 1.0
+09 (217, 216) annotated 0.9907834101382489
+10 (216, 217) annotated 0.9907834101382489
+11 (216, 217) annotated 0.9953490356716164
+12 (216, 217) annotated 0.9907834101382489
+13 (217, 217) annotated 0.9816517658051774
+14 (217, 217) annotated 0.9816517658051774
+15 (216, 217) annotated 0.9907834101382489
+16 (217, 217) annotated 0.9816517658051774
+17 (216, 216) annotated 0.9999571330589849
+18 (216, 216) annotated 0.9999785665294925
+19 (217, 216) annotated 0.995242362177846
+20 (216, 217) annotated 0.9861964499061273
+21 (216, 216) annotated 0.9953489368998628
+22 (216, 217) annotated 0.9907834101382489
+23 (216, 217) annotated 0.9861964499061273
+24 (217, 216) annotated 0.9907834101382489
+25 (217, 217) annotated 0.9862175879717131
+26 (216, 217) annotated 0.9907834101382489
+27 (216, 216) annotated 1.0
+28 (217, 216) annotated 0.9907834101382489
+29 (217, 217) annotated 0.9816517658051774
+30 (217, 216) annotated 0.9907834101382489
+31 (217, 217) annotated 0.9816517658051774
+32 (216, 216) annotated 0.9999785665294925
+33 (216, 217) annotated 0.995242362177846
+34 (216, 216) annotated 0.9999785665294925
+35 (217, 216) annotated 0.9953703703703703
+36 (216, 216) annotated 0.9999571330589849
+37 (216, 217) annotated 0.9907834101382489
+38 (217, 217) annotated 0.9807173649897003
+39 (216, 217) annotated 0.9907834101382489
+40 (217, 217) annotated 0.9862175879717131
+41 (216, 217) annotated 0.9953490356716164
+42 (217, 216) annotated 0.9907834101382489
+43 (216, 217) annotated 0.9953703703703703
+44 (216, 216) annotated 0.9999785665294925
+45 (217, 217) annotated 0.9861963515895432
+46 (216, 216) annotated 0.9999571330589849
+47 (216, 217) annotated 0.9861964499061273
+48 (217, 217) annotated 0.9862175879717131
+49 (216, 217) annotated 0.9861964499061273
+50 (217, 217) annotated 0.9862175879717131
+51 (216, 217) annotated 0.9861964499061273
+52 (217, 216) annotated 0.9907834101382489
+53 (217, 217) annotated 0.9907834101382489
+54 (217, 217) annotated 0.9862175879717131
+55 (216, 217) annotated 0.9953703703703703
+56 (216, 217) annotated 0.9953490356716164
+57 (216, 216) annotated 0.9999571330589849
+58 (216, 216) annotated 0.9953703703703703
+59 (217, 217) annotated 0.9816517658051774
+60 (216, 217) annotated 0.9907834101382489
+61 (147, 217) annotated 0.9907834101382489
+62 (217, 217) annotated 0.9862175879717131
+63 (147, 216) annotated 0.9999370118417737
+64 (216, 216) annotated 0.9999785665294925
+65 (217, 216) annotated 0.9953703703703703
+66 (217, 217) annotated 0.9862175879717131
+67 (216, 216) annotated 0.9996356310013718
+68 (216, 217) annotated 0.9907834101382489
+69 (210, 216) annotated 0.9952380952380953
+70 (216, 217) annotated 0.9907834101382489
+71 (217, 216) annotated 0.9953703703703703
+Traceback (most recent call last):
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\build_reference_cells.py", line 39, in <module>
+    main(sys.argv[1], sys.argv[2])
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\build_reference_cells.py", line 29, in main
+    cid, cov = R.rasterise_reference(g, w0, n0, (H, W))
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\..\..\hansen_audit\reference.py", line 83, in rasterise_reference
+    counts = np.stack([(blocks == k).sum(-1) for k in range(1, ncls)], -1) if ncls > 1 else np.zeros((H, W, 1), int)
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\..\..\hansen_audit\reference.py", line 83, in <listcomp>
+    counts = np.stack([(blocks == k).sum(-1) for k in range(1, ncls)], -1) if ncls > 1 else np.zeros((H, W, 1), int)
+numpy._core._exceptions.MemoryError: Unable to allocate 1.12 MiB for an array with shape (216, 217, 25) and data type bool
+done

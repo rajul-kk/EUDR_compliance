@@ -1,0 +1,65 @@
+command: python -I scripts/hansen_audit/s2_run_landuse.py D:/Work/eudr-hansen-audit-refdata/reference_cells.npz D:/Work/eudr-hansen-audit-refdata/zenodo_23874371/grid_index.csv D:/Work/eudr-hansen-audit-refdata/s2 results/s2b s2b
+feature set s2b: 41 features
+72 grids with both composites; missing []
+fold 0: train 60 grids / 1193669 cells, test 12 grids (204 s)
+fold 1: train 60 grids / 1200000 cells, test 12 grids (486 s)
+fold 2: train 60 grids / 1193669 cells, test 12 grids (759 s)
+fold 3: train 60 grids / 1193669 cells, test 12 grids (1042 s)
+fold 4: train 60 grids / 1193669 cells, test 12 grids (1337 s)
+fold 5: train 60 grids / 1193669 cells, test 12 grids (1626 s)
+{
+ "transfer_rule": {
+  "ba_ref_all": 0.6174749058582387,
+  "ba_2020_le2021": 0.6630999241001188,
+  "drop": -0.04562501824188003,
+  "unreliable": false
+ },
+ "quality_gate": {
+  "recall_FOREST_tree": 0.6219548944684852,
+  "recall_PLANT_tree": 0.702396975590432,
+  "passed": false
+ },
+ "E2_all": {
+  "n_grids": 72,
+  "n_cells": 177080,
+  "n_boot_ok": 2000,
+  "clipped_point": false,
+  "clipped_boot_frac": 0.202,
+  "raw": {
+   "FOREST": {
+    "est": 0.3811158798283262,
+    "lo": 0.30149373597168666,
+    "hi": 0.475762167223351
+   },
+   "PLANT": {
+    "est": 0.40574881409532415,
+    "lo": 0.3180524869448826,
+    "hi": 0.4864547291632617
+   },
+   "OTHER": {
+    "est": 0.21313530607634967,
+    "lo": 0.15750088904304568,
+    "hi": 0.2738017305232052
+   }
+  },
+  "corrected": {
+   "FOREST": {
+    "est": 0.47551738853596975,
+    "lo": 0.2523863314944274,
+    "hi": 0.7586189135706486
+   },
+   "PLANT": {
+    "est": 0.4000069745910441,
+    "lo": 0.21060650892956748,
+    "hi": 0.5668173700941473
+   },
+   "OTHER": {
+    "est": 0.12447563687298607,
+    "lo": 0.0,
+    "hi": 0.396758275096769
+   }
+  }
+ },
+ "headline_allowed": false
+}
+done in 1709 s
