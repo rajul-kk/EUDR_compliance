@@ -63,9 +63,11 @@ def mc_dropout_predict(
 ) -> tuple:
     """Monte Carlo Dropout inference: returns (mean_probs, uncertainty_entropy).
 
-    Activates dropout by calling model.train(), then runs n_passes forward passes
+    Switches only the dropout layers to training mode, then runs n_passes forward passes
     under torch.no_grad(). Returns pixel-wise mean softmax probabilities and
-    Shannon entropy as an uncertainty map.
+    Shannon entropy as an uncertainty map. BatchNorm stays in eval mode (calling model.train()
+    here used to make BatchNorm use single-image batch statistics and overwrite its running
+    statistics), and every module's previous mode is restored afterwards.
 
     Args:
         model:        Any model with Dropout2d layers. Must already be on the right device.
@@ -78,24 +80,49 @@ def mc_dropout_predict(
         uncertainty: (B, H, W) float32 — pixel-wise Shannon entropy (nats).
     """
     import torch
+    import torch.nn as nn
     import torch.nn.functional as F
 
-    model.train()  # activates Dropout2d
+    previous = {m: m.training for m in model.modules()}
+    model.eval()
+    for m in model.modules():
+        if isinstance(m, nn.modules.dropout._DropoutNd):
+            m.train()
     probs_list = []
 
-    with torch.no_grad():
-        for _ in range(n_passes):
-            if extra_inputs:
-                logits = model(x, *extra_inputs)["out"]
-            else:
-                logits = model(x)["out"]
-            probs_list.append(F.softmax(logits, dim=1))
+    try:
+        with torch.no_grad():
+            for _ in range(n_passes):
+                if extra_inputs:
+                    logits = model(x, *extra_inputs)["out"]
+                else:
+                    logits = model(x)["out"]
+                probs_list.append(F.softmax(logits, dim=1))
+    finally:
+        for m, was_training in previous.items():
+            m.training = was_training
 
     mean_probs = torch.stack(probs_list, dim=0).mean(dim=0)  # (B, C, H, W)
     # Shannon entropy: -sum(p * log(p + eps))
     uncertainty = -(mean_probs * (mean_probs + 1e-8).log()).sum(dim=1)  # (B, H, W)
-    model.eval()
     return mean_probs, uncertainty
+
+
+def keep_frozen_batchnorm_eval(model: "torch.nn.Module") -> int:
+    """Put BatchNorm layers whose parameters are all frozen back into eval mode; call after model.train().
+
+    requires_grad=False stops weight updates but not BatchNorm's running mean/var, which keep drifting in train
+    mode, so a "frozen" pretrained encoder still changes. Returns the number of layers switched."""
+    import torch.nn as nn
+
+    n = 0
+    for m in model.modules():
+        if isinstance(m, nn.modules.batchnorm._BatchNorm):
+            params = list(m.parameters())
+            if params and not any(p.requires_grad for p in params):
+                m.eval()
+                n += 1
+    return n
 
 
 def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:

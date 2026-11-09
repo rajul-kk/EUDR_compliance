@@ -20,7 +20,7 @@ if _src_dir not in sys.path:
 
 from change_siamese_model import get_siamese_model
 from preprocessing.change_dataset import ChangeDetectionDataset
-from train_utils import seed_everything, split_dataset
+from train_utils import keep_frozen_batchnorm_eval, seed_everything, split_dataset
 
 IGNORE_INDEX = 255
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -146,6 +146,7 @@ def train(args: argparse.Namespace) -> None:
                 p.requires_grad_(True)
             logger.info("Encoder unfrozen at epoch %d — end-to-end fine-tuning", epoch + 1)
         model.train()
+        keep_frozen_batchnorm_eval(model)  # during warm-up the frozen encoder's BatchNorm statistics stay fixed
         train_loss = 0.0
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs} train",
                          leave=False, unit="batch")

@@ -34,6 +34,7 @@ PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 ACCESS_TOKEN = None
 TOKEN_EXPIRY = 0
 STATE_LOCK = threading.Lock()
+TOKEN_LOCK = threading.Lock()  # one refresh at a time across dask threads
 
 # SCL classes treated as cloud / shadow
 _CLOUD_SCL = {0, 1, 3, 8, 9, 10}
@@ -165,10 +166,20 @@ def update_manifest(manifest_path, farm_id, year, status, message=""):
 # Authentication
 # ---------------------------------------------------------------------------
 
-def get_auth_token():
+def get_auth_token(rejected=None):
+    """Cached access token, refreshed near expiry.
+
+    rejected: a token the server just answered 401 to. It is dropped from the cache even if the local clock says it
+    is still valid, so the caller's retry uses a new token; if another thread already replaced it, that one is used.
+    """
+    with TOKEN_LOCK:
+        return _get_auth_token_locked(rejected)
+
+
+def _get_auth_token_locked(rejected):
     global ACCESS_TOKEN, TOKEN_EXPIRY
     current_time = time.time()
-    if ACCESS_TOKEN and current_time < (TOKEN_EXPIRY - 60):
+    if ACCESS_TOKEN and ACCESS_TOKEN != rejected and current_time < (TOKEN_EXPIRY - 60):
         return ACCESS_TOKEN
 
     logger.debug("Refreshing Copernicus access token")
@@ -243,7 +254,7 @@ def _download_scene_bytes(bbox, date):
     response = request_with_retry("POST", PROCESS_URL, json=payload, headers=headers, timeout=60)
 
     if response.status_code == 401:
-        token = get_auth_token()
+        token = get_auth_token(rejected=token)
         headers["Authorization"] = f"Bearer {token}"
         response = request_with_retry("POST", PROCESS_URL, json=payload, headers=headers, timeout=60)
 
@@ -396,8 +407,16 @@ def download_farm_image(row, year, farm_id, start_date, end_date, profile_cfg):
         return None
 
     profile.update(count=5, dtype="float32", driver="GTiff", compress="lzw")
-    with rasterio.open(filename, "w", **profile) as dst:
-        dst.write(composite)
+    # write beside the target and rename: resume treats any existing {farm_id}_*.tiff as done, so a run killed
+    # mid-write must not leave a partial file under the final name
+    partial = filename + ".part"
+    try:
+        with rasterio.open(partial, "w", **profile) as dst:
+            dst.write(composite)
+        os.replace(partial, filename)
+    finally:
+        if os.path.exists(partial):
+            os.remove(partial)
 
     logger.info("Saved composite (%d scenes) to %s", max_scenes, filename)
     return filename
@@ -454,8 +473,9 @@ def process_single_farm(row, skip_count, index, profile, manifest_path):
         logger.exception("Unexpected error processing farm at index %d: %s", index, exc)
         try:
             fid = normalize_farm_id(row["farm_id"])
-            update_manifest(manifest_path, fid, 2020, "failed", str(exc))
-            update_manifest(manifest_path, fid, 2024, "failed", str(exc))
+            for year, suffix in ((2020, "baseline"), (2024, "current")):
+                if not glob.glob(f"data/raw_satellite/{year}_{suffix}/{fid}_*.tiff"):  # a saved year stays downloaded
+                    update_manifest(manifest_path, fid, year, "failed", str(exc))
         except Exception:
             pass
         return False

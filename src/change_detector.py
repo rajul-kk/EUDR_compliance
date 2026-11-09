@@ -14,6 +14,22 @@ class RiskLevel(str, Enum):
     NO_BASELINE_FOREST = "NO_BASELINE_FOREST"
 
 
+VIOLATION_THRESHOLD = 10.0  # % of baseline forest lost -> VIOLATION
+WARNING_THRESHOLD = 5.0     # % of baseline forest lost -> WARNING
+
+
+def classify_forest_loss(forest_2020: int, forest_lost: int):
+    """The one alert rule: loss as a share of the farm's 2020 forest. Returns (percent, RiskLevel)."""
+    if forest_2020 <= 0:
+        return 0.0, RiskLevel.NO_BASELINE_FOREST
+    pct = forest_lost / forest_2020 * 100
+    if pct > VIOLATION_THRESHOLD:
+        return pct, RiskLevel.VIOLATION
+    if pct > WARNING_THRESHOLD:
+        return pct, RiskLevel.WARNING
+    return pct, RiskLevel.COMPLIANT
+
+
 @dataclass
 class ChangeResult:
     farm_id: str
@@ -39,8 +55,8 @@ class ChangeDetector:
       3 = Water / wetland
     """
 
-    VIOLATION_THRESHOLD = 10.0  # % forest loss → VIOLATION
-    WARNING_THRESHOLD = 5.0     # % forest loss → WARNING
+    VIOLATION_THRESHOLD = VIOLATION_THRESHOLD
+    WARNING_THRESHOLD = WARNING_THRESHOLD
 
     def __init__(self, forest_class: int = 1) -> None:
         self.forest_class = forest_class
@@ -70,17 +86,8 @@ class ChangeDetector:
         forest_2024 = int(np.sum(mask_2024 == self.forest_class))
         lost = max(0, forest_2020 - forest_2024)
 
-        if forest_2020 == 0:
-            pct = 0.0
-            level = RiskLevel.NO_BASELINE_FOREST
-        else:
-            pct = round((lost / forest_2020) * 100, 2)
-            if pct > self.VIOLATION_THRESHOLD:
-                level = RiskLevel.VIOLATION
-            elif pct > self.WARNING_THRESHOLD:
-                level = RiskLevel.WARNING
-            else:
-                level = RiskLevel.COMPLIANT
+        pct, level = classify_forest_loss(forest_2020, lost)
+        pct = round(pct, 2)
 
         return ChangeResult(
             farm_id=farm_id,

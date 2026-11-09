@@ -27,4 +27,4 @@ from src.pipeline_runner import main  # noqa: E402
 
 if __name__ == "__main__":
     setup_pipeline_logging()
-    main()
+    sys.exit(main())
