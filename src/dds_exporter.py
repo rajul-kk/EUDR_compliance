@@ -1,15 +1,14 @@
 """
 Due Diligence Statement (DDS) exporter for EUDR compliance.
 
-Converts the deforestation detection report into the structured formats required
-by EU Regulation 2023/1115.  Supports three output formats:
+Converts the deforestation detection report into DDS-like records. Supports three output formats:
 
-  JSON  — matches the EU Information System (EU IS) API schema
-  XML   — W3C-valid envelope accepted by TRACES NT
+  JSON  — modelled on the content of a DDS; not the EU Information System format
+  XML   — modelled on the content of a DDS; not the TRACES NT schema (own root and namespace)
   PDF   — human-readable summary for operators and auditors
 
-Schema fields follow the public EUDR DDS specification:
-  https://environment.ec.europa.eu/topics/forests/deforestation/
+None of these can be submitted as they are. The EU Information System takes a DDS through a
+SOAP service (DDS V3) whose schema differs in structure and names; see docs/dds_schema_check.md.
   regulation-deforestation-free-products_en
 
 Usage:

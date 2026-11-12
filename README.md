@@ -179,7 +179,8 @@ violations = log.verify()
 print("Log intact" if not violations else violations)
 ```
 
-Export EU IS-compatible Due Diligence Statements:
+Export Due Diligence Statement drafts, modelled on the DDS content. They are not in the EU Information System format and
+cannot be submitted as they are (see `docs/dds_schema_check.md`):
 
 ```bash
 python main_audit.py \
@@ -193,8 +194,8 @@ python main_audit.py \
 
 | File | Format |
 |---|---|
-| `dds.json` | EU IS API JSON |
-| `dds.xml` | TRACES NT XML |
+| `dds.json` | JSON modelled on the DDS content |
+| `dds.xml` | XML modelled on the DDS content (own schema, not TRACES NT) |
 | `dds.pdf` | Human-readable summary |
 
 ---
