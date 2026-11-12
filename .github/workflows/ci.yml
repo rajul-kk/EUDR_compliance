@@ -161,7 +161,7 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          pip install pytest numpy scipy pandas rasterio
+          pip install pytest numpy scipy pandas rasterio shapely pyproj
           pip install torch --index-url https://download.pytorch.org/whl/cpu -q
 
       - name: Run tests
