@@ -16,7 +16,7 @@ if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
 from tessera_backbone import TesseraSegmentationModel
-from train_utils import compute_miou, seed_everything, split_dataset
+from train_utils import compute_miou, keep_frozen_batchnorm_eval, seed_everything, split_dataset
 
 _gee_dir = os.path.join(os.path.dirname(_src_dir), "GEE_dynamic")
 if _gee_dir not in sys.path:
@@ -80,6 +80,7 @@ def train_tessera_head(
 
     for epoch in range(epochs):
         model.train()
+        keep_frozen_batchnorm_eval(model)  # the frozen encoder's BatchNorm statistics must not drift either
         train_loss = 0.0
 
         for images, masks in train_loader:

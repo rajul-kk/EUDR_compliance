@@ -26,6 +26,12 @@ IGNORE_INDEX = 255
 FOREST_CLASS = 1
 
 
+def check_year_dirs(dir_t1: str, dir_t2: str) -> None:
+    """Same-named files in one folder would pair with themselves, making every embedding difference zero."""
+    if os.path.realpath(dir_t1) == os.path.realpath(dir_t2):
+        raise ValueError(f"embeddings_dir_t1 and embeddings_dir_t2 are the same folder: {dir_t1}")
+
+
 class ChangeEmbedDataset(Dataset):
     """Pairs of (embed_t1, embed_t2) → element-wise difference → binary change mask.
 
@@ -36,6 +42,7 @@ class ChangeEmbedDataset(Dataset):
     def __init__(self, embeddings_dir_t1: str, embeddings_dir_t2: str, mask_dir: str,
                  year_t1: str = "2020", year_t2: str = "2024") -> None:
         self.pairs: list = []
+        check_year_dirs(embeddings_dir_t1, embeddings_dir_t2)
 
         from train_utils import extract_farm_key, load_embedding
 

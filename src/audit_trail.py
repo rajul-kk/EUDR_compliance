@@ -4,8 +4,11 @@ Append-only audit trail for EUDR compliance assessments.
 Each pipeline run writes one AuditEntry to audit_log.jsonl.  Entries record
 SHA-256 hashes of every input satellite image and every output prediction mask
 so any past assessment can be independently verified.  The log file is never
-modified in place — only appended — which makes tampering detectable via hash
-chaining.
+modified in place — only appended.  Each entry's chain hash covers the previous
+one, so verify() detects an edited, inserted or removed entry anywhere before
+the last.  Removing entries from the end leaves a valid shorter chain: to
+detect that, keep the head() hash somewhere outside the log (e.g. in the DDS
+evidence or a commit) and pass it to verify(expected_head=...).
 """
 from __future__ import annotations
 
@@ -68,8 +71,15 @@ class AuditLog:
 
     log_path: str
 
+    def head(self) -> Optional[str]:
+        """Chain hash of the newest entry, or None for an empty log. Record it externally to detect truncation."""
+        return self._last_chain_hash()
+
     def _last_chain_hash(self) -> Optional[str]:
-        """Read the chain_hash of the last written entry without loading the whole file."""
+        """Read the chain_hash of the last written entry.
+
+        Raises ValueError if the last line is not a complete entry (e.g. a write cut off by a crash): appending
+        after it would start a new chain from nothing and hide the break."""
         if not os.path.exists(self.log_path):
             return None
         last: Optional[str] = None
@@ -81,9 +91,12 @@ class AuditLog:
         if last is None:
             return None
         try:
-            return json.loads(last).get("chain_hash")
-        except json.JSONDecodeError:
-            return None
+            chain = json.loads(last).get("chain_hash")
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{self.log_path}: last line is not a complete entry ({exc}); repair before appending")
+        if not chain:
+            raise ValueError(f"{self.log_path}: last entry has no chain_hash; repair before appending")
+        return chain
 
     def append(self, entry: AuditEntry) -> AuditEntry:
         """Compute chain hash and append entry to the log. Returns the written entry."""
@@ -102,13 +115,17 @@ class AuditLog:
 
         return entry
 
-    def verify(self) -> List[str]:
-        """Walk the log and verify every chain hash. Returns list of violation messages."""
+    def verify(self, expected_head: Optional[str] = None) -> List[str]:
+        """Walk the log and verify every chain hash. Returns list of violation messages.
+
+        expected_head: a head() value recorded earlier; if given, the log must still contain it, so entries removed
+        from the end are reported."""
         if not os.path.exists(self.log_path):
             return ["Log file does not exist."]
 
         violations: List[str] = []
         previous_chain: Optional[str] = None
+        seen = set()
 
         with open(self.log_path, "r", encoding="utf-8") as fh:
             for lineno, raw in enumerate(fh, start=1):
@@ -132,7 +149,13 @@ class AuditLog:
                         f"chain hash mismatch — expected {expected}, got {stored_chain}"
                     )
                 previous_chain = stored_chain
+                seen.add(stored_chain)
 
+        if expected_head is not None and expected_head not in seen:
+            violations.append(
+                f"Recorded head {expected_head} is not in the log (now ends at {previous_chain}): "
+                "entries were removed from the end or the log was replaced"
+            )
         return violations
 
     def history(self, farm_id: Optional[str] = None) -> List[Dict]:
