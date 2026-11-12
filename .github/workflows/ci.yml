@@ -141,11 +141,33 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          pip install pytest numpy pillow
+          pip install pytest numpy pillow pandas requests python-dotenv tqdm
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu -q
 
       - name: Run tests
         run: pytest tests/ -q --tb=short
+
+  test-hansen-audit:
+    name: pytest (Hansen label audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest numpy scipy pandas rasterio
+          pip install torch --index-url https://download.pytorch.org/whl/cpu -q
+
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+        run: pytest tests_hansen_audit/ -q --tb=short
 
   notebook-lint:
     name: Notebook static validation
