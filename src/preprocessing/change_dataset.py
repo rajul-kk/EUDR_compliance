@@ -37,7 +37,8 @@ IGNORE_INDEX = 255
 
 # Hansen GFC label values (generate_labels.py)
 HANSEN_FOREST_2020 = 1    # was forest as of 31 Dec 2020
-HANSEN_POST_EUDR_LOSS = 2  # loss detected 2021-2023
+HANSEN_POST_EUDR_LOSS = 2  # loss detected 2021-2024
+HANSEN_NODATA = 255        # generate_labels.LABEL_NODATA: Hansen has no data here
 
 
 _OPTICAL_BANDS = [0, 1, 2, 3]  # R, G, B, NIR — clip these; SCL is categorical, NDVI/NDWI are derived
@@ -83,6 +84,28 @@ def load_mask(path: str) -> np.ndarray:
 
 
 _load_mask = load_mask  # private alias kept for internal use
+
+
+def hansen_change_mask(raw: np.ndarray, scl_t1: np.ndarray, scl_t2: np.ndarray) -> np.ndarray:
+    """Binary change target from a Hansen label, on the grid of the two SCL rasters.
+
+    Loss (2) becomes 1, every other class 0. Cells with no Hansen data (255) or cloud in either
+    year become IGNORE_INDEX. The label is resized nearest-neighbour when its grid differs
+    (Hansen is 30 m, the imagery finer).
+    """
+    h, w = scl_t1.shape
+    if raw.shape != (h, w):
+        from PIL import Image as PILImage
+        raw = np.array(
+            PILImage.fromarray(raw.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
+            dtype=np.int64,
+        )
+    change = np.zeros((h, w), dtype=np.int64)
+    change[raw == HANSEN_POST_EUDR_LOSS] = 1
+    change[raw == HANSEN_NODATA] = IGNORE_INDEX
+    cloud = np.isin(scl_t1, list(CLOUD_SCL_CLASSES)) | np.isin(scl_t2, list(CLOUD_SCL_CLASSES))
+    change[cloud] = IGNORE_INDEX
+    return change
 
 
 def _cloud_ignore(mask: np.ndarray, scl: np.ndarray) -> np.ndarray:
@@ -212,21 +235,7 @@ class ChangeDetectionDataset(Dataset):
         if self.label_backend == "hansen":
             # Hansen label encodes both years in one file.
             # Resize label to match satellite tile if needed (Hansen is 30m, Sentinel is 10m).
-            raw = _load_mask(label_path)
-            if raw.shape != (h, w):
-                from PIL import Image as PILImage
-                raw = np.array(
-                    PILImage.fromarray(raw.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
-                    dtype=np.int64,
-                )
-
-            # value 2 = post-EUDR loss → change=1; value 1 = forest in 2020 → change=0
-            change = np.zeros((h, w), dtype=np.int64)
-            change[raw == HANSEN_POST_EUDR_LOSS] = 1
-
-            # Cloud masking: ignore pixels cloudy in either image
-            cloud = np.isin(scl_t1, list(CLOUD_SCL_CLASSES)) | np.isin(scl_t2, list(CLOUD_SCL_CLASSES))
-            change[cloud] = IGNORE_INDEX
+            change = hansen_change_mask(_load_mask(label_path), scl_t1, scl_t2)
 
         else:
             # Hybrid legacy: derive change from two per-year masks

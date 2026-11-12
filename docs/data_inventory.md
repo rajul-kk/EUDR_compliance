@@ -20,7 +20,7 @@ Folder `D:/Work/eudr-satellite-upload` (read-only). All numbers below were compu
 - Tile is centred on the CSV farm point (median offset 0.0 m, measured on all 415).
 
 ## Labels
-- uint8, 1 band, EPSG:4326, pixel 2.6949e-4 deg (~30 m), nodata tag **0** (same value as class 0, see design.md). 16 distinct raster shapes (166-204 x 167-168), ~5 km box. Label extent covers the image footprint 100 % for all 415 farms.
+- uint8, 1 band, EPSG:4326, pixel 2.6949e-4 deg (~30 m), nodata tag **0** (same value as class 0, see design.md). Labels generated after 12 Nov 2026 write **255** where Hansen has no data (`datamask` 0) and carry nodata tag 255 (`generate_labels.LABEL_NODATA`); the training loader ignores those cells. The 415 labels above predate this and keep the old encoding. 16 distinct raster shapes (166-204 x 167-168), ~5 km box. Label extent covers the image footprint 100 % for all 415 farms.
 - Values observed: {0, 1, 2} only. Semantics (from `generate_labels.py`): 0 = non-forest or lost <= 2020; 1 = tree cover (>=10 % in 2000) with no loss through 2024; 2 = loss 2021-24.
 - Class balance over the 415 complete farms (11.88 M px): 0: 96.7 %, 1: 0.71 %, 2: 2.60 %.
   Among Hansen "forest/loss" pixels (classes 1+2) **loss is 79 %**; by group: ID Oil Palm 75.4 % (71,019 loss vs 23,199 stable), CM Cocoa 75.9 %, TH Rubber 80.1 %, BR Cattle 96.3 %, VN Coffee 90.2 %.

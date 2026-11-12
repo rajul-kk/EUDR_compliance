@@ -111,3 +111,51 @@ def test_farm_key_regex():
         m = re.match(pattern, fname)
         assert m is not None, f"No match for {fname}"
         assert m.group(1) == expected_key
+
+
+def test_hansen_change_mask_ignores_no_data_and_cloud():
+    """255 (no Hansen data) and cloudy cells are ignored; only class 2 counts as change."""
+    from preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
+
+    raw = np.array([[0, 1], [2, 255]], dtype=np.uint8)
+    clear = np.full((2, 2), 4, dtype=np.uint8)          # SCL 4 = vegetation
+    out = hansen_change_mask(raw, clear, clear)
+    assert out.tolist() == [[0, 0], [1, IGNORE_INDEX]]
+
+    cloudy = clear.copy()
+    cloudy[0, 0] = 9                                     # SCL 9 = high-probability cloud
+    out = hansen_change_mask(raw, clear, cloudy)
+    assert out[0, 0] == IGNORE_INDEX and out[1, 0] == 1
+
+
+def test_hansen_change_mask_resizes_coarse_labels_nearest():
+    from preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
+
+    raw = np.array([[2, 255], [0, 1]], dtype=np.uint8)
+    clear = np.full((4, 4), 4, dtype=np.uint8)
+    out = hansen_change_mask(raw, clear, clear)
+    assert out.shape == (4, 4)
+    assert out[0, 0] == 1 and out[0, 3] == IGNORE_INDEX and out[3, 0] == 0 and out[3, 3] == 0
+
+
+def test_label_nodata_constants_agree():
+    """The generator's no-data value is the one the loader ignores, and is not a class.
+
+    Read from the source rather than imported: generate_labels needs Earth Engine and a local auth module.
+    """
+    import ast
+    from pathlib import Path
+
+    from preprocessing.change_dataset import (
+        HANSEN_FOREST_2020,
+        HANSEN_NODATA,
+        HANSEN_POST_EUDR_LOSS,
+    )
+
+    src = Path(__file__).resolve().parents[1] / "GEE_dynamic" / "src" / "generate_labels.py"
+    values = {node.targets[0].id: ast.literal_eval(node.value)
+              for node in ast.parse(src.read_text(encoding="utf-8")).body
+              if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
+              and node.targets[0].id == "LABEL_NODATA"}
+    assert values == {"LABEL_NODATA": HANSEN_NODATA}
+    assert HANSEN_NODATA not in (0, HANSEN_FOREST_2020, HANSEN_POST_EUDR_LOSS)

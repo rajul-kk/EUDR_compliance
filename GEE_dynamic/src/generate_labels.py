@@ -2,9 +2,13 @@
 Generate per-farm forest loss labels from Hansen Global Forest Change (GFC).
 
 Label encoding (saved as uint8):
-  0 = Non-forest / Other
-  1 = Forest in 2020 (no loss by end of 2020)
-  2 = Post-EUDR deforestation (loss in 2021-2024)
+  0   = Non-forest / Other
+  1   = Forest in 2020 (no loss by end of 2020)
+  2   = Post-EUDR deforestation (loss in 2021-2024)
+  255 = No data (Hansen datamask 0), also written as the GeoTIFF nodata tag
+
+Labels written before LABEL_NODATA existed carry a nodata tag of 0, the same value as class 0; read them
+without masking, and treat 0 there as "non-forest or no data".
 
 EUDR baseline date: 31 December 2020.
 Hansen asset: UMD/hansen/global_forest_change_2023_v1_11
@@ -20,6 +24,7 @@ import zipfile
 
 import ee
 import pandas as pd
+import rasterio
 import requests
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +43,7 @@ TREECOVER_THRESHOLD = 10    # % canopy cover in 2000 to count as forest
 BUFFER_METERS = 2500        # 5km × 5km tile around centroid
 OUTPUT_SCALE = 30           # Hansen native resolution (metres)
 OUTPUT_CRS = "EPSG:4326"
+LABEL_NODATA = 255          # Hansen datamask 0; never a class value
 
 PROJECT_ROOT = os.path.abspath(os.path.join(parent_dir, ".."))
 DEFAULT_CSV = os.path.join(PROJECT_ROOT, "inputs", "farms_osm.csv")
@@ -79,6 +85,12 @@ def _download_url(url: str, output_path: str) -> bool:
         return False
 
 
+def tag_nodata(path: str, value: int = LABEL_NODATA) -> None:
+    """Set the GeoTIFF nodata tag, so masked reads cannot confuse missing cells with class 0."""
+    with rasterio.open(path, "r+") as ds:
+        ds.nodata = value
+
+
 def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> bool:
     """
     Download a Hansen GFC label mask for one farm.
@@ -87,7 +99,8 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
     Pixel values:
       0 = non-forest or unknown
       1 = forest as of 2020 (no post-2020 loss detected)
-      2 = post-EUDR loss (lossyear 21-23, i.e. 2021-2023)
+      2 = post-EUDR loss (lossyear 21-24, i.e. 2021-2024)
+      255 = no data (Hansen datamask 0)
     """
     out_path = os.path.join(output_dir, f"{farm_id}_hansen_label.tif")
     if os.path.exists(out_path):
@@ -100,6 +113,7 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
 
         treecover = hansen.select("treecover2000")
         lossyear = hansen.select("lossyear")
+        has_data = hansen.select("datamask").gt(0)
 
         # Was this pixel forested in 2000?
         was_forest = treecover.gte(TREECOVER_THRESHOLD)
@@ -117,6 +131,8 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
             ee.Image.constant(0).uint8()
             .where(forest_2020, 1)
             .where(was_forest.And(post_eudr_loss), 2)
+            .updateMask(has_data)
+            .unmask(LABEL_NODATA)
             .clip(region)
             .rename("hansen_label")
         )
@@ -131,6 +147,7 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
 
         success = _download_url(url, out_path)
         if success:
+            tag_nodata(out_path)
             logger.info("Saved: %s", out_path)
         return success
 
