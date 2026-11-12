@@ -20,3 +20,27 @@ reference polygons, (b) noise-robust training evaluated on that, (c) farm-level 
 intervals on an EUDR farm list. Limits: web search was shallow (a handful of queries), only abstracts for two papers;
 I could have missed a closer paper. A deeper search (Google Scholar, "GFC" + "oil palm" + "commission error") is recommended
 before any preprint claim of novelty.
+
+## Second pass (2026-11-13, U3)
+
+Same evidence tags. Added **catalog** = dataset catalogue page read. Searches: Hansen GFC loss with oil palm rotation,
+replanting and commission error in Indonesia; EUDR farm screening with Hansen false positives; forest-loss driver maps.
+No Google Scholar access from here, and PMC returned a browser check, which was not worked around.
+
+| Source | What I read | What it establishes | Overlap with this audit |
+|---|---|---|---|
+| Sims et al. 2025, "Global drivers of forest loss at 1 km resolution", Environ. Res. Lett. 20: 074027, doi:10.1088/1748-9326/add606 (WRI / Google DeepMind, CC BY 4.0) | catalog (Earth Engine page for v1.2, 2001-2024) | Classes loss drivers at 1 km. The page says the product "does not distinguish between the loss of natural forest and planted trees" and that "clearing and replanting an orchard would be included in the permanent agriculture class", which "is not deforestation of a natural forest". | Closest. It names the same confusion and leaves it inside one class; it does not measure how much loss is replanting. Its "permanent agriculture" share for Indonesia cannot be read as deforestation for oil palm. Accuracy figures are in the paper, not read. |
+| "High-resolution maps show that rubber causes substantial deforestation", Nature 2023, doi:10.1038/s41586-023-06642-z (first author recalled as Wang; not checked) | snippet | States that rotational clearing and replanting of plantations and tree crops may be wrongly classed as deforestation, likely most in Indonesia, Malaysia and Thailand. | Premise, for rubber; no measured share of Hansen loss on existing plantations seen. |
+| Riau oil palm age structure 1990-2020 (authors not seen), Environ. Res. Lett., doi:10.1088/1748-9326/ac8a61 | snippet | About 44 % of oil palm 20 years after planting had been replanted (20 %) or converted (23 %); says age data help interpret gain and loss in Hansen. | Supports the mechanism (replanting cycles) in one province; no Hansen confusion estimate seen. |
+| Comment on Hansen et al. 2013, Science 2014 (first author recalled as Tropek; not checked) | snippet (ResearchGate listing) | Early examples of plantations mapped as forest and their harvest as loss. | Premise only. |
+| "Slowing deforestation in Indonesia follows declining oil palm expansion and lower oil prices" (PMC8963565; authors recalled as Gaveau et al. 2022, not checked) | not read (browser check) | Unknown here. Known to map industrial plantation expansion separately from forest loss; whether it reports Hansen loss inside existing plantations was not checked. | **Read before any novelty claim.** |
+| Vendor and advocacy pages (Nadar, TraceBean, tracextech), a MODIS loss-detection study, EUSPA coffee report | snippets | Repeat that Hansen loss is not EUDR deforestation; a cited Forclime figure (deforestation overestimated "by up to 347 %") is second-hand. | Not used for numbers. |
+
+### Verdict after the second pass
+
+Unchanged in substance, firmer on premise. The confusion between plantation replanting and deforestation in Hansen loss
+is stated in a 2025 driver map's own documentation and in a 2023 Nature paper; the audit must cite both and must not
+present the confusion itself as new. Not found in what was read: a measured, confusion-corrected share of Hansen loss on
+land that was already plantation at the EUDR cut-off, against independent reference polygons, with farm-level flag
+rates. Before a preprint: read PMC8963565 and the Sims et al. 2025 accuracy section in full, and run a Google
+Scholar search for "tree cover loss" with "oil palm" and "replanting".
