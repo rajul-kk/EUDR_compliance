@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import rasterio
@@ -26,7 +26,7 @@ def collect_source_masks(mask_dir: Path, year: str) -> List[Path]:
     return sorted(mask_dir.glob(f"*_{year}_hybrid.tif*"))
 
 
-def build_tile_masks(tile_tiff_dir: Path, source_mask_dir: Path, out_dir: Path, year: str) -> Dict[str, object]:
+def build_tile_masks(tile_tiff_dir: Path, source_mask_dir: Path, out_dir: Path, year: str) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     tile_paths = collect_tile_tiffs(tile_tiff_dir)
@@ -39,7 +39,7 @@ def build_tile_masks(tile_tiff_dir: Path, source_mask_dir: Path, out_dir: Path, 
 
     source_bounds = {p: read_bounds(p) for p in source_masks}
 
-    summary = {
+    summary: Dict[str, Any] = {
         "year": year,
         "tile_count": len(tile_paths),
         "source_mask_count": len(source_masks),

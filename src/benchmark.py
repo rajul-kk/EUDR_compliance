@@ -5,7 +5,7 @@ import json
 import os
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -205,7 +205,7 @@ def run_baseline_metrics(
         "change_fp": 0.0,
         "change_fn": 0.0,
     }
-    by_crop = defaultdict(lambda: {
+    by_crop: Dict[str, Dict[str, float]] = defaultdict(lambda: {
         "samples": 0,
         "miou_sum": 0.0,
         "forest_tp": 0.0,
@@ -358,7 +358,7 @@ def run_benchmark(
     deeplab_elapsed_seconds: Optional[float] = None,
     tessera_elapsed_seconds: Optional[float] = None,
 ) -> None:
-    rows: List[Dict[str, float]] = []
+    rows: List[Dict[str, Any]] = []
 
     deeplab_files = sorted(glob.glob(os.path.join(deeplab_pred_dir, "*_predicted.tif")))
     tessera_files = sorted(glob.glob(os.path.join(tessera_pred_dir, "*_predicted.tif")))
@@ -518,8 +518,8 @@ def run_change_detection_benchmark(
                   "forest_precision", "forest_recall", "forest_f1",
                   "change_precision", "change_recall", "change_f1",
                   "train_seconds", "inference_seconds"]
-    with open(output_csv, "a" if file_exists else "w", newline="") as fp:
-        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+    with open(output_csv, "a" if file_exists else "w", newline="") as out_file:
+        writer = csv.DictWriter(out_file, fieldnames=fieldnames)
         if not file_exists:
             writer.writeheader()
         writer.writerows(rows)

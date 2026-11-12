@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +20,7 @@ if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
 from change_embed_model import get_change_embed_model
-from train_utils import compute_miou, seed_everything, split_dataset
-
+from train_utils import seed_everything, split_dataset
 
 IGNORE_INDEX = 255
 FOREST_CLASS = 1

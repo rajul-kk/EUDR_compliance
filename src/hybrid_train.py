@@ -63,6 +63,7 @@ class HybridDataset(Dataset):
 
     def __getitem__(self, idx: int):
         import random
+
         from PIL import Image as PILImage
 
         img_path, label_path = self.samples[idx]
@@ -72,15 +73,17 @@ class HybridDataset(Dataset):
         h, w = img.shape[1], img.shape[2]
         if label.shape != (h, w):
             label = np.array(
-                PILImage.fromarray(label.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
+                PILImage.fromarray(label.astype(np.uint8)).resize((w, h), PILImage.Resampling.NEAREST),
                 dtype=np.int64,
             )
 
         if self._training:
             if random.random() < 0.5:
-                img = img[:, :, ::-1].copy(); label = label[:, ::-1].copy()
+                img = img[:, :, ::-1].copy()
+                label = label[:, ::-1].copy()
             if random.random() < 0.5:
-                img = img[:, ::-1, :].copy(); label = label[::-1, :].copy()
+                img = img[:, ::-1, :].copy()
+                label = label[::-1, :].copy()
             k = random.randint(0, 3)
             if k > 0:
                 img = np.rot90(img, k=k, axes=(1, 2)).copy()

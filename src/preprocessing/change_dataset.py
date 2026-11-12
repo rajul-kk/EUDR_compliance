@@ -8,9 +8,8 @@ import logging
 import os
 import re
 import sys
-from typing import List, Optional, Tuple
-
 import warnings
+from typing import List, Optional, Tuple
 
 import numpy as np
 import rasterio
@@ -97,7 +96,7 @@ def hansen_change_mask(raw: np.ndarray, scl_t1: np.ndarray, scl_t2: np.ndarray) 
     if raw.shape != (h, w):
         from PIL import Image as PILImage
         raw = np.array(
-            PILImage.fromarray(raw.astype(np.uint8)).resize((w, h), PILImage.NEAREST),
+            PILImage.fromarray(raw.astype(np.uint8)).resize((w, h), PILImage.Resampling.NEAREST),
             dtype=np.int64,
         )
     change = np.zeros((h, w), dtype=np.int64)

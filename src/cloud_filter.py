@@ -5,7 +5,7 @@ import numpy as np
 try:
     from s2cloudless import S2PixelCloudDetector as _S2Detector
 except ImportError:
-    _S2Detector = None  # type: ignore[assignment]
+    _S2Detector = None  # type: ignore[assignment,misc]
 
 
 class CloudFilter:

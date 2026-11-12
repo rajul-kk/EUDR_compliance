@@ -21,8 +21,9 @@ def seed_everything(seed: int) -> None:
 
 
 def split_dataset(dataset: Dataset, val_ratio: float, seed: int) -> Tuple[Subset, Subset]:
-    val_size = max(1, int(len(dataset) * val_ratio))
-    train_size = len(dataset) - val_size
+    n = len(dataset)  # type: ignore[arg-type]  # map-style datasets define __len__
+    val_size = max(1, int(n * val_ratio))
+    train_size = n - val_size
     if train_size <= 0:
         raise ValueError("Validation split too large for dataset size.")
     generator = torch.Generator().manual_seed(seed)
