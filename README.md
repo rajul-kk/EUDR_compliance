@@ -1,6 +1,17 @@
 # EUDR Compliance AI
 
-Satellite-based deforestation detection for EUDR supply chain compliance. Pairs 2020 and 2024 Sentinel-2 composites across ~1,000 farms using a Siamese DeepLab model with Hansen GFC labels to flag post-2020 forest loss.
+Satellite-based forest-loss detection for EUDR supply-chain screening. Pairs 2020 and 2024 Sentinel-2 composites across
+~1,000 farms and trains change models on Hansen Global Forest Change labels.
+
+> **Read this first: the labels are not ground truth for EUDR deforestation.** Hansen loss is any stand-replacing loss
+> of tree cover (canopy of 10 % or more), which includes harvest and replanting of plantations. In 72 Indonesian
+> reference grids, the label audit in this repo finds that about half of Hansen's 2021-24 loss (0.49,
+> confusion-corrected) is on land that was already plantation on 31 Dec 2020, which `REPORT_S2.md` reads, as fixed
+> before the run, as replanting or harvest rather than deforestation; roughly a third is on land that was forest. That
+> reading has not yet been checked against the text of Regulation (EU) 2023/1115. The models below learn Hansen, so
+> they inherit this: treat a flag as a lead for review, not a finding. Accuracy figures are against Hansen or against
+> the reference maps, not against truth. Details: [Hansen label audit](#hansen-label-audit), `REPORT_S2.md`,
+> `docs/results.md`.
 
 [![CI](https://github.com/rajul-kk/EUDR-compliance/actions/workflows/ci.yml/badge.svg)](https://github.com/rajul-kk/EUDR-compliance/actions/workflows/ci.yml)
 
@@ -28,7 +39,7 @@ Google EE      ──► GEE_dynamic/generate_labels.py  (Hansen GFC labels → 
 | M1b | `tessera` | Frozen ResNet50 encoder + ASPP head (lightweight, faster to train) |
 | M1c | `tessera-embed` | Head trained on precomputed GeoTESSERA embeddings (CPU-only) |
 
-**Labels:** Hansen Global Forest Change 2025 v1.13 (`UMD/hansen/global_forest_change_2025_v1_13`). Forest baseline = 31 Dec 2020 (EUDR cutoff). Pixel values: `0` = non-forest, `1` = forest in 2020, `2` = post-EUDR loss (2021–2024).
+**Labels:** Hansen Global Forest Change 2025 v1.13 (`UMD/hansen/global_forest_change_2025_v1_13`). Forest baseline = 31 Dec 2020 (EUDR cutoff). Pixel values: `0` = non-forest, `1` = tree cover in 2020, `2` = tree-cover loss 2021–2024 (not necessarily deforestation; see the note at the top), `255` = no Hansen data (labels generated from 12 Nov 2026 on).
 
 ---
 
