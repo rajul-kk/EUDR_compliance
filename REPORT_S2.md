@@ -38,7 +38,7 @@ natural forest with mature plantation and other land; C-band radar (canopy struc
 
 | 2020 land use | corrected share [95 %] | raw share | EUDR reading (fixed in advance) |
 |---|---|---|---|
-| PLANT | **0.49 [0.31-0.65]** | 0.45 | replanting or harvest on land that was not forest at the cut-off: upper part of the false-flag share |
+| PLANT | **0.49 [0.30-0.65]** | 0.45 | replanting or harvest on land that was not forest at the cut-off: upper part of the false-flag share |
 | FOREST | **0.31 [0.15-0.50]** | 0.32 | candidate deforestation |
 | OTHER | 0.21 [0.00-0.44] | 0.23 | cleared before the cut-off or not forest: also not EUDR deforestation |
 
