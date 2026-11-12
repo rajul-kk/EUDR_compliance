@@ -67,6 +67,9 @@ S2C classifier fit once on all 72 grids (1.43M cells), applied to 2020 Sentinel-
   This is not the 26 of the first audit, which counted only the usable 37 x 37 image-patch footprint; the boxes here are larger and
   neighbouring farms overlap (shared cells), so farms are not independent and the farm bootstrap is optimistic.
 - **Flags that are plantation-driven** (fewer than 6 of the farm's loss cells predicted FOREST in 2020): **46 of 79, 0.58 [0.48-0.70]**.
+- *Added 13 Nov 2026 (PROTOCOL_E5, docs/results.md section 7):* inside the farms' OpenStreetMap outlines (median 1.7 ha against about
+  120 ha per box) only 4 of 83 farms are flagged, against 69 of the same farms in the box. The box numbers above describe the land
+  around the farms more than the farms.
   Robust to the flag threshold: 43 of 82 at >= 3 cells, 43 of 71 at >= 12.
 - Loss cells on all farms by predicted 2020 class: FOREST 0.37, PLANT 0.26, OTHER 0.37 (raw).
 - **Warning sign for transport:** these are oil palm farms, yet only 0.13 of their Hansen stable-forest cells are predicted PLANT

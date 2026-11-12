@@ -25,6 +25,14 @@ that number with labels on the farms.
   stratified: the label files on disk declare 0 as no-data, so non-forest reads as no-data (the E7 encoding problem;
   labels generated after 12 Nov use 255). Non-forest cells are outside the population.
 
+## Population choice after E5 (owner)
+
+E5 (13 Nov, `docs/results.md` section 7) found the OpenStreetMap outlines are small (median 1.7 ha against about 120 ha per box):
+inside the outlines there are only 89 valid loss cells over 83 farms, and only 4 farms are flagged. Two options:
+- Boxes (as above): measures the land around the farms; keeps the comparison with E4.
+- Outlines: measures the farms themselves; 89 loss cells are few enough to label all of them (a census, no sampling error
+  for that domain), plus a sample of the boxes for the E4 comparison.
+
 ## Sample (owner)
 
 Proposal:

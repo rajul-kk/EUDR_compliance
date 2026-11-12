@@ -29,3 +29,16 @@ GPU Siamese DeepLab with robust loss; Kaggle notebook (notebooks/kaggle_hansen_a
 Addresses the caveat in section 1. Third registered attempt (S2C) passed the quality gate: of Hansen 2021-24 loss cells in the 72 grids,
 0.49 [0.30-0.65] were plantation in 2020 (not EUDR deforestation), 0.31 [0.15-0.50] forest, 0.21 other (confusion-corrected, grid bootstrap).
 The <= 2021 grids give 0.61, matching the reference. First two attempts (optical only) failed the gate. Details and caveats in REPORT_S2.md.
+
+## 7. Farm numbers inside the OpenStreetMap outlines (PROTOCOL_E5; results/e5/farms.json)
+Run: `e5_outlines.py fetch` (Overpass mirror, 92 of 94 objects returned; 2 ways no longer exist) then `e5_outlines.py run`, same
+cells and S2C predictions as E4, no refit. 83 farms included; 9 outlines are smaller than one 30 m cell (0.03-0.08 ha) and have no cell.
+- The outlines are small: median 1.7 ha (quartiles 0.4-5.3, max 170), 29 under 0.5 ha, 57 under 4 ha, against about 120 ha per E4 box.
+  Cell counts agree with outline areas (median ratio 1.01). No cell is inside two outlines.
+- Flags: **4 of 83 farms flagged inside the outline, against 69 of the same 83 in the box.** 65 farms lose their flag; none gains one.
+  All 4 are plantation-driven by the E4 rule (loss cells inside outlines by predicted 2020 class: FOREST 5, PLANT 46, OTHER 38 over all farms).
+- So the E4 box numbers (79 of 94 flagged, 46 plantation-driven) describe the land around the farms more than the farms. The E4
+  question "why is so little of the stable forest predicted PLANT" cannot be answered here: only 22 stable-forest cells fall inside
+  outlines (0 predicted PLANT). By the pre-registered reading that is "under-calls palm", but 22 cells carry no weight.
+- Limits: OSM outlines are volunteered; a 0.04 ha "oil palm farm" is more likely a mapping artefact than a plot. With 29 outlines under
+  the 0.5 ha flag threshold, those farms cannot be flagged at all. Predictions remain transported (E3 would supply a reference).
