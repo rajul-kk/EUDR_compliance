@@ -60,7 +60,7 @@ class AuditEntry:
     input_image_hashes: Dict[str, str]   # {filename: sha256:...}
     output_mask_hashes: Dict[str, str]   # {filename: sha256:...}
     report_hash: str                     # sha256 of output CSV report
-    summary: Dict                        # {total_farms, violations, warnings, compliant}
+    summary: Dict                        # generate_summary_stats output: {total_farms, decision_rule, flagged, ...}
     chain_hash: str = ""                 # hash linking to previous entry
     operator_id: Optional[str] = None   # optional: submitting operator
 

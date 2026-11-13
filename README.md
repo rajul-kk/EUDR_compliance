@@ -200,14 +200,26 @@ python main_audit.py \
 
 ---
 
-## Risk levels
+## Decision rule
+
+One rule for every model path and for the audit: `hansen_audit/decisions.py`, `plot_decision`. The regulation sets no
+percentage tolerance per plot, and its "forest" is land of more than 0.5 ha (Art. 2(4); `docs/regulation_check.md`,
+read from a compiled copy and pending a check against EUR-Lex), so a plot is flagged on the area of forest it lost.
 
 | Level | Condition |
 |---|---|
-| `COMPLIANT` | < 5% forest loss since 2020 |
-| `WARNING` | 5–10% forest loss |
-| `VIOLATION` | > 10% forest loss |
-| `NO_BASELINE_FOREST` | No forest detected in 2020 baseline |
+| `FLAGGED` | More than 0.5 ha of the plot's 2020 forest lost (6 or more 30 m cells) |
+| `CLEAR` | 0.5 ha or less lost |
+| `UNCERTAIN` | The loss estimate's interval spans 0.5 ha (when an interval is supplied) |
+| `NO_BASELINE_FOREST` | No forest detected in the 2020 baseline |
+| `UNASSESSED` | No baseline, no prediction, failed analysis, or unknown pixel size; the reason is reported |
+
+Area comes from each mask's pixel size (its transform and CRS). The DDS export maps `FLAGGED` and `UNCERTAIN` to
+manual review, and `NO_BASELINE_FOREST` and `UNASSESSED` to `INCONCLUSIVE`. A flag is a detection to review, not a
+legal finding.
+
+The earlier percentage levels (`COMPLIANT` under 5 % of the farm's 2020 forest lost, `WARNING` 5–10 %, `VIOLATION`
+over 10 %) remain available with `EUDR_DECISION_RULE=legacy_percent`, for comparison with earlier reports only.
 
 ---
 

@@ -50,3 +50,10 @@ coverage for authorities. The compilation shows no percentage tolerance of defor
 - Check the six quotes and the numbering against EUR-Lex (consolidated text of 18 Sep 2026).
 - Then decide for E2: replace the percentage levels with the audit's rule, and whether to keep the old levels behind
   a named option for continuity.
+
+## Applied (14 Nov 2026)
+
+On the owner's instruction the product now uses the audit's rule from one function (`hansen_audit/decisions.py`,
+`plot_decision`): FLAGGED above 0.5 ha of forest lost, CLEAR otherwise, UNCERTAIN when an interval spans 0.5 ha. The
+percentage levels stay available as `EUDR_DECISION_RULE=legacy_percent`. The quotes above are still to be checked
+against EUR-Lex.

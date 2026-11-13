@@ -1,13 +1,48 @@
-"""Farm-level compliance decisions and cluster-bootstrap rates."""
+"""Farm-level compliance decisions and cluster-bootstrap rates.
+
+`plot_decision` is the one decision rule, shared by the audit and the product (`src/change_detector.py`). It flags a
+plot when forest loss since the 2020 baseline covers more than 0.5 ha, the minimum area of "forest" in Art. 2(4) of
+Regulation (EU) 2023/1115 (docs/regulation_check.md; the text sets no percentage tolerance per plot). With an interval
+on the loss area it adds a third outcome, UNCERTAIN, when the interval straddles the threshold (PROTOCOL.md).
+"""
 from __future__ import annotations
 
 import numpy as np
 
 CELL_M2 = 900.0
-DEFAULT_MIN_CELLS = 6      # 5,400 m2 ~ 0.54 ha (PROTOCOL)
+MIN_LOSS_HA = 0.5
+
+FLAGGED = "FLAGGED"
+CLEAR = "CLEAR"
+UNCERTAIN = "UNCERTAIN"
+NO_BASELINE_FOREST = "NO_BASELINE_FOREST"
+
+
+def min_cells_for(cell_m2: float = CELL_M2, min_loss_ha: float = MIN_LOSS_HA) -> int:
+    """Smallest number of whole cells whose area is more than `min_loss_ha` (6 at 30 m: 5,400 m2)."""
+    return int(min_loss_ha * 1e4 // cell_m2) + 1
+
+
+DEFAULT_MIN_CELLS = min_cells_for()
+
+
+def plot_decision(loss_m2: float, forest_2020_m2: float | None = None, halfwidth_m2: float = 0.0,
+                  min_loss_ha: float = MIN_LOSS_HA) -> str:
+    """FLAGGED if forest loss is more than `min_loss_ha`, CLEAR if not, UNCERTAIN if loss +/- halfwidth straddles it.
+
+    NO_BASELINE_FOREST when the plot had no forest in the baseline (forest_2020_m2 given and <= 0)."""
+    if forest_2020_m2 is not None and forest_2020_m2 <= 0:
+        return NO_BASELINE_FOREST
+    t = min_loss_ha * 1e4
+    if loss_m2 - halfwidth_m2 > t:
+        return FLAGGED
+    if loss_m2 + halfwidth_m2 <= t:
+        return CLEAR
+    return UNCERTAIN
 
 
 def farm_flag(loss_cells, min_cells: int = DEFAULT_MIN_CELLS) -> np.ndarray:
+    """Vectorised `plot_decision` on 30 m cell counts with no interval: True where FLAGGED."""
     return np.asarray(loss_cells) >= min_cells
 
 

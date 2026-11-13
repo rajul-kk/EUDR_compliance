@@ -12,7 +12,7 @@ import re
 import pandas as pd
 import rasterio.features
 
-from src.change_detector import classify_forest_loss
+from src.change_detector import FLAG_LEVELS, KNOWN_LEVELS, classify, decision_rule, pixel_area_m2
 from src.postprocessing.refiner import refine_mask
 
 
@@ -61,9 +61,9 @@ def export_deforestation_vector(mask_2020, mask_2024, transform, crs, output_pat
 
     return output_path
 
-def compute_deforestation_metrics(mask_2020, mask_2024, forest_class=1):
+def compute_deforestation_metrics(mask_2020, mask_2024, forest_class=1, pixel_m2=None, rule=None):
     """
-    Compare two segmentation masks to detect forest loss.
+    Compare two segmentation masks to detect forest loss, and decide with the rule in force (`classify`).
     """
     forest_2020 = int(np.sum(mask_2020 == forest_class))
     forest_2024 = int(np.sum(mask_2024 == forest_class))
@@ -71,19 +71,22 @@ def compute_deforestation_metrics(mask_2020, mask_2024, forest_class=1):
     total_pixels = mask_2020.size
     forest_lost = max(0, forest_2020 - forest_2024)
 
-    deforestation_pct, level = classify_forest_loss(forest_2020, forest_lost)
-    alert_level = level.value
+    deforestation_pct, level, loss_ha = classify(forest_2020, forest_lost, pixel_m2, rule)
 
     metrics = {
         'forest_pixels_2020': forest_2020,
         'forest_pixels_2024': forest_2024,
         'forest_pixels_lost': forest_lost,
+        'forest_loss_ha': round(loss_ha, 4) if loss_ha == loss_ha else loss_ha,
         'deforestation_percent': round(deforestation_pct, 2),
         'forest_coverage_2020_pct': round((forest_2020 / total_pixels) * 100, 2),
         'forest_coverage_2024_pct': round((forest_2024 / total_pixels) * 100, 2),
-        'alert_level': alert_level,
+        'alert_level': level.value,
+        'decision_rule': decision_rule(rule),
         'total_pixels': total_pixels
     }
+    if level.value == 'UNASSESSED':
+        metrics['reason'] = 'pixel size unknown (no transform or CRS), so the 0.5 ha rule cannot be applied'
     return metrics
 
 def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_vector_dir=None):
@@ -100,7 +103,8 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
         if mask_2020.shape != mask_2024.shape:
             raise ValueError(f"Dimensions mismatch: {mask_2020.shape} vs {mask_2024.shape}")
 
-        metrics = compute_deforestation_metrics(mask_2020, mask_2024)
+        metrics = compute_deforestation_metrics(mask_2020, mask_2024,
+                                                pixel_m2=pixel_area_m2(transform, crs, mask_2020.shape[0]))
         metrics['farm_id'] = farm_id
 
         # --- Vector Export ---
@@ -119,9 +123,8 @@ def analyze_farm_change(change_mask_path: str, baseline_mask_path: str, farm_id:
     """Analyze deforestation from a pre-computed binary change mask (1 = forest loss).
 
     For change-detection models (M3 Siamese, M5 embed-change). Loss is counted inside the farm's 2020 forest (from
-    the baseline mask) and classified by the same rule as the two-mask path (classify_forest_loss), so a farm gets
-    the same alert level whichever model produced it. Before, the percentage was of the whole image, so a farm that
-    is mostly not forest could lose most of its forest and still come out COMPLIANT.
+    the baseline mask) and classified by the same rule as the two-mask path (`classify`), so a farm gets the same
+    alert level whichever model produced it.
 
     Returns:
         Dict with change metrics, or None on failure.
@@ -137,16 +140,21 @@ def analyze_farm_change(change_mask_path: str, baseline_mask_path: str, farm_id:
 
         forest_2020 = baseline == forest_class
         lost = int(np.sum((change_mask == 1) & forest_2020))
-        deforestation_pct, level = classify_forest_loss(int(forest_2020.sum()), lost)
+        pixel_m2 = pixel_area_m2(transform, crs, change_mask.shape[0])
+        deforestation_pct, level, loss_ha = classify(int(forest_2020.sum()), lost, pixel_m2)
 
         metrics = {
             'farm_id': farm_id,
             'forest_pixels_2020': int(forest_2020.sum()),
             'forest_pixels_lost': lost,
+            'forest_loss_ha': round(loss_ha, 4) if loss_ha == loss_ha else loss_ha,
             'change_pixels_outside_forest': int(np.sum((change_mask == 1) & ~forest_2020)),
             'deforestation_percent': round(deforestation_pct, 2),
             'alert_level': level.value,
+            'decision_rule': decision_rule(),
         }
+        if level.value == 'UNASSESSED':
+            metrics['reason'] = 'pixel size unknown (no transform or CRS), so the 0.5 ha rule cannot be applied'
 
         if output_vector_dir:
             os.makedirs(output_vector_dir, exist_ok=True)
@@ -217,7 +225,9 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
         return None
 
     report_df = pd.DataFrame(results)
-    report_df = report_df.sort_values('deforestation_percent', ascending=False, na_position='last')
+    key = 'forest_loss_ha' if 'forest_loss_ha' in report_df and report_df['forest_loss_ha'].notna().any() \
+        else 'deforestation_percent'
+    report_df = report_df.sort_values(key, ascending=False, na_position='last')
     os.makedirs(os.path.dirname(output_report_path), exist_ok=True)
     report_df.to_csv(output_report_path, index=False)
 
@@ -226,18 +236,25 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
 
 
 def generate_summary_stats(report_df, output_json_path):
+    def n(level):
+        return int((report_df['alert_level'] == level).sum())
+
     summary = {
         'total_farms': len(report_df),
-        'violations': int(len(report_df[report_df['alert_level'] == 'VIOLATION'])),
-        'warnings': int(len(report_df[report_df['alert_level'] == 'WARNING'])),
-        'compliant': int(len(report_df[report_df['alert_level'] == 'COMPLIANT'])),
-        'no_baseline_forest': int(len(report_df[report_df['alert_level'] == 'NO_BASELINE_FOREST'])),
-        'unassessed': int(len(report_df[report_df['alert_level'] == UNASSESSED])),
-        'other': int((~report_df['alert_level'].isin(
-            ['VIOLATION', 'WARNING', 'COMPLIANT', 'NO_BASELINE_FOREST', UNASSESSED])).sum()),  # counts sum to total_farms
+        'decision_rule': decision_rule(),
+        'flagged': n('FLAGGED'),
+        'uncertain': n('UNCERTAIN'),
+        'clear': n('CLEAR'),
+        'violations': n('VIOLATION'),
+        'warnings': n('WARNING'),
+        'compliant': n('COMPLIANT'),
+        'no_baseline_forest': n('NO_BASELINE_FOREST'),
+        'unassessed': n(UNASSESSED),
+        'other': int((~report_df['alert_level'].isin(KNOWN_LEVELS)).sum()),  # counts sum to total_farms
         'avg_deforestation_pct': float(report_df['deforestation_percent'].mean()),  # assessed farms only (NaN skipped)
         'worst_offender': report_df.iloc[0]['farm_id'] if len(report_df) > 0 else None
     }
+    summary['flagged_or_violation'] = sum(n(level) for level in FLAG_LEVELS)
     with open(output_json_path, 'w') as f:
         json.dump(summary, f, indent=2)
     return summary

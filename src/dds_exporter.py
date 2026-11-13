@@ -95,7 +95,7 @@ class DDSRecord:
     baseline_year: int
     assessment_year: int
     model_version: str
-    risk_level: str                  # COMPLIANT | WARNING | VIOLATION | INCONCLUSIVE
+    risk_level: str                  # FLAGGED | CLEAR | UNCERTAIN | INCONCLUSIVE (legacy rule: COMPLIANT | WARNING | VIOLATION)
     deforestation_pct: float
     evidence_hash: str               # sha256 of input imagery / audit entry
     notes: str = ""
@@ -163,7 +163,20 @@ class DDSExporter:
             if defor_pct != defor_pct:  # NaN: not assessed
                 defor_pct = 0.0
 
-            if risk == "COMPLIANT":
+            loss_ha = float(row.get("forest_loss_ha", float("nan")))
+            loss_txt = f"{loss_ha:.2f} ha" if loss_ha == loss_ha else "an unknown area"
+
+            if risk == "CLEAR":
+                notes = (f"Forest loss detected since the baseline year: {loss_txt}, not more than the 0.5 ha minimum "
+                         "area of forest (Art. 2(4) of Regulation (EU) 2023/1115).")
+            elif risk == "FLAGGED":
+                notes = (f"Forest loss of {loss_txt} detected on the plot since the baseline year, more than the 0.5 ha "
+                         "minimum area of forest (Art. 2(4) of Regulation (EU) 2023/1115). Manual review of the "
+                         "detection required before market placement.")
+            elif risk == "UNCERTAIN":
+                notes = (f"Forest loss estimate {loss_txt}, with an interval that spans the 0.5 ha threshold; the model "
+                         "cannot decide. Manual review required before market placement.")
+            elif risk == "COMPLIANT":
                 notes = "No significant deforestation detected since baseline year."
             elif risk == "WARNING":
                 notes = (
@@ -386,19 +399,18 @@ class DDSExporter:
             story.append(Spacer(1, 0.5 * cm))
 
         # Summary counts
-        counts = {"COMPLIANT": 0, "WARNING": 0, "VIOLATION": 0, "INCONCLUSIVE": 0}
+        counts: dict = {}
         for r in records:
             counts[r.risk_level] = counts.get(r.risk_level, 0) + 1
 
         story.append(Paragraph("Assessment Summary", heading_style))
-        summary_data = [
-            ["Metric", "Count"],
-            ["Total farms assessed", str(len(records))],
-            ["Compliant", str(counts.get("COMPLIANT", 0))],
-            ["Warning", str(counts.get("WARNING", 0))],
-            ["Violation", str(counts.get("VIOLATION", 0))],
-            ["Inconclusive (manual review)", str(counts.get("INCONCLUSIVE", 0))],
-        ]
+        summary_data = [["Metric", "Count"], ["Total farms assessed", str(len(records))]]
+        for level, label in (("FLAGGED", "Flagged: forest loss over 0.5 ha"), ("UNCERTAIN", "Uncertain (manual review)"),
+                             ("CLEAR", "Clear"), ("VIOLATION", "Violation (legacy rule)"),
+                             ("WARNING", "Warning (legacy rule)"), ("COMPLIANT", "Compliant (legacy rule)")):
+            if counts.get(level):
+                summary_data.append([label, str(counts[level])])
+        summary_data.append(["Inconclusive (manual review)", str(counts.get("INCONCLUSIVE", 0))])
         summary_table = Table(summary_data, colWidths=[10 * cm, 4 * cm])
         summary_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2C5F2E")),
@@ -418,6 +430,9 @@ class DDSExporter:
         table_data = [["Farm ID", "Country", "Deforestation %", "Risk Level", "DDS Reference"]]
 
         _RISK_COLORS = {
+            "CLEAR": colors.HexColor("#D4EDDA"),
+            "UNCERTAIN": colors.HexColor("#FFF3CD"),
+            "FLAGGED": colors.HexColor("#F8D7DA"),
             "COMPLIANT": colors.HexColor("#D4EDDA"),
             "WARNING": colors.HexColor("#FFF3CD"),
             "VIOLATION": colors.HexColor("#F8D7DA"),
