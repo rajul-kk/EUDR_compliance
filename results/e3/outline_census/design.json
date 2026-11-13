@@ -1,0 +1,13 @@
+{
+ "census": "loss cells inside the OSM outlines",
+ "N_h": {
+  "6": 5,
+  "7": 46,
+  "8": 38
+ },
+ "n": 89,
+ "seed": 20261116,
+ "second_frac": 0.25,
+ "n_second_pass": 22,
+ "protocol": "PROTOCOL_E3.md (98109bc)"
+}
