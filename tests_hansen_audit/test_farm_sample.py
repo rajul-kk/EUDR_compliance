@@ -114,3 +114,17 @@ def test_plantation_driven_rate_matches_raw_rule_when_prediction_is_right():
     counts = np.array([[0, 10, 0], [7, 1, 0], [5, 5, 5]])
     r = S.plantation_driven_rate(counts, [0] * 5 + [1] * 5 + [2] * 5, [True] * 5 + [False] * 10, n_boot=50, n_draw=20)
     assert abs(r["est"] - 2 / 3) < 1e-12
+
+
+def test_second_pass_subset_size_and_reproducibility():
+    assert S.second_pass_subset(10, 1.0, 0).tolist() == list(range(10))
+    q = S.second_pass_subset(300, 0.25, 7)
+    assert len(q) == 75 and len(set(q.tolist())) == 75 and q.max() < 300
+    assert (q == np.sort(q)).all()
+    assert (q == S.second_pass_subset(300, 0.25, 7)).all()
+    assert not (q == S.second_pass_subset(300, 0.25, 8)).all()
+    assert len(S.second_pass_subset(3, 0.1, 0)) == 1
+    assert len(S.second_pass_subset(0, 0.25, 0)) == 0
+    for bad in (0, -0.1, 1.5):
+        with pytest.raises(ValueError):
+            S.second_pass_subset(10, bad, 0)

@@ -68,6 +68,15 @@ def draw(strata: np.ndarray, n_h: dict, seed: int) -> np.ndarray:
     return np.concatenate(out) if out else np.empty(0, int)
 
 
+def second_pass_subset(n: int, frac: float, seed: int) -> np.ndarray:
+    """Sorted indices of the cells the blind second labeller sees: all of them at frac 1, otherwise a simple random
+    subset of round(frac * n) cells (at least one when n > 0)."""
+    if not 0 < frac <= 1:
+        raise ValueError(f"second-pass fraction must be in (0, 1], got {frac}")
+    k = n if frac == 1 else (max(1, round(frac * n)) if n else 0)
+    return np.sort(np.random.default_rng(seed).choice(n, k, replace=False))
+
+
 def write_sheets(path_sheet: str, path_key: str, lon, lat, key_rows: list, seed: int, prefix: str = "S"):
     """Labelling sheet (shuffled order, coordinates only, blank label) and a separate key linking each sample id to its
     stratum and source. Run twice with different seeds and prefixes for a blind second pass."""

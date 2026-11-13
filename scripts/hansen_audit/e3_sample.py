@@ -2,13 +2,16 @@
 
 usage:
   python -I e3_sample.py population <data_root> <e4_out_dir> <farm_preds.npz> <out_json>
-  python -I e3_sample.py draw <data_root> <e4_out_dir> <farm_preds.npz> <protocol_md> <out_dir> --n-total N --n-min M --seed S [--domain 6 7 8]
+  python -I e3_sample.py draw <data_root> <e4_out_dir> <farm_preds.npz> <protocol_md> <out_dir> --n-total N --n-min M --seed S [--domain 6 7 8] [--second-frac F]
+  python -I e3_sample.py census <data_root> <e4_out_dir> <farm_preds.npz> <outlines_dir> <protocol_md> <out_dir> --seed S [--second-frac F]
   python -I e3_sample.py estimate <population_json> <key_csv> <labels_csv> [--farms farms.json] [--key2 <key_csv> --labels2 <labels_csv>]
 population: every cell centre in any of the 94 farm boxes, counted once (cells shared by overlapping boxes or windows are
             merged on the global Hansen grid), with its stratum (Hansen class x S2C 2020 prediction). Writes N_h and sample
             sizes for a range of interval half-widths. Draws nothing.
 draw:       refuses unless <protocol_md> contains the line "Status: frozen". Writes sheet_A.csv / key_A.csv and a second blind
-            pass sheet_B.csv / key_B.csv over the same cells in a different order with different ids.
+            pass sheet_B.csv / key_B.csv over the same cells, or a seeded share of them (--second-frac), in a different order
+            with different ids.
+census:     every Hansen loss cell inside a farm's OSM outline (as E5), all labelled; same sheets and the same frozen check.
 estimate:   reads labels (sample_id,label) and writes the stratified shares in the loss domain, the S2C map accuracy on the
             farms and, with a second pass, labeller agreement.
 """
@@ -89,11 +92,60 @@ def cmd_draw(a):
     lat = np.array([cells[keys[i]]["lat"] for i in idx])
     rows = [{"cell": f"{keys[i][0]}_{keys[i][1]}", "stratum": cells[keys[i]]["stratum"], "hansen": cells[keys[i]]["hansen"], "pred": cells[keys[i]]["pred"],
              "window": cells[keys[i]]["window"], "farms": ";".join(sorted(cells[keys[i]]["farms"]))} for i in idx]
-    os.makedirs(a.out_dir, exist_ok=True)
-    S.write_sheets(os.path.join(a.out_dir, "sheet_A.csv"), os.path.join(a.out_dir, "key_A.csv"), lon, lat, rows, a.seed + 1, "A")
-    S.write_sheets(os.path.join(a.out_dir, "sheet_B.csv"), os.path.join(a.out_dir, "key_B.csv"), lon, lat, rows, a.seed + 2, "B")
-    json.dump({"N_h": N_h, "n_h": n_h, "seed": a.seed, "protocol": a.protocol}, open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
-    print(json.dumps({"N_h": N_h, "n_h": n_h}, indent=1))
+    n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
+    json.dump({"N_h": N_h, "n_h": n_h, "seed": a.seed, "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
+              open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
+    print(json.dumps({"N_h": N_h, "n_h": n_h, "n_second_pass": n_b}, indent=1))
+
+
+def write_pair(out_dir, lon, lat, rows, seed, second_frac):
+    """Sheet A over every cell; blind sheet B over a seeded subset (all cells at fraction 1). Returns the size of B."""
+    os.makedirs(out_dir, exist_ok=True)
+    S.write_sheets(os.path.join(out_dir, "sheet_A.csv"), os.path.join(out_dir, "key_A.csv"), lon, lat, rows, seed + 1, "A")
+    b = S.second_pass_subset(len(rows), second_frac, seed + 3)
+    S.write_sheets(os.path.join(out_dir, "sheet_B.csv"), os.path.join(out_dir, "key_B.csv"), lon[b], lat[b], [rows[i] for i in b],
+                   seed + 2, "B")
+    return int(len(b))
+
+
+def outline_set(e4_out_dir, outlines_dir):
+    """Global Hansen grid keys of the cells whose centres fall inside a farm's OSM outline and inside its E4 box (as E5)."""
+    from hansen_audit import outlines as O
+
+    W = json.load(open(os.path.join(e4_out_dir, "windows.json")))
+    boxes = dict(zip(W["farms"], np.array(W["boxes"])))
+    els = {O.farm_key(e): e for e in json.load(open(os.path.join(outlines_dir, "overpass.json")))["elements"]}
+    out = set()
+    for w in W["windows"]:
+        origin, shape = np.array(w["origin"]), tuple(w["shape"])
+        for k in w["farms"]:
+            poly = O.element_polygon(els[k]) if k in els else None
+            if poly is None:
+                continue
+            r, c = np.nonzero(O.outline_cells(origin, shape, poly) & E.farm_cells(origin, shape, boxes[k]))
+            lon = origin[0] + (c + 0.5) * HANSEN_RES
+            lat = origin[1] - (r + 0.5) * HANSEN_RES
+            out.update(zip(np.floor(lon / HANSEN_RES).astype(int).tolist(), np.floor(lat / HANSEN_RES).astype(int).tolist()))
+    return out
+
+
+def cmd_census(a):
+    text = open(a.protocol).read()
+    if "Status: frozen" not in text.splitlines():
+        sys.exit(f"{a.protocol} is not frozen (needs a line 'Status: frozen'); nothing written")
+    cells = population(a.data_root, a.e4_out_dir, a.preds)
+    inside = outline_set(a.e4_out_dir, a.outlines_dir)
+    keys = sorted(g for g in cells if g in inside and cells[g]["stratum"] in LOSS_DOMAIN)
+    lon = np.array([cells[g]["lon"] for g in keys])
+    lat = np.array([cells[g]["lat"] for g in keys])
+    rows = [{"cell": f"{g[0]}_{g[1]}", "stratum": cells[g]["stratum"], "hansen": cells[g]["hansen"], "pred": cells[g]["pred"],
+             "window": cells[g]["window"], "farms": ";".join(sorted(cells[g]["farms"]))} for g in keys]
+    n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
+    N_h = {h: sum(r["stratum"] == h for r in rows) for h in LOSS_DOMAIN}
+    json.dump({"census": "loss cells inside the OSM outlines", "N_h": N_h, "n": len(rows), "seed": a.seed,
+               "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
+              open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
+    print(json.dumps({"N_h": N_h, "n": len(rows), "n_second_pass": n_b}, indent=1))
 
 
 def read_labels(key_csv, labels_csv):
@@ -139,6 +191,12 @@ def main():
     d.add_argument("--n-min", type=int, default=0)
     d.add_argument("--seed", type=int, required=True)
     d.add_argument("--domain", nargs="+", default=[str(h) for h in LOSS_DOMAIN])
+    d.add_argument("--second-frac", type=float, default=1.0, help="share of the cells on the blind second sheet")
+    c = sub.add_parser("census")
+    for n in ("data_root", "e4_out_dir", "preds", "outlines_dir", "protocol", "out_dir"):
+        c.add_argument(n)
+    c.add_argument("--seed", type=int, required=True)
+    c.add_argument("--second-frac", type=float, default=1.0, help="share of the cells on the blind second sheet")
     e = sub.add_parser("estimate")
     for n in ("population", "key", "labels"):
         e.add_argument(n)
@@ -146,7 +204,7 @@ def main():
     e.add_argument("--key2")
     e.add_argument("--labels2")
     a = ap.parse_args()
-    {"population": cmd_population, "draw": cmd_draw, "estimate": cmd_estimate}[a.cmd](a)
+    {"population": cmd_population, "draw": cmd_draw, "census": cmd_census, "estimate": cmd_estimate}[a.cmd](a)
 
 
 if __name__ == "__main__":
