@@ -128,3 +128,27 @@ def test_second_pass_subset_size_and_reproducibility():
     for bad in (0, -0.1, 1.5):
         with pytest.raises(ValueError):
             S.second_pass_subset(10, bad, 0)
+
+
+def test_census_estimate_shares_by_prediction_and_farms():
+    pred = [0, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 1]
+    lab = ["FOREST", "PLANT", "PLANT", "UNSURE", "OTHER", "FOREST",
+           "FOREST", "FOREST", "FOREST", "FOREST", "FOREST", "FOREST", ""]
+    owner = ["a", "a", "a", "a", "a", "a", "b", "b", "b", "b", "b", "b", "b"]
+    out = S.census_estimate(pred, lab, owner, min_cells=6)
+    assert (out["n"], out["n_labelled"], out["n_dropped"]) == (13, 11, 2)
+    assert out["overall"]["FOREST"] == pytest.approx(8 / 11)
+    assert out["overall"]["PLANT"] == pytest.approx(2 / 11)
+    by = out["by_predicted_class"]
+    assert by["FOREST"]["n_labelled"] == 7 and by["FOREST"]["shares"]["FOREST"] == 1.0
+    assert by["PLANT"]["n_labelled"] == 2 and by["PLANT"]["n_dropped"] == 2
+    assert by["OTHER"]["shares"] == {"FOREST": 0.5, "PLANT": 0.0, "OTHER": 0.5}
+    assert out["farms_with_min_forest_cells"] == ["b"]
+    assert out["n_farms"] == 2 and out["min_cells"] == 6
+    assert out["farms_flagged_on_all_loss_cells"] == ["a", "b"]
+
+
+def test_census_estimate_without_labels_in_a_class():
+    out = S.census_estimate([1, 1], ["UNSURE", "UNSURE"], ["a", "a"])
+    assert out["overall"] is None and out["by_predicted_class"]["PLANT"]["shares"] is None
+    assert out["farms_with_min_forest_cells"] == []

@@ -5,6 +5,7 @@ usage:
   python -I e3_sample.py draw <data_root> <e4_out_dir> <farm_preds.npz> <protocol_md> <out_dir> --n-total N --n-min M --seed S [--domain 6 7 8] [--second-frac F]
   python -I e3_sample.py census <data_root> <e4_out_dir> <farm_preds.npz> <outlines_dir> <protocol_md> <out_dir> --seed S [--second-frac F]
   python -I e3_sample.py estimate <population_json> <key_csv> <labels_csv> [--farms farms.json] [--key2 <key_csv> --labels2 <labels_csv>]
+  python -I e3_sample.py census-estimate <e4_out_dir> <outlines_dir> <key_csv> <labels_csv> [--key2 <key_csv> --labels2 <labels_csv>]
 population: every cell centre in any of the 94 farm boxes, counted once (cells shared by overlapping boxes or windows are
             merged on the global Hansen grid), with its stratum (Hansen class x S2C 2020 prediction). Writes N_h and sample
             sizes for a range of interval half-widths. Draws nothing.
@@ -14,6 +15,9 @@ draw:       refuses unless <protocol_md> contains the line "Status: frozen". Wri
 census:     every Hansen loss cell inside a farm's OSM outline (as E5), all labelled; same sheets and the same frozen check.
 estimate:   reads labels (sample_id,label) and writes the stratified shares in the loss domain, the S2C map accuracy on the
             farms and, with a second pass, labeller agreement.
+census-estimate: estimate 5 on the outline census: class shares overall and by S2C prediction, and the farms with 6 or
+            more FOREST loss cells inside their outline (each cell's farm recovered from the outlines, as E5), with
+            agreement when a second pass is given.
 """
 import argparse
 import csv
@@ -109,13 +113,14 @@ def write_pair(out_dir, lon, lat, rows, seed, second_frac):
 
 
 def outline_set(e4_out_dir, outlines_dir):
-    """Global Hansen grid keys of the cells whose centres fall inside a farm's OSM outline and inside its E4 box (as E5)."""
+    """Global Hansen grid keys of the cells whose centres fall inside a farm's OSM outline and inside its E4 box (as E5),
+    each mapped to the set of farms whose outline holds it."""
     from hansen_audit import outlines as O
 
     W = json.load(open(os.path.join(e4_out_dir, "windows.json")))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
     els = {O.farm_key(e): e for e in json.load(open(os.path.join(outlines_dir, "overpass.json")))["elements"]}
-    out = set()
+    out: dict = {}
     for w in W["windows"]:
         origin, shape = np.array(w["origin"]), tuple(w["shape"])
         for k in w["farms"]:
@@ -125,7 +130,8 @@ def outline_set(e4_out_dir, outlines_dir):
             r, c = np.nonzero(O.outline_cells(origin, shape, poly) & E.farm_cells(origin, shape, boxes[k]))
             lon = origin[0] + (c + 0.5) * HANSEN_RES
             lat = origin[1] - (r + 0.5) * HANSEN_RES
-            out.update(zip(np.floor(lon / HANSEN_RES).astype(int).tolist(), np.floor(lat / HANSEN_RES).astype(int).tolist()))
+            for g in zip(np.floor(lon / HANSEN_RES).astype(int).tolist(), np.floor(lat / HANSEN_RES).astype(int).tolist()):
+                out.setdefault(g, set()).add(k)
     return out
 
 
@@ -171,10 +177,29 @@ def cmd_estimate(a):
         ok = np.isin(np.array(y, dtype=object), list(S.CLASSES)) & np.isin(s, LOSS_DOMAIN)
         out["plantation_driven_flags"] = S.plantation_driven_rate(counts, s[ok] % 3, np.array(y, dtype=object)[ok] == "FOREST")
     if a.key2 and a.labels2:
-        _, cell2, _, y2, _ = read_labels(a.key2, a.labels2)
-        first = dict(zip(cell, y))
-        pairs = [(first[c], l2) for c, l2 in zip(cell2, y2) if c in first]
-        out["agreement"] = S.agreement([p[0] for p in pairs], [p[1] for p in pairs])
+        out["agreement"] = agreement_pass(cell, y, a.key2, a.labels2)
+    print(json.dumps(out, indent=1))
+
+
+def agreement_pass(cell, y, key2, labels2):
+    _, cell2, _, y2, _ = read_labels(key2, labels2)
+    first = dict(zip(cell, y))
+    pairs = [(first[c], l2) for c, l2 in zip(cell2, y2) if c in first]
+    return S.agreement([q[0] for q in pairs], [q[1] for q in pairs])
+
+
+def cmd_census_estimate(a):
+    owners = outline_set(a.e4_out_dir, a.outlines_dir)
+    ids, cell, _, y, key = read_labels(a.key, a.labels)
+    owner = []
+    for c in cell:
+        g = tuple(int(v) for v in c.split("_"))
+        if len(owners.get(g, ())) != 1:
+            sys.exit(f"cell {c} is in {len(owners.get(g, ()))} outlines, expected 1; nothing estimated")
+        owner.append(next(iter(owners[g])))
+    out = {"census_shares": S.census_estimate([int(key[i]["pred"]) for i in ids], y, owner)}
+    if a.key2 and a.labels2:
+        out["agreement"] = agreement_pass(cell, y, a.key2, a.labels2)
     print(json.dumps(out, indent=1))
 
 
@@ -203,8 +228,14 @@ def main():
     e.add_argument("--farms", help="results/e4/farms.json: adds the farm-level plantation-driven share with measured rates")
     e.add_argument("--key2")
     e.add_argument("--labels2")
+    ce = sub.add_parser("census-estimate")
+    for n in ("e4_out_dir", "outlines_dir", "key", "labels"):
+        ce.add_argument(n)
+    ce.add_argument("--key2")
+    ce.add_argument("--labels2")
     a = ap.parse_args()
-    {"population": cmd_population, "draw": cmd_draw, "census": cmd_census, "estimate": cmd_estimate}[a.cmd](a)
+    {"population": cmd_population, "draw": cmd_draw, "census": cmd_census, "estimate": cmd_estimate,
+     "census-estimate": cmd_census_estimate}[a.cmd](a)
 
 
 if __name__ == "__main__":

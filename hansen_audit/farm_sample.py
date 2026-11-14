@@ -192,3 +192,33 @@ def agreement(a, b, classes=CLASSES) -> dict:
     pe = sum(float((a == c).mean()) * float((b == c).mean()) for c in classes)
     kappa = (po - pe) / (1 - pe) if pe < 1 else 1.0
     return {"n": n, "agreement": po, "kappa": kappa}
+
+
+def census_estimate(pred, labels, owner, min_cells: int | None = None, classes=CLASSES) -> dict:
+    """Estimate 5: a census, so plain proportions with no sampling error. Shares of the reference classes among the
+    labelled cells, overall and by S2C predicted class (UNSURE and blank labels counted and left out), and the farms with
+    at least min_cells FOREST loss cells, beside the farms flagged on all their loss cells (as E5).
+
+    pred: S2C class per cell (0 FOREST, 1 PLANT, 2 OTHER); owner: the farm whose outline holds the cell."""
+    from hansen_audit.decisions import DEFAULT_MIN_CELLS
+
+    k = DEFAULT_MIN_CELLS if min_cells is None else min_cells
+    p, y, o = np.asarray(pred, int), np.asarray(labels, dtype=object), np.asarray(owner, dtype=object)
+    ok = np.isin(y, list(classes))
+
+    def shares(m):
+        n = int((m & ok).sum())
+        return n, int((m & ~ok).sum()), ({c: float((y[m & ok] == c).sum() / n) for c in classes} if n else None)
+
+    n, _, overall = shares(np.ones(len(y), bool))
+    by = {}
+    for i, c in enumerate(classes):
+        nl, nd, sh = shares(p == i)
+        by[c] = {"n_labelled": nl, "n_dropped": nd, "shares": sh}
+    farms = sorted(set(o.tolist()))
+    forest = {f: int(((o == f) & (y == "FOREST")).sum()) for f in farms}
+    return {"n": int(len(y)), "n_labelled": n, "n_dropped": int((~ok).sum()), "overall": overall,
+            "by_predicted_class": by, "n_farms": len(farms), "min_cells": k,
+            "forest_cells_per_farm": forest,
+            "farms_with_min_forest_cells": [f for f in farms if forest[f] >= k],
+            "farms_flagged_on_all_loss_cells": [f for f in farms if int((o == f).sum()) >= k]}
