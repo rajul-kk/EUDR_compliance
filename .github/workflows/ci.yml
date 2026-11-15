@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, Tessera-head]
+    branches: [main, Tessera-head, "feat/**"]
   pull_request:
     branches: [main]
 
@@ -80,7 +80,7 @@ jobs:
           EOF
 
   lint:
-    name: Ruff lint (new files only)
+    name: Ruff lint
     runs-on: ubuntu-latest
 
     steps:
@@ -97,6 +97,10 @@ jobs:
         run: |
           ruff check src/ main_audit.py \
             --output-format=github
+
+      - name: Lint the Hansen label audit (blocking)
+        run: |
+          ruff check hansen_audit/ scripts/hansen_audit/ tests_hansen_audit/             --output-format=github
 
       - name: Lint GEE_dynamic/ and NDVI_pred/ (informational)
         run: |
