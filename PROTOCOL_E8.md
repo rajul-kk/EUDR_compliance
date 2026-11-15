@@ -51,3 +51,9 @@ membership, coverage and "partial" at 0.5, exclusions) are those of E4 and E5, w
 `results/e8/box/` (farms.json, farm_preds.npz, run.log), `results/e8/outline/` (farms.json, run.log),
 `results/e8/download_manifest.json` (copied from the refdata folder, with bytes received), `results/e8/pooled.json`, and a
 section in `docs/results.md`.
+
+## Deviations
+
+- 15 Nov 2026, outline fetch: the Overpass mirror used by E5 (`overpass.kumi.systems`) timed out after 300 s, so the outlines
+  were fetched from `https://overpass-api.de/api/interpreter` (new `--endpoint` option of `e5_outlines.py fetch`; the
+  endpoint is recorded in the manifest). Same query form; all 106 objects returned.

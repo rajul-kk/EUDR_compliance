@@ -1,7 +1,7 @@
 """PROTOCOL_E5: fetch the farms' OpenStreetMap outlines and recount E4 inside them.
 
 usage:
-  python -I e5_outlines.py fetch <e4_out_dir> <outlines_dir>
+  python -I e5_outlines.py fetch <e4_out_dir> <outlines_dir> [--endpoint <url>]
   python -I e5_outlines.py run <data_root> <e4_out_dir> <outlines_dir> <e4_results_dir> <results_dir>
 fetch: one Overpass request for the 94 ways and relations (`out geom meta`); writes <outlines_dir>/overpass.json and
        manifest.json (fetch time, versions, timestamps). Data (c) OpenStreetMap contributors, ODbL. Skips if present.
@@ -39,14 +39,14 @@ def fetch(a):
     rels = [f.split("_", 1)[1] for f in farms if f.startswith("relation_")]
     q = f"[out:json][timeout:180];(way(id:{','.join(ways)});relation(id:{','.join(rels)}););out geom meta;"
     t = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    r = requests.post(OVERPASS, data={"data": q}, headers={"User-Agent": "hansen-audit-research/1.0"}, timeout=300)
+    r = requests.post(a.endpoint, data={"data": q}, headers={"User-Agent": "hansen-audit-research/1.0"}, timeout=300)
     r.raise_for_status()
     d = r.json()
     tmp = out + ".tmp"
     json.dump(d, open(tmp, "w"))
     os.replace(tmp, out)
     els = d.get("elements", [])
-    man = {"fetched_utc": t, "endpoint": OVERPASS, "query": q, "bytes": len(r.content), "requested": len(farms),
+    man = {"fetched_utc": t, "endpoint": a.endpoint, "query": q, "bytes": len(r.content), "requested": len(farms),
            "returned": len(els), "missing": sorted(set(farms) - {O.farm_key(e) for e in els}),
            "objects": {O.farm_key(e): {"version": e.get("version"), "timestamp": e.get("timestamp")} for e in els},
            "licence": "(c) OpenStreetMap contributors, ODbL 1.0"}
@@ -142,6 +142,7 @@ def main():
     f = sub.add_parser("fetch")
     f.add_argument("e4_out_dir")
     f.add_argument("outlines_dir")
+    f.add_argument("--endpoint", default=OVERPASS, help="Overpass interpreter URL (PROTOCOL_E8: the mirror timed out)")
     r = sub.add_parser("run")
     for n in ("data_root", "e4_out_dir", "outlines_dir", "e4_results_dir", "results_dir"):
         r.add_argument(n)
