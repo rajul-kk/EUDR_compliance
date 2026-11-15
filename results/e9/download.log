@@ -1,0 +1,24 @@
+C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.10.0). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+1036 grids x 2 versions, 2072 to fetch
+C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\site-packages\ee\deprecation.py:215: DeprecationWarning: 
+
+Attention required for JRC/GFC2020/V3! You are using a deprecated asset.
+To make sure your code keeps working, please update it.
+This dataset has been superseded by JRC/GFC2020/V4
+
+Learn more: https://developers.google.com/earth-engine/datasets/catalog/JRC_GFC2020_V3
+
+  warnings.warn(warning, category=DeprecationWarning)
+8/2072 done, 0 failed, 0.000 GB
+208/2072 done, 0 failed, 0.010 GB
+408/2072 done, 0 failed, 0.020 GB
+608/2072 done, 0 failed, 0.029 GB
+808/2072 done, 0 failed, 0.039 GB
+1008/2072 done, 0 failed, 0.050 GB
+1208/2072 done, 0 failed, 0.059 GB
+1408/2072 done, 0 failed, 0.068 GB
+1608/2072 done, 0 failed, 0.078 GB
+1808/2072 done, 0 failed, 0.088 GB
+2008/2072 done, 0 failed, 0.100 GB
+all done

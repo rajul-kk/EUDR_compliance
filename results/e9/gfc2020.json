@@ -1,0 +1,486 @@
+{
+ "protocol": "PROTOCOL_E9.md",
+ "primary": {
+  "version": "V3",
+  "threshold_pct": 50
+ },
+ "missing_farms": [],
+ "analyses_1_to_3": {
+  "n_farms": 996,
+  "loss_cells": 661505,
+  "share_loss_on_gfc_forest": {
+   "est": 0.3501878292681083,
+   "lo": 0.32036057438199267,
+   "hi": 0.3810366876738304
+  },
+  "share_class1_on_gfc_forest": {
+   "est": 0.39252801391035547,
+   "lo": 0.3516954241252972,
+   "hi": 0.4338169467534241
+  },
+  "share_class0_on_gfc_forest": {
+   "est": 0.19741744640902933,
+   "lo": 0.18093099085518138,
+   "hi": 0.21379418710708206
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 554,
+  "share_flags_not_surviving": {
+   "est": 0.38100558659217876,
+   "lo": 0.34955727185360186,
+   "hi": 0.4140300059417706
+  },
+  "agreement_forest_2020": {
+   "n": 29022075,
+   "both": 312920,
+   "hansen_only": 555625,
+   "gfc_only": 5557998,
+   "neither": 22595532,
+   "agreement": 0.7893457652493835,
+   "kappa": 0.04296160788636664
+  },
+  "by_group": {
+   "AR|Cattle": {
+    "n_farms": 33,
+    "loss_cells": 15,
+    "share_loss_on_gfc_forest": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0
+    }
+   },
+   "AU|Cattle": {
+    "n_farms": 9,
+    "loss_cells": 0,
+    "share_loss_on_gfc_forest": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null
+   },
+   "BR|Cattle": {
+    "n_farms": 69,
+    "loss_cells": 16000,
+    "share_loss_on_gfc_forest": {
+     "est": 0.582,
+     "lo": 0.5406194888374485,
+     "hi": 0.6186060769645326
+    },
+    "hansen_flagged": 69,
+    "gated_flagged": 68,
+    "share_flags_not_surviving": {
+     "est": 0.014492753623188406,
+     "lo": 0.0,
+     "hi": 0.043478260869565216
+    }
+   },
+   "BR|Cocoa": {
+    "n_farms": 15,
+    "loss_cells": 3796,
+    "share_loss_on_gfc_forest": {
+     "est": 0.23314014752370918,
+     "lo": 0.15634565184438387,
+     "hi": 0.3346805495298692
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 15,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   },
+   "BR|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 17934,
+    "share_loss_on_gfc_forest": {
+     "est": 0.1649938663990186,
+     "lo": 0.09594731407326478,
+     "hi": 0.26627909928225285
+    },
+    "hansen_flagged": 31,
+    "gated_flagged": 20,
+    "share_flags_not_surviving": {
+     "est": 0.3548387096774194,
+     "lo": 0.1935483870967742,
+     "hi": 0.5161290322580645
+    }
+   },
+   "BR|Soy": {
+    "n_farms": 73,
+    "loss_cells": 13430,
+    "share_loss_on_gfc_forest": {
+     "est": 0.6683544303797468,
+     "lo": 0.5524394246220281,
+     "hi": 0.7774858159669523
+    },
+    "hansen_flagged": 62,
+    "gated_flagged": 57,
+    "share_flags_not_surviving": {
+     "est": 0.08064516129032258,
+     "lo": 0.01639344262295082,
+     "hi": 0.15384615384615385
+    }
+   },
+   "CI|Cocoa": {
+    "n_farms": 35,
+    "loss_cells": 36253,
+    "share_loss_on_gfc_forest": {
+     "est": 0.0019584586103219043,
+     "lo": 0.0,
+     "hi": 0.005998918344089151
+    },
+    "hansen_flagged": 35,
+    "gated_flagged": 2,
+    "share_flags_not_surviving": {
+     "est": 0.9428571428571428,
+     "lo": 0.8571428571428571,
+     "hi": 1.0
+    }
+   },
+   "CM|Cocoa": {
+    "n_farms": 96,
+    "loss_cells": 166125,
+    "share_loss_on_gfc_forest": {
+     "est": 0.6532791572610985,
+     "lo": 0.6190759028360382,
+     "hi": 0.6860844330516164
+    },
+    "hansen_flagged": 96,
+    "gated_flagged": 96,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   },
+   "CR|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 2773,
+    "share_loss_on_gfc_forest": {
+     "est": 0.20555355210962856,
+     "lo": 0.0879356612681763,
+     "hi": 0.3483573241012656
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 9,
+    "share_flags_not_surviving": {
+     "est": 0.4,
+     "lo": 0.2,
+     "hi": 0.6666666666666666
+    }
+   },
+   "ET|Coffee": {
+    "n_farms": 9,
+    "loss_cells": 1544,
+    "share_loss_on_gfc_forest": {
+     "est": 0.2610103626943005,
+     "lo": 0.13252513814657127,
+     "hi": 0.34748700173310226
+    },
+    "hansen_flagged": 9,
+    "gated_flagged": 4,
+    "share_flags_not_surviving": {
+     "est": 0.5555555555555556,
+     "lo": 0.2222222222222222,
+     "hi": 0.8888888888888888
+    }
+   },
+   "GH|Cocoa": {
+    "n_farms": 88,
+    "loss_cells": 71289,
+    "share_loss_on_gfc_forest": {
+     "est": 0.8005162086717446,
+     "lo": 0.772544888158231,
+     "hi": 0.830685980924383
+    },
+    "hansen_flagged": 88,
+    "gated_flagged": 88,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   },
+   "ID|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 20855,
+    "share_loss_on_gfc_forest": {
+     "est": 0.12083433229441382,
+     "lo": 0.07050935657767093,
+     "hi": 0.16999462270068416
+    },
+    "hansen_flagged": 31,
+    "gated_flagged": 13,
+    "share_flags_not_surviving": {
+     "est": 0.5806451612903226,
+     "lo": 0.3870967741935484,
+     "hi": 0.7419354838709677
+    }
+   },
+   "ID|Oil Palm": {
+    "n_farms": 200,
+    "loss_cells": 207115,
+    "share_loss_on_gfc_forest": {
+     "est": 0.13316756391376772,
+     "lo": 0.09272540850738838,
+     "hi": 0.17564552888542753
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 105,
+    "share_flags_not_surviving": {
+     "est": 0.475,
+     "lo": 0.41,
+     "hi": 0.545
+    }
+   },
+   "IN|Coffee": {
+    "n_farms": 1,
+    "loss_cells": 265,
+    "share_loss_on_gfc_forest": {
+     "est": 0.15849056603773584,
+     "lo": 0.15849056603773584,
+     "hi": 0.15849056603773584
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   },
+   "IN|Rubber": {
+    "n_farms": 80,
+    "loss_cells": 29681,
+    "share_loss_on_gfc_forest": {
+     "est": 0.000134766348842694,
+     "lo": 0.0,
+     "hi": 0.00039116187518384207
+    },
+    "hansen_flagged": 77,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0
+    }
+   },
+   "IT|Cattle": {
+    "n_farms": 12,
+    "loss_cells": 492,
+    "share_loss_on_gfc_forest": {
+     "est": 0.9085365853658537,
+     "lo": 0.8823402271571452,
+     "hi": 0.9423804383029256
+    },
+    "hansen_flagged": 6,
+    "gated_flagged": 6,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   },
+   "KE|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 3570,
+    "share_loss_on_gfc_forest": {
+     "est": 0.5941176470588235,
+     "lo": 0.43364742134345474,
+     "hi": 0.7409375723938645
+    },
+    "hansen_flagged": 24,
+    "gated_flagged": 14,
+    "share_flags_not_surviving": {
+     "est": 0.4166666666666667,
+     "lo": 0.21739130434782608,
+     "hi": 0.6190476190476191
+    }
+   },
+   "PA|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 3990,
+    "share_loss_on_gfc_forest": {
+     "est": 0.10050125313283208,
+     "lo": 0.029461183488274315,
+     "hi": 0.24660522034397525
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 9,
+    "share_flags_not_surviving": {
+     "est": 0.4,
+     "lo": 0.2,
+     "hi": 0.6666666666666666
+    }
+   },
+   "TH|Rubber": {
+    "n_farms": 40,
+    "loss_cells": 50223,
+    "share_loss_on_gfc_forest": {
+     "est": 0.18485554427254444,
+     "lo": 0.09926968382750569,
+     "hi": 0.29169484656156813
+    },
+    "hansen_flagged": 40,
+    "gated_flagged": 37,
+    "share_flags_not_surviving": {
+     "est": 0.075,
+     "lo": 0.0,
+     "hi": 0.175
+    }
+   },
+   "US|Cattle": {
+    "n_farms": 26,
+    "loss_cells": 6,
+    "share_loss_on_gfc_forest": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0
+    },
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null
+   },
+   "US|Soy": {
+    "n_farms": 20,
+    "loss_cells": 613,
+    "share_loss_on_gfc_forest": {
+     "est": 0.7748776508972267,
+     "lo": 0.6990545277250685,
+     "hi": 0.8259634701454582
+    },
+    "hansen_flagged": 13,
+    "gated_flagged": 10,
+    "share_flags_not_surviving": {
+     "est": 0.23076923076923078,
+     "lo": 0.0,
+     "hi": 0.461666666666666
+    }
+   },
+   "VN|Coffee": {
+    "n_farms": 67,
+    "loss_cells": 15536,
+    "share_loss_on_gfc_forest": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 67,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": {
+     "est": 1.0,
+     "lo": 1.0,
+     "hi": 1.0
+    }
+   }
+  }
+ },
+ "analysis_4_s2c": {
+  "windows_used": 40,
+  "windows_missing": [],
+  "loss_cells_s2c_by_gfc": {
+   "FOREST": {
+    "gfc_nonforest": 4276,
+    "gfc_forest": 310
+   },
+   "PLANT": {
+    "gfc_nonforest": 1300,
+    "gfc_forest": 29
+   },
+   "OTHER": {
+    "gfc_nonforest": 2731,
+    "gfc_forest": 103
+   }
+  },
+  "share_s2c_plant_gfc_nonforest": 0.9781790820165538,
+  "share_s2c_forest_gfc_forest": 0.06759703445268207,
+  "reading": "S2C and GFC2020 disagree",
+  "stable_cells_gfc_forest_share": 0.06871401151631477,
+  "note": "farm boxes overlap within a window, so a cell can be counted for more than one farm (as in E4)"
+ },
+ "analysis_5_sensitivity": {
+  "V3_30": {
+   "n_farms": 996,
+   "share_loss_on_gfc_forest": {
+    "est": 0.36292393859456845,
+    "lo": 0.33272708311343036,
+    "hi": 0.39425125057786453
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 557,
+   "share_flags_not_surviving": {
+    "est": 0.3776536312849162,
+    "lo": 0.3466570477247503,
+    "hi": 0.4111111111111111
+   }
+  },
+  "V3_70": {
+   "n_farms": 996,
+   "share_loss_on_gfc_forest": {
+    "est": 0.3384192107391479,
+    "lo": 0.3088495882950139,
+    "hi": 0.3690196853867625
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 553,
+   "share_flags_not_surviving": {
+    "est": 0.38212290502793295,
+    "lo": 0.3512250594633902,
+    "hi": 0.41549362635466913
+   }
+  },
+  "V4_30": {
+   "n_farms": 996,
+   "share_loss_on_gfc_forest": {
+    "est": 0.20543457721408,
+    "lo": 0.18027211784313146,
+    "hi": 0.2298179626351134
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 546,
+   "share_flags_not_surviving": {
+    "est": 0.38994413407821227,
+    "lo": 0.3584054692842066,
+    "hi": 0.4231701111097286
+   }
+  },
+  "V4_50": {
+   "n_farms": 996,
+   "share_loss_on_gfc_forest": {
+    "est": 0.19468333572686525,
+    "lo": 0.170618488205798,
+    "hi": 0.21820599977709249
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 538,
+   "share_flags_not_surviving": {
+    "est": 0.39888268156424583,
+    "lo": 0.36725490873893807,
+    "hi": 0.43318576135020087
+   }
+  },
+  "V4_70": {
+   "n_farms": 996,
+   "share_loss_on_gfc_forest": {
+    "est": 0.18338636896168586,
+    "lo": 0.1604819114729766,
+    "hi": 0.20593350018501308
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 534,
+   "share_flags_not_surviving": {
+    "est": 0.4033519553072626,
+    "lo": 0.3723258030246219,
+    "hi": 0.4370804951819125
+   }
+  }
+ },
+ "seconds": 37.7
+}

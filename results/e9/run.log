@@ -1,0 +1,136 @@
+{
+ "n_farms": 996,
+ "loss_cells": 661505,
+ "share_loss_on_gfc_forest": {
+  "est": 0.3501878292681083,
+  "lo": 0.32036057438199267,
+  "hi": 0.3810366876738304
+ },
+ "share_class1_on_gfc_forest": {
+  "est": 0.39252801391035547,
+  "lo": 0.3516954241252972,
+  "hi": 0.4338169467534241
+ },
+ "share_class0_on_gfc_forest": {
+  "est": 0.19741744640902933,
+  "lo": 0.18093099085518138,
+  "hi": 0.21379418710708206
+ },
+ "hansen_flagged": 895,
+ "gated_flagged": 554,
+ "share_flags_not_surviving": {
+  "est": 0.38100558659217876,
+  "lo": 0.34955727185360186,
+  "hi": 0.4140300059417706
+ },
+ "agreement_forest_2020": {
+  "n": 29022075,
+  "both": 312920,
+  "hansen_only": 555625,
+  "gfc_only": 5557998,
+  "neither": 22595532,
+  "agreement": 0.7893457652493835,
+  "kappa": 0.04296160788636664
+ }
+}
+{
+ "windows_used": 40,
+ "windows_missing": [],
+ "loss_cells_s2c_by_gfc": {
+  "FOREST": {
+   "gfc_nonforest": 4276,
+   "gfc_forest": 310
+  },
+  "PLANT": {
+   "gfc_nonforest": 1300,
+   "gfc_forest": 29
+  },
+  "OTHER": {
+   "gfc_nonforest": 2731,
+   "gfc_forest": 103
+  }
+ },
+ "share_s2c_plant_gfc_nonforest": 0.9781790820165538,
+ "share_s2c_forest_gfc_forest": 0.06759703445268207,
+ "reading": "S2C and GFC2020 disagree",
+ "stable_cells_gfc_forest_share": 0.06871401151631477,
+ "note": "farm boxes overlap within a window, so a cell can be counted for more than one farm (as in E4)"
+}
+{
+ "V3_30": {
+  "n_farms": 996,
+  "share_loss_on_gfc_forest": {
+   "est": 0.36292393859456845,
+   "lo": 0.33272708311343036,
+   "hi": 0.39425125057786453
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 557,
+  "share_flags_not_surviving": {
+   "est": 0.3776536312849162,
+   "lo": 0.3466570477247503,
+   "hi": 0.4111111111111111
+  }
+ },
+ "V3_70": {
+  "n_farms": 996,
+  "share_loss_on_gfc_forest": {
+   "est": 0.3384192107391479,
+   "lo": 0.3088495882950139,
+   "hi": 0.3690196853867625
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 553,
+  "share_flags_not_surviving": {
+   "est": 0.38212290502793295,
+   "lo": 0.3512250594633902,
+   "hi": 0.41549362635466913
+  }
+ },
+ "V4_30": {
+  "n_farms": 996,
+  "share_loss_on_gfc_forest": {
+   "est": 0.20543457721408,
+   "lo": 0.18027211784313146,
+   "hi": 0.2298179626351134
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 546,
+  "share_flags_not_surviving": {
+   "est": 0.38994413407821227,
+   "lo": 0.3584054692842066,
+   "hi": 0.4231701111097286
+  }
+ },
+ "V4_50": {
+  "n_farms": 996,
+  "share_loss_on_gfc_forest": {
+   "est": 0.19468333572686525,
+   "lo": 0.170618488205798,
+   "hi": 0.21820599977709249
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 538,
+  "share_flags_not_surviving": {
+   "est": 0.39888268156424583,
+   "lo": 0.36725490873893807,
+   "hi": 0.43318576135020087
+  }
+ },
+ "V4_70": {
+  "n_farms": 996,
+  "share_loss_on_gfc_forest": {
+   "est": 0.18338636896168586,
+   "lo": 0.1604819114729766,
+   "hi": 0.20593350018501308
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 534,
+  "share_flags_not_surviving": {
+   "est": 0.4033519553072626,
+   "lo": 0.3723258030246219,
+   "hi": 0.4370804951819125
+  }
+ }
+} 
+saved 37.7

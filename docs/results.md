@@ -86,3 +86,28 @@ Transported S2C output, no reference on these farms.
 - Reading: the E5 result repeats on a second, disjoint set of farms. Inside the plots, few farms carry 0.5 ha of Hansen loss,
   and those that do are predicted plantation or other land in 2020, not forest. The box numbers differ a lot between the two
   sets (0.58 against 0.16 plantation-driven), which says the land around the plots varies; the box is not a farm-level unit.
+
+## 10. Hansen loss against the EU's 2020 forest map (PROTOCOL_E9; results/e9/gfc2020.json)
+JRC GFC2020 version 3 (10 m, EUDR forest definition; "may be used by anyone, anywhere, anytime without permission", attribution:
+Bourgoin et al., JRC), as the forest share of each 30 m label cell, computed on Earth Engine for all 996 farms' label boxes and
+the 40 E4/E8 windows (2,072 grids, 0.10 GB received, none failed). A cell is GFC forest at >= 50 %. Two maps compared; neither is
+truth.
+- **Share of Hansen 2021-2024 loss on land GFC2020 calls forest in 2020: 0.35 [0.32, 0.38]** (661,505 loss cells). About two
+  thirds of the loss Hansen reports on these farms is on land the EU's own map did not count as forest at the cut-off date.
+- **Flags: 895 farms flagged by Hansen; 554 still flagged when only loss on GFC forest counts. 0.38 [0.35, 0.41] of the
+  Hansen flags do not survive.** By group (farms, share of loss on GFC forest, flags not surviving): ID Oil Palm 200, 0.13,
+  0.47 [0.41, 0.55]; IN Rubber 80, 0.00, all 77; VN Coffee 67, 0.00, all 67; CI Cocoa 35, 0.00, 33 of 35; while CM Cocoa (96,
+  0.65), GH Cocoa (88, 0.80) and BR Cattle (69, 0.58) keep almost every flag. Groups below 20 farms are in the JSON.
+- Agreement on forest in 2020 (Hansen class 1 or 2 against GFC forest), all cells of the label boxes: 0.79, but kappa **0.04**.
+  The Hansen labels call 3 % of the box cells forest in 2020 (classes 1 and 2), GFC2020 20 %. Class 0 mixes "never forest" with
+  "lost by 2020" (design.md), and GFC calls 0.20 of class-0 cells forest. Checked that this is not a grid error (shapes match,
+  flipped grids correlate worse). Why the label rasters hold so little 2020 forest is open (see goals, E10).
+- **S2C check (ID oil palm, E4 + E8 windows): S2C and GFC2020 disagree** (pre-registered). Of loss cells S2C calls PLANT, 0.98
+  are GFC non-forest (consistent), but of those S2C calls FOREST only 0.07 are GFC forest (4,276 of 4,586 are not). Of Hansen
+  stable-forest cells in the farm boxes, GFC calls 0.07 forest, where S2C called 0.55 FOREST (E4). So on the farms, GFC2020 sees
+  very little forest, and S2C's FOREST class there is mostly land GFC does not call forest. This fits the E4 warning that S2C
+  under-calls palm away from its training grids, and it means the E4/E8 "plantation-driven" shares, taken from S2C, are low.
+- Sensitivity: the forest threshold barely matters (30 %: 0.36 of loss on forest, 0.38 of flags lost; 70 %: 0.34, 0.38).
+  Version 4 puts less loss on forest (0.19 at 50 %) and loses a similar share of flags (0.40).
+- Limits: GFC2020 is a model (V3 overall accuracy about 0.91 in the JRC assessment; no assessment for V4 yet); it is a map of
+  2020 only, so it cannot date a conversion. Gating Hansen with GFC2020 is a candidate rule for the product, not adopted.
