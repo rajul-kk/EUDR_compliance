@@ -18,6 +18,11 @@ This is a sensitivity analysis, not a measured false-flag rate: no reference gri
   severe noise (15 %, 30 %): CE 0.819, GCE 0.788, SCE 0.792, forward(oracle) 0.834, forward(anchor) 0.654. Diff vs CE: GCE -0.033 [-0.096, 0.005], forward-oracle +0.012 [0.001, 0.026], anchor-forward -0.207 [-0.559, -0.041].
 - Pre-registered criteria: (a) GCE or forward beats CE by >= 0.02 F1 with interval excluding 0 at severe noise: **not met** (GCE worse; oracle forward +0.012 only). (b) anchor-point T estimator max-abs error < 0.05: **not met** (0.50 mild, 0.36 severe; the anchor assumption fails with so little data and a 75 % majority class). Anchor-based forward correction hurt.
 - Sample is tiny (7 test farms); intervals resample farms; do not generalise.
+- 20-seed rerun (14 Nov, the notebook's settings run locally; results/experiments_20seeds.json, reference 'none' so no experiment D).
+  Same data and splits; the 5-seed run above stays the registered result. Severe noise, diff vs CE: GCE -0.023 [-0.071, 0.003],
+  SCE -0.049 [-0.135, 0.004], forward(oracle T) +0.023 [0.004, 0.049], forward(anchor T-hat) -0.189 [-0.534, -0.031]. With 20 seeds the
+  oracle-T forward correction clears criterion (a)'s numbers, but it is given the true noise matrix; the estimable version still hurts,
+  and GCE is still no better than CE. The reading is unchanged; the intervals still resample only 7 test farms.
 
 ## 4. Per-farm uncertainty
 Experiment C ran but is degenerate: 7 evaluation farms, 3 calibration farms, so the split-conformal half-width is infinite (needs >= 9 calibration farms at 90 %) and every test farm is "uncertain"; ensemble std was 0.0 cells in the test farms (members agree). Implemented and unit-tested (coverage on synthetic data), **not** informative on real data here. Needs the full set of farms (labels exist for 996) with imagery, which this folder does not have.

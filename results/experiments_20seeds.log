@@ -1,0 +1,18 @@
+$ python -I scripts/hansen_audit/run_experiments.py results/features.npz none results/experiments_20seeds.json 15 20  (2026-11-14 18:08, git 263458d)
+patches (7586, 15, 3, 3) loss share 0.7492749802267334
+A ce {'f1_loss_vs_hansen_mean': 0.8853164773092255, 'f1_sd': 0.011872442021144191, 'bal_acc_mean': 0.7685774883668142, 'bal_acc_sd': 0.013254974760733909} 91.26711440086365
+A gce {'f1_loss_vs_hansen_mean': 0.8952359269370603, 'f1_sd': 0.008933401643151862, 'bal_acc_mean': 0.7586218221541257, 'bal_acc_sd': 0.01474827763237762} 202.58562231063843
+A sce {'f1_loss_vs_hansen_mean': 0.9026650776033737, 'f1_sd': 0.009318695128944773, 'bal_acc_mean': 0.7544728890023833, 'bal_acc_sd': 0.02596037482808832} 291.0799057483673
+B mild ce {'f1_vs_clean_mean': 0.8392585045897049, 'f1_sd': 0.017904355939944862, 'bal_acc_mean': 0.529071190211346, 'bal_acc_sd': 0.06937553067484538} 305.50771164894104
+B mild gce {'f1_vs_clean_mean': 0.8447019306157939, 'f1_sd': 0.00763749679950053, 'bal_acc_mean': 0.5288959955506118, 'bal_acc_sd': 0.05949421114360748} 318.5995626449585
+B mild sce {'f1_vs_clean_mean': 0.8463432510543724, 'f1_sd': 0.009758249140012155, 'bal_acc_mean': 0.5229060066740823, 'bal_acc_sd': 0.06138418769358816} 332.2672905921936
+B mild forward_oracleT {'f1_vs_clean_mean': 0.8443694749674296, 'f1_sd': 0.007432886203364199, 'bal_acc_mean': 0.5244215795328142, 'bal_acc_sd': 0.058529765768401} 345.6134819984436
+B mild forward_anchorT {'f1_vs_clean_mean': 0.6767001171226668, 'f1_sd': 0.0038452265848827175, 'bal_acc_mean': 0.747666852057842, 'bal_acc_sd': 0.010231363032079244} 359.332998752594
+B severe ce {'f1_vs_clean_mean': 0.8068932701920721, 'f1_sd': 0.05627091138446017, 'bal_acc_mean': 0.5444577308120133, 'bal_acc_sd': 0.08531432370081711} 371.990847826004
+B severe gce {'f1_vs_clean_mean': 0.7841451837543663, 'f1_sd': 0.058616689847392676, 'bal_acc_mean': 0.5806924360400445, 'bal_acc_sd': 0.07848851423926417} 385.52779936790466
+B severe sce {'f1_vs_clean_mean': 0.7593294528235003, 'f1_sd': 0.06610932700682258, 'bal_acc_mean': 0.5973526140155728, 'bal_acc_sd': 0.07382962630844205} 399.4295380115509
+B severe forward_oracleT {'f1_vs_clean_mean': 0.8350087506903054, 'f1_sd': 0.018794095966914635, 'bal_acc_mean': 0.5186763070077864, 'bal_acc_sd': 0.04435069981840048} 412.3543450832367
+B severe forward_anchorT {'f1_vs_clean_mean': 0.6614992110923673, 'f1_sd': 0.012720818385682562, 'bal_acc_mean': 0.7454254727474974, 'bal_acc_sd': 0.0070627441162362525} 425.75952339172363
+C {'n_farms_eval': 7, 'n_cal': 3, 'n_test': 4, 'conformal_halfwidth_cells': inf, 'hansen_flag_rate_test': 0.75, 'model_flag_rate_test': 0.75, 'agreement': 1.0, 'uncertain_share': 1.0, 'decision_counts_0_1_2': [0, 0, 4], 'mean_ensemble_std_cells': 0.0, 'note': 'Coverage is w.r.t. the noisy Hansen count, not truth. Small n.'}
+saved results/experiments_20seeds.json 438.7101023197174
+exit 0
