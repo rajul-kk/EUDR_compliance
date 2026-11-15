@@ -25,7 +25,7 @@ This is a sensitivity analysis, not a measured false-flag rate: no reference gri
   and GCE is still no better than CE. The reading is unchanged; the intervals still resample only 7 test farms.
 
 ## 4. Per-farm uncertainty
-Experiment C ran but is degenerate: 7 evaluation farms, 3 calibration farms, so the split-conformal half-width is infinite (needs >= 9 calibration farms at 90 %) and every test farm is "uncertain"; ensemble std was 0.0 cells in the test farms (members agree). Implemented and unit-tested (coverage on synthetic data), **not** informative on real data here. Needs the full set of farms (labels exist for 996) with imagery, which this folder does not have.
+(Rerun on all farms in section 8: finite but wide intervals.) Experiment C ran but is degenerate: 7 evaluation farms, 3 calibration farms, so the split-conformal half-width is infinite (needs >= 9 calibration farms at 90 %) and every test farm is "uncertain"; ensemble std was 0.0 cells in the test farms (members agree). Implemented and unit-tested (coverage on synthetic data), **not** informative on real data here. Needs the full set of farms (labels exist for 996) with imagery, which this folder does not have.
 
 ## 5. Not run
 GPU Siamese DeepLab with robust loss; Kaggle notebook (notebooks/kaggle_hansen_audit.ipynb) re-runs the CPU pipeline with 20 seeds and was not executed. Experiment D key in experiments.json is discarded (PROTOCOL deviation 1).
@@ -47,3 +47,27 @@ cells and S2C predictions as E4, no refit. 83 farms included; 9 outlines are sma
   outlines (0 predicted PLANT). By the pre-registered reading that is "under-calls palm", but 22 cells carry no weight.
 - Limits: OSM outlines are volunteered; a 0.04 ha "oil palm farm" is more likely a mapping artefact than a plot. With 29 outlines under
   the 0.5 ha flag threshold, those farms cannot be flagged at all. Predictions remain transported (E3 would supply a reference).
+
+## 8. The full set of farms (PROTOCOL_E6; results/e6/experiments.json)
+The loader skipped 670 undated files per year (median composites of up to 3 scenes, `src/sentinel_client.py`), so every analysis
+above used 415 farms. Read as well (opt-in, `build_features.py --composites`), all 996 labelled farms have both years; 586 have
+usable class 1/2 cells (227 single-scene, 359 composite; 25,844 cells, loss 0.76). Same model, 15 epochs, 5 seeds; agreement
+with Hansen, not accuracy. Run: `run_e6.py results/e6_features.npz results/e6/experiments.json` (461 s, CPU).
+- Experiment C, registered code, 111 ID oil palm farms: 23 evaluation farms, 11 calibration, 12 test. The conformal half-width
+  is now finite but wide: 33.2 cells (the flag threshold is 6). Model and Hansen flag the same 10 of 12 test farms (agreement
+  1.0); 3 are flagged with the interval entirely above 6, 9 are "uncertain", none is cleared. Ensemble spread 4.0 cells. The
+  experiment now runs as designed, and its answer is that the per-farm interval around a Hansen-trained count is too wide to
+  clear or confirm most farms.
+- Leave-one-group-out (11 groups with >= 20 farms), F1 of loss in-group vs held-out, gap with farm-bootstrap 95 % interval.
+  Does not transfer (gap >= 0.05, interval above 0): VN Coffee 0.947 vs 0.404 (gap 0.54 [0.41, 0.67]; balanced accuracy 0.96 vs
+  0.43), GH Cocoa 0.860 vs 0.691 (0.17 [0.07, 0.28]), BR Cattle 0.967 vs 0.816 (0.15 [0.07, 0.25]). Transfers: ID Oil Palm (gap
+  0.017 [0.007, 0.028]), CM Cocoa, IN Rubber, ID Coffee, CI Cocoa, BR Coffee, TH Rubber, KE Coffee (all gaps under 0.05).
+  Read "transfers" with the base rate beside it: loss is 0.72-0.89 of the cells in most of these groups, and balanced accuracy
+  is 0.50-0.67 in five of them (CI Cocoa 0.50: the model calls every cell loss). A model that predicts loss everywhere
+  "transfers" by this rule. The clear failure is VN Coffee, the one large group where loss is the minority (0.29).
+- Image type (groups with >= 10 farms of each): ID Oil Palm scene 0.899 vs composite 0.875 (difference 0.025 [-0.036, 0.081]), CM
+  Cocoa 0.821 vs 0.780 (0.041 [-0.035, 0.127]); no difference shown. BR Coffee 0.78 vs 0.95 (-0.17 [-0.24, -0.09]), but its loss
+  share differs by type (0.62 vs 0.89), so that gap follows the base rate, not the imagery.
+- Limits: everything is agreement with Hansen, whose loss label the audit finds is about half plantation turnover in ID oil
+  palm; the composites' scene dates are not recorded per file; image type is tied to country in 8 of 11 groups. `git` in the
+  results file is the commit before `run_e6.py` itself was committed (it is committed with these results).

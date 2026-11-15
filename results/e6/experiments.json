@@ -1,0 +1,295 @@
+{
+ "protocol": "PROTOCOL_E6.md",
+ "command": "python -I scripts/hansen_audit/run_e6.py results/e6_features.npz results/e6/experiments.json",
+ "git": "263458d",
+ "epochs": 15,
+ "seeds": 5,
+ "n_farms": 586,
+ "n_cells": 25844,
+ "farms_by_product": {
+  "scene": 227,
+  "composite": 359
+ },
+ "exp_c": {
+  "n_farms_eval": 23,
+  "n_cal": 11,
+  "n_test": 12,
+  "conformal_halfwidth_cells": 33.19999999999999,
+  "hansen_flag_rate_test": 0.8333333333333334,
+  "model_flag_rate_test": 0.8333333333333334,
+  "agreement": 1.0,
+  "uncertain_share": 0.75,
+  "decision_counts_0_1_2": [
+   0,
+   3,
+   9
+  ],
+  "mean_ensemble_std_cells": 3.964911047976665,
+  "note": "Coverage is w.r.t. the noisy Hansen count, not truth.",
+  "n_id_oil_palm_farms": 111,
+  "agreement_by_product": {
+   "scene": {
+    "n": 1,
+    "agreement": 1.0
+   },
+   "composite": {
+    "n": 11,
+    "agreement": 1.0
+   }
+  }
+ },
+ "transfer": {
+  "ID|Oil Palm": {
+   "n_farms": 111,
+   "n_cells": 6818,
+   "loss_share": 0.7546201232032854,
+   "f1_in_group": 0.8787243735763098,
+   "f1_held_out": 0.8620841014836275,
+   "bal_acc_in_group": 0.6673550711378395,
+   "bal_acc_held_out": 0.5778795678462658,
+   "f1_gap_mean_lo_hi": [
+    0.016651409364310695,
+    0.006773296753629291,
+    0.027813667943879843
+   ],
+   "reading": "transfers"
+  },
+  "CM|Cocoa": {
+   "n_farms": 74,
+   "n_cells": 4919,
+   "loss_share": 0.7267737344988819,
+   "f1_in_group": 0.8041155520379897,
+   "f1_held_out": 0.796448087431694,
+   "bal_acc_in_group": 0.5698948967698967,
+   "bal_acc_held_out": 0.5989125457875457,
+   "f1_gap_mean_lo_hi": [
+    0.008244124836005113,
+    -0.019552900132947124,
+    0.035903222438555094
+   ],
+   "reading": "transfers"
+  },
+  "GH|Cocoa": {
+   "n_farms": 71,
+   "n_cells": 3993,
+   "loss_share": 0.76984723265715,
+   "f1_in_group": 0.8599092284417549,
+   "f1_held_out": 0.6913533117007062,
+   "bal_acc_in_group": 0.5846798201490546,
+   "bal_acc_held_out": 0.6019666860884543,
+   "f1_gap_mean_lo_hi": [
+    0.16833342731573028,
+    0.06877295770587008,
+    0.2825764747071702
+   ],
+   "reading": "does not transfer"
+  },
+  "IN|Rubber": {
+   "n_farms": 64,
+   "n_cells": 1660,
+   "loss_share": 0.8355421686746988,
+   "f1_in_group": 0.9028764805414552,
+   "f1_held_out": 0.8946103673189152,
+   "bal_acc_in_group": 0.5523225872901432,
+   "bal_acc_held_out": 0.5612939091670166,
+   "f1_gap_mean_lo_hi": [
+    0.008525822732947198,
+    -0.003804838667664409,
+    0.023439185927484674
+   ],
+   "reading": "transfers"
+  },
+  "VN|Coffee": {
+   "n_farms": 54,
+   "n_cells": 822,
+   "loss_share": 0.291970802919708,
+   "f1_in_group": 0.9469214437367304,
+   "f1_held_out": 0.40388349514563104,
+   "bal_acc_in_group": 0.9577104810996564,
+   "bal_acc_held_out": 0.43333333333333335,
+   "f1_gap_mean_lo_hi": [
+    0.5423465386168594,
+    0.4124054988512062,
+    0.6687194057313226
+   ],
+   "reading": "does not transfer"
+  },
+  "BR|Cattle": {
+   "n_farms": 46,
+   "n_cells": 974,
+   "loss_share": 0.9794661190965093,
+   "f1_in_group": 0.9671261930010604,
+   "f1_held_out": 0.8162261831591887,
+   "bal_acc_in_group": 0.4779874213836478,
+   "bal_acc_held_out": 0.6230083857442348,
+   "f1_gap_mean_lo_hi": [
+    0.14776780416038543,
+    0.0661611169981176,
+    0.24786627955498683
+   ],
+   "reading": "does not transfer"
+  },
+  "ID|Coffee": {
+   "n_farms": 30,
+   "n_cells": 1954,
+   "loss_share": 0.721596724667349,
+   "f1_in_group": 0.8205304857044436,
+   "f1_held_out": 0.840358446730833,
+   "bal_acc_in_group": 0.6447668961201503,
+   "bal_acc_held_out": 0.6391935231539424,
+   "f1_gap_mean_lo_hi": [
+    -0.019202749588343997,
+    -0.03928563517809806,
+    0.004327955590650363
+   ],
+   "reading": "transfers"
+  },
+  "CI|Cocoa": {
+   "n_farms": 26,
+   "n_cells": 1056,
+   "loss_share": 0.8607954545454546,
+   "f1_in_group": 0.9256619144602851,
+   "f1_held_out": 0.9251908396946565,
+   "bal_acc_in_group": 0.5034013605442177,
+   "bal_acc_held_out": 0.5,
+   "f1_gap_mean_lo_hi": [
+    0.0004972774053802686,
+    0.0,
+    0.001783491151999483
+   ],
+   "reading": "transfers"
+  },
+  "BR|Coffee": {
+   "n_farms": 24,
+   "n_cells": 902,
+   "loss_share": 0.7583148558758315,
+   "f1_in_group": 0.8863636363636364,
+   "f1_held_out": 0.8852691218130312,
+   "bal_acc_in_group": 0.7267825527120553,
+   "bal_acc_held_out": 0.7206328129191479,
+   "f1_gap_mean_lo_hi": [
+    0.0011316046917081287,
+    -0.009488215525105651,
+    0.010820232770414037
+   ],
+   "reading": "transfers"
+  },
+  "TH|Rubber": {
+   "n_farms": 21,
+   "n_cells": 1095,
+   "loss_share": 0.891324200913242,
+   "f1_in_group": 0.971021860701576,
+   "f1_held_out": 0.9642857142857143,
+   "bal_acc_in_group": 0.8379812990770079,
+   "bal_acc_held_out": 0.7122365339578455,
+   "f1_gap_mean_lo_hi": [
+    0.006783701440819434,
+    0.002346906292750292,
+    0.011363977366640493
+   ],
+   "reading": "transfers"
+  },
+  "KE|Coffee": {
+   "n_farms": 20,
+   "n_cells": 558,
+   "loss_share": 0.4444444444444444,
+   "f1_in_group": 0.6863572433192686,
+   "f1_held_out": 0.6440677966101694,
+   "bal_acc_in_group": 0.6387096774193548,
+   "bal_acc_held_out": 0.5592741935483871,
+   "f1_gap_mean_lo_hi": [
+    0.041143481647043637,
+    -0.009857589182398244,
+    0.10259985817523046
+   ],
+   "reading": "transfers"
+  }
+ },
+ "group_sizes": {
+  "AR|Cattle": 1,
+  "BR|Cattle": 46,
+  "BR|Cocoa": 7,
+  "BR|Coffee": 24,
+  "BR|Soy": 14,
+  "CI|Cocoa": 26,
+  "CM|Cocoa": 74,
+  "CR|Coffee": 7,
+  "ET|Coffee": 3,
+  "GH|Cocoa": 71,
+  "ID|Coffee": 30,
+  "ID|Oil Palm": 111,
+  "IN|Coffee": 1,
+  "IN|Rubber": 64,
+  "KE|Coffee": 20,
+  "PA|Coffee": 9,
+  "TH|Rubber": 21,
+  "US|Soy": 3,
+  "VN|Coffee": 54
+ },
+ "image_type": {
+  "BR|Coffee": {
+   "scene": {
+    "n_farms": 10,
+    "n_cells": 443,
+    "loss_share": 0.618510158013544,
+    "f1_in_group": 0.7803992740471869,
+    "bal_acc_in_group": 0.7089038137606358
+   },
+   "composite": {
+    "n_farms": 14,
+    "n_cells": 459,
+    "loss_share": 0.8932461873638344,
+    "f1_in_group": 0.9544924154025671,
+    "bal_acc_in_group": 0.6110253857640617
+   },
+   "f1_scene_minus_composite_mean_lo_hi": [
+    -0.1718965997292669,
+    -0.2396818767201701,
+    -0.09424131763308737
+   ]
+  },
+  "CM|Cocoa": {
+   "scene": {
+    "n_farms": 51,
+    "n_cells": 2895,
+    "loss_share": 0.7436960276338515,
+    "f1_in_group": 0.8209291835814163,
+    "bal_acc_in_group": 0.612019147106213
+   },
+   "composite": {
+    "n_farms": 23,
+    "n_cells": 2024,
+    "loss_share": 0.7025691699604744,
+    "f1_in_group": 0.7804258023514459,
+    "bal_acc_in_group": 0.5189955189219246
+   },
+   "f1_scene_minus_composite_mean_lo_hi": [
+    0.04056928743138493,
+    -0.03496782420322354,
+    0.12747445083038308
+   ]
+  },
+  "ID|Oil Palm": {
+   "scene": {
+    "n_farms": 35,
+    "n_cells": 1008,
+    "loss_share": 0.7767857142857143,
+    "f1_in_group": 0.8993120700437773,
+    "bal_acc_in_group": 0.7435759897828864
+   },
+   "composite": {
+    "n_farms": 76,
+    "n_cells": 5810,
+    "loss_share": 0.7507745266781412,
+    "f1_in_group": 0.8752133105802048,
+    "bal_acc_in_group": 0.6557399603810914
+   },
+   "f1_scene_minus_composite_mean_lo_hi": [
+    0.02453788322775665,
+    -0.03581952850975087,
+    0.08122876557491296
+   ]
+  }
+ },
+ "seconds": 460.70836544036865
+}
