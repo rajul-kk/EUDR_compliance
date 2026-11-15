@@ -55,6 +55,8 @@ source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+To rerun the Hansen label audit with the exact versions behind its results, use `requirements-audit.txt` instead.
+
 ### 2. Configure credentials
 
 ```bash
