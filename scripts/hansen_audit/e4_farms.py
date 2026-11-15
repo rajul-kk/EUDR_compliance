@@ -1,7 +1,7 @@
 """PROTOCOL_S2 E4 (deviation 5): 2020 land use under Hansen loss on the 94 Indonesian oil palm farms, with the S2C classifier.
 
 usage:
-  python -I e4_farms.py download <data_root> <features.npz> <out_dir> [--budget-gb 2]
+  python -I e4_farms.py download <data_root> <features.npz> <out_dir> [--budget-gb 2] [--composites] [--exclude <windows.json>]
   python -I e4_farms.py run <data_root> <features.npz> <out_dir> <reference_cells.npz> <grid_index.csv> <s2_dir> <s1_dir> <results_dir>
 download: groups farms into <= 0.05 deg windows, writes <out_dir>/windows.json and <out_dir>/win_XX.npz (S2 + S1 2020 cells), resumable,
           atomic writes, own byte guard (system-wide received bytes summed over runs).
@@ -29,12 +29,16 @@ for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSE
     os.environ.setdefault(k, v)
 
 
-def farms_and_windows(root, features_npz):
+def farms_and_windows(root, features_npz, composites=False, exclude=None):
+    """ID oil palm farms in features_npz, minus those listed in the windows.json `exclude` (PROTOCOL_E8), grouped into windows."""
     import rasterio
 
     z = np.load(features_npz, allow_pickle=True)
     keys = [str(k) for k in z["keys"][(z["country"] == "ID") & (z["crop"] == "Oil Palm")]]
-    imgs = index_images(Path(root) / "2020_baseline")
+    if exclude:
+        done = set(json.load(open(exclude))["farms"])
+        keys = [k for k in keys if k not in done]
+    imgs = index_images(Path(root) / "2020_baseline", composites=composites)
     boxes = []
     for k in keys:
         with rasterio.open(imgs[k][0][1]) as s:
@@ -51,7 +55,7 @@ def download(a):
     from hansen_audit.budget import DownloadBudget
 
     os.makedirs(a.out_dir, exist_ok=True)
-    keys, boxes, wins = farms_and_windows(a.data_root, a.features)
+    keys, boxes, wins = farms_and_windows(a.data_root, a.features, a.composites, a.exclude)
     json.dump({"farms": keys, "boxes": boxes.tolist(), "windows": wins}, open(os.path.join(a.out_dir, "windows.json"), "w"), indent=1)
     budget = DownloadBudget(a.out_dir, a.budget_gb, "windows", retry_failed=a.retry_failed)
 
@@ -166,6 +170,8 @@ def main():
         d.add_argument(n)
     d.add_argument("--budget-gb", type=float, default=2.0)
     d.add_argument("--retry-failed", action="store_true")
+    d.add_argument("--composites", action="store_true", help="also read undated composite images for the farm boxes (E6)")
+    d.add_argument("--exclude", help="windows.json of an earlier run; its farms are skipped (PROTOCOL_E8)")
     r = sub.add_parser("run")
     for n in ("data_root", "features", "out_dir", "ref_npz", "grid_index", "s2_dir", "s1_dir", "results_dir"):
         r.add_argument(n)
