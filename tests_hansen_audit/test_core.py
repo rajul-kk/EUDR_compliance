@@ -1,7 +1,12 @@
-import sys, pathlib
+import pathlib
+import sys
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-import numpy as np, torch, pytest
-from hansen_audit import noise, losses, decisions, uncertainty
+import numpy as np
+import pytest
+import torch
+
+from hansen_audit import decisions, losses, noise, uncertainty
 from hansen_audit.io import IMG_RE, LAB_RE, farm_key
 
 
@@ -54,14 +59,17 @@ def test_forward_correction_recovers_clean_prior():
     z = torch.zeros(1, 2, requires_grad=True)
     opt = torch.optim.Adam([z], 0.05)
     for _ in range(300):
-        opt.zero_grad(); losses.forward_ce(z.expand(4000, 2), yn, T).backward(); opt.step()
+        opt.zero_grad()
+        losses.forward_ce(z.expand(4000, 2), yn, T).backward()
+        opt.step()
     p = torch.softmax(z, 1)[0, 1].item()
     assert abs(p - y.float().mean().item()) < 0.04   # clean prior, not the noisy prior
 
 
 def test_decisions():
     assert decisions.farm_flag(np.array([0, 5, 6, 100])).tolist() == [False, False, True, True]
-    flag = np.array([1, 1, 0, 0, 1, 0], bool); tp = np.array([1, 0, 0, 0, 0, 1], bool)
+    flag = np.array([1, 1, 0, 0, 1, 0], bool)
+    tp = np.array([1, 0, 0, 0, 0, 1], bool)
     est, lo, hi = decisions.false_flag_rate(flag, tp, n_boot=200)
     assert est == pytest.approx(2 / 4) and lo <= est <= hi
     assert decisions.missed_flag_rate(flag, tp, n_boot=50)[0] == pytest.approx(0.5)

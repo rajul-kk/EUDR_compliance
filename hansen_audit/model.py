@@ -17,14 +17,15 @@ def make_patches(X: np.ndarray, Y: np.ndarray, V: np.ndarray, min_valid: float =
     Only cells with Hansen class 1 or 2, valid share >= min_valid, and a fully valid 3x3 window (no NaN) are kept."""
     Fn, C, G, _ = X.shape
     Xp = np.nan_to_num(np.pad(X, ((0, 0), (0, 0), (1, 1), (1, 1)), constant_values=np.nan), nan=0.0)
-    bad = np.pad(np.isnan(X).any(1), ((0, 0), (1, 1), (1, 1)), constant_values=True)
     ps, ys, fs = [], [], []
     for f in range(Fn):
         ii, jj = np.where((Y[f] >= 1) & (V[f] >= min_valid) & ~np.isnan(X[f]).any(0))
         if len(ii) == 0:
             continue
         for i, j in zip(ii, jj):
-            ps.append(Xp[f, :, i:i + 3, j:j + 3]); ys.append(Y[f, i, j] - 1); fs.append(f)
+            ps.append(Xp[f, :, i:i + 3, j:j + 3])
+            ys.append(Y[f, i, j] - 1)
+            fs.append(f)
     return np.stack(ps).astype(np.float32), np.array(ys, np.int64), np.array(fs, np.int64)
 
 
@@ -55,13 +56,15 @@ def loss_fn(name, T=None, q=0.7):
 
 
 def standardise(train_p, *others):
-    mu = train_p.mean((0, 2, 3), keepdims=True); sd = train_p.std((0, 2, 3), keepdims=True) + 1e-6
+    mu = train_p.mean((0, 2, 3), keepdims=True)
+    sd = train_p.std((0, 2, 3), keepdims=True) + 1e-6
     return [(p - mu) / sd for p in (train_p, *others)]
 
 
 def train_model(Xtr, ytr, Xva, yva, loss_name="ce", T=None, seed=0, epochs=15, bs=256, lr=1e-3, q=0.7):
     """Early stopping on validation *noisy-label* loss (as in PROTOCOL; no clean data used)."""
-    torch.manual_seed(seed); np.random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     m = PatchCNN(Xtr.shape[1])
     opt = torch.optim.Adam(m.parameters(), lr)
     lf = loss_fn(loss_name, T, q)
@@ -73,7 +76,9 @@ def train_model(Xtr, ytr, Xva, yva, loss_name="ce", T=None, seed=0, epochs=15, b
         perm = torch.randperm(len(Xt))
         for i in range(0, len(perm), bs):
             idx = perm[i:i + bs]
-            opt.zero_grad(); lf(m(Xt[idx]), yt[idx]).backward(); opt.step()
+            opt.zero_grad()
+            lf(m(Xt[idx]), yt[idx]).backward()
+            opt.step()
         m.eval()
         with torch.no_grad():
             vl = float(lf(m(Xv), yv))
@@ -91,5 +96,7 @@ def predict_proba(m, X, bs=4096):
 
 
 def f1_binary(y, pred):
-    tp = int(((y == 1) & (pred == 1)).sum()); fp = int(((y == 0) & (pred == 1)).sum()); fn = int(((y == 1) & (pred == 0)).sum())
+    tp = int(((y == 1) & (pred == 1)).sum())
+    fp = int(((y == 0) & (pred == 1)).sum())
+    fn = int(((y == 1) & (pred == 0)).sum())
     return 2 * tp / max(2 * tp + fp + fn, 1)

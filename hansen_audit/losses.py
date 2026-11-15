@@ -1,7 +1,6 @@
 """Noise-robust losses (torch). logits: (N,k), target: (N,) long."""
 from __future__ import annotations
 
-import torch
 import torch.nn.functional as F
 
 

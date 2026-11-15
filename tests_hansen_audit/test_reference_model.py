@@ -1,8 +1,13 @@
-import sys, pathlib
+import pathlib
+import sys
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import numpy as np
 import pytest
-from hansen_audit import reference as R, model as M, features as Ft
+
+from hansen_audit import features as Ft
+from hansen_audit import model as M
+from hansen_audit import reference as R
 
 
 def test_tile_name():
@@ -52,16 +57,22 @@ def test_patches_and_training_smoke():
 
 
 def test_make_patches_drops_invalid():
-    X = np.zeros((1, 15, 5, 5), np.float32); X[0, :, 2, 2] = np.nan
-    Y = np.full((1, 5, 5), 2, np.uint8); V = np.ones((1, 5, 5), np.float32); V[0, 0, 0] = 0.1
+    X = np.zeros((1, 15, 5, 5), np.float32)
+    X[0, :, 2, 2] = np.nan
+    Y = np.full((1, 5, 5), 2, np.uint8)
+    V = np.ones((1, 5, 5), np.float32)
+    V[0, 0, 0] = 0.1
     P, y, f = M.make_patches(X, Y, V)
     assert len(y) == 25 - 2
 
 
 def test_cell_means_masks_clouds():
     img = np.zeros((5, 74, 74), np.float32)
-    img[:4] = 0.2; img[3] = 0.4; img[4] = 4
-    img[:4, :37, :] = 9.0; img[4, :37, :] = 9          # cloudy top half (SCL 9) with garbage reflectance
+    img[:4] = 0.2
+    img[3] = 0.4
+    img[4] = 4
+    img[:4, :37, :] = 9.0
+    img[4, :37, :] = 9          # cloudy top half (SCL 9) with garbage reflectance
     feat, valid = Ft._cell_means(img, grid=2)
     assert valid[0].tolist() == [0.0, 0.0] and valid[1].tolist() == [1.0, 1.0]
     assert feat[0, 1, 0] == pytest.approx(0.2, abs=1e-5)

@@ -51,13 +51,16 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
     # raster metadata: all distinct signatures
     sig_img, sig_lab = Counter(), Counter()
     for fid in complete:
-        m = _meta(b[fid][0][1]); sig_img[(m["count"], tuple(m["dtypes"]), m["w"], m["h"], m["crs"], tuple(m["res"]), m["nodata"])] += 1
-        m = _meta(lab[fid]); sig_lab[(m["count"], tuple(m["dtypes"]), m["w"], m["h"], m["crs"], tuple(m["res"]), m["nodata"])] += 1
+        m = _meta(b[fid][0][1])
+        sig_img[(m["count"], tuple(m["dtypes"]), m["w"], m["h"], m["crs"], tuple(m["res"]), m["nodata"])] += 1
+        m = _meta(lab[fid])
+        sig_lab[(m["count"], tuple(m["dtypes"]), m["w"], m["h"], m["crs"], tuple(m["res"]), m["nodata"])] += 1
     inv["image_signatures"] = [dict(sig=str(k), n=v) for k, v in sig_img.items()]
     inv["label_signatures"] = [dict(sig=str(k), n=v) for k, v in sig_lab.items()]
 
     # label values + class balance over all complete labels; footprint ratio
-    tot = Counter(); per_farm = {}
+    tot = Counter()
+    per_farm = {}
     for fid in complete:
         with rasterio.open(lab[fid]) as s:
             a = s.read(1)

@@ -1,7 +1,10 @@
 """Reference-vs-Hansen confusion on the Zenodo grids, cluster bootstrap over grids.
 usage: python -I analyse_reference.py <reference_cells.npz> <grid_index.csv> <out.json>"""
-import json, sys
-import numpy as np, pandas as pd
+import json
+import sys
+
+import numpy as np
+import pandas as pd
 
 GROUPS = {1: "FOREST", 2: "PLANT", 3: "OTHER"}
 
@@ -50,7 +53,8 @@ def main(npz, gi, out, n_boot=2000):
         gid = k[7:]
         h, cid, cov = z[k], z["classid_" + gid], z["cov_" + gid].astype(np.float32)
         cid = np.where(cov >= 0.5, cid, -1)
-        n = min(h.shape[0], cid.shape[0]); m = min(h.shape[1], cid.shape[1])
+        n = min(h.shape[0], cid.shape[0])
+        m = min(h.shape[1], cid.shape[1])
         per[gid] = table(h[:n, :m], class_group_arr(cid[:n, :m]))
     gids = sorted(per)
     res = {"n_grids": len(gids), "pooled": metrics(sum(per.values()))}
@@ -70,7 +74,8 @@ def main(npz, gi, out, n_boot=2000):
         tt = sum(per[g] for g in gg)
         bs = []
         for _ in range(n_boot):
-            pick = rng.integers(0, len(gg), len(gg)); bs.append(metrics(sum(per[gg[i]] for i in pick)))
+            pick = rng.integers(0, len(gg), len(gg))
+            bs.append(metrics(sum(per[gg[i]] for i in pick)))
         m = metrics(tt)
         res["by_label_year"][lab] = {"n_grids": len(gg), "pooled": m,
             "ci95": {k: [float(np.nanpercentile([b[k] for b in bs], 2.5)), float(np.nanpercentile([b[k] for b in bs], 97.5))] for k in m}}

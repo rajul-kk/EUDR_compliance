@@ -57,11 +57,11 @@ def read_window(layer: str, west: float, south: float, east: float, north: float
     with rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif",
                       GDAL_HTTP_MAX_RETRY="4", GDAL_HTTP_RETRY_DELAY="2"):
         with rasterio.open(url) as s:
-            l, t = s.bounds.left, s.bounds.top
-            c0, c1 = int(math.floor((west - l) / RES)), int(math.ceil((east - l) / RES))
+            left, t = s.bounds.left, s.bounds.top
+            c0, c1 = int(math.floor((west - left) / RES)), int(math.ceil((east - left) / RES))
             r0, r1 = int(math.floor((t - north) / RES)), int(math.ceil((t - south) / RES))
             arr = s.read(1, window=Window(c0, r0, c1 - c0, r1 - r0))
-            return arr, (l + c0 * RES, t - r0 * RES)
+            return arr, (left + c0 * RES, t - r0 * RES)
 
 
 def rasterise_reference(gdf, west: float, north: float, shape, sub: int = 5):
