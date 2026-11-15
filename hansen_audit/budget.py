@@ -14,13 +14,39 @@ import json
 import os
 import threading
 import time
-from typing import Callable, Optional
+from contextlib import contextmanager
+from typing import Callable, Iterator, Optional
+
+LOCK_PATH = os.path.join(os.path.expanduser("~"), ".hansen_audit_download.lock")
 
 
 def _net_bytes() -> int:
     import psutil
 
     return psutil.net_io_counters().bytes_recv
+
+
+@contextmanager
+def exclusive_download(path: str = LOCK_PATH) -> Iterator[None]:
+    """Hold a machine-wide lock for the length of a guarded download. The byte count is system-wide, so two guarded
+    downloads at once would each count the other's traffic; the second one stops here instead."""
+    fh = open(path, "a+")  # noqa: SIM115 - the open handle is the lock
+    try:
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                fh.seek(0)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            raise RuntimeError(f"another guarded download holds {path}; run downloads one at a time") from None
+        yield
+    finally:
+        fh.close()
 
 
 class DownloadBudget:

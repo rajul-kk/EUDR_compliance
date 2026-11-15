@@ -2,7 +2,9 @@
 import json
 import time
 
-from hansen_audit.budget import DownloadBudget
+import pytest
+
+from hansen_audit.budget import DownloadBudget, exclusive_download
 
 
 class Net:
@@ -55,3 +57,13 @@ def test_the_manifest_is_never_half_written(tmp_path):
     b.close()
     assert not (tmp_path / "manifest.json.part").exists()
     json.loads((tmp_path / "manifest.json").read_text())
+
+
+def test_only_one_guarded_download_at_a_time(tmp_path):
+    lock = str(tmp_path / "dl.lock")
+    with exclusive_download(lock):
+        with pytest.raises(RuntimeError, match="one at a time"):
+            with exclusive_download(lock):
+                pass
+    with exclusive_download(lock):  # released after the first one ends
+        pass

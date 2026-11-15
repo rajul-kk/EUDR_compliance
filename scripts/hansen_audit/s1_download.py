@@ -15,7 +15,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import s1  # noqa: E402
-from hansen_audit.budget import DownloadBudget  # noqa: E402
+from hansen_audit.budget import DownloadBudget, exclusive_download  # noqa: E402
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
                  GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff").items():
@@ -75,4 +75,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with exclusive_download():
+        main()

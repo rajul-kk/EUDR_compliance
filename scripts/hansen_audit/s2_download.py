@@ -15,7 +15,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import s2  # noqa: E402
-from hansen_audit.budget import DownloadBudget  # noqa: E402
+from hansen_audit.budget import DownloadBudget, exclusive_download  # noqa: E402
 
 os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
 os.environ.setdefault("GDAL_HTTP_MERGE_CONSECUTIVE_RANGES", "YES")
@@ -79,4 +79,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with exclusive_download():
+        main()

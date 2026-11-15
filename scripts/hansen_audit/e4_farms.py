@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import landuse as L  # noqa: E402
 from hansen_audit import s1, s2  # noqa: E402
+from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.io import index_images, index_labels  # noqa: E402
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
@@ -176,7 +177,11 @@ def main():
     for n in ("data_root", "features", "out_dir", "ref_npz", "grid_index", "s2_dir", "s1_dir", "results_dir"):
         r.add_argument(n)
     a = ap.parse_args()
-    download(a) if a.cmd == "download" else run(a)
+    if a.cmd == "download":
+        with exclusive_download():
+            download(a)
+    else:
+        run(a)
 
 
 if __name__ == "__main__":

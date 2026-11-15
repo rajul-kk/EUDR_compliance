@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import gfc  # noqa: E402
+from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.io import index_labels  # noqa: E402
 
 ASSETS = {"V3": "JRC/GFC2020/V3", "V4": "JRC/GFC2020/V4"}
@@ -259,7 +260,11 @@ def main():
         r.add_argument(n)
     r.add_argument("--boxes", nargs="*", default=[], help="pairs: windows.json farm_preds.npz")
     a = ap.parse_args()
-    download(a) if a.cmd == "download" else run(a)
+    if a.cmd == "download":
+        with exclusive_download():
+            download(a)
+    else:
+        run(a)
 
 
 if __name__ == "__main__":
