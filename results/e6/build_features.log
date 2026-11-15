@@ -1,0 +1,2 @@
+$ python -I scripts/hansen_audit/build_features.py D:/Work/eudr-satellite-upload results/e6_features.npz --composites (2026-11-15 03:36)
+saved 996

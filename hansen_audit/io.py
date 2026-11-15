@@ -4,6 +4,8 @@ File naming (verified on the data, see docs/data_inventory.md):
   2020_baseline/{kind}_{osmid}_2020_{YYYY-MM-DD}.tiff
   2024_current/{kind}_{osmid}_2024_{YYYY-MM-DD}.tiff
   hansen_labels/{kind}_{osmid}_hansen_label.tif
+  2020_baseline/{kind}_{osmid}_2020.tiff, 2024_current/{kind}_{osmid}_2024.tiff: median composites of up to 3 scenes written by
+    src/sentinel_client.py (no scene date; found 14 Nov, E6). Read only when asked (composites=True).
   farms_osm.csv: farm_id = "osm_{kind}_{osmid}"
 kind is "relation" or "way". A farm can have several image dates per year.
 """
@@ -16,6 +18,8 @@ from pathlib import Path
 import pandas as pd
 
 IMG_RE = re.compile(r"^(?P<fid>(?:relation|way)_\d+)_(?P<year>20\d\d)_(?P<date>\d{4}-\d{2}-\d{2})\.tiff?$")
+COMP_RE = re.compile(r"^(?P<fid>(?:relation|way)_\d+)_(?P<year>20\d\d)\.tiff?$")
+COMPOSITE = "composite"
 LAB_RE = re.compile(r"^(?P<fid>(?:relation|way)_\d+)_hansen_label\.tif$")
 
 
@@ -24,13 +28,16 @@ def farm_key(farm_id: str) -> str:
     return farm_id[4:] if farm_id.startswith("osm_") else farm_id
 
 
-def index_images(folder: Path) -> dict[str, list[tuple[str, Path]]]:
-    """farm key -> sorted [(date, path)]; unparsable names are skipped."""
+def index_images(folder: Path, composites: bool = False) -> dict[str, list[tuple[str, Path]]]:
+    """farm key -> sorted [(date, path)]; unparsable names are skipped. With composites=True, undated composites are
+    included with the date COMPOSITE, which sorts after every scene date, so a dated scene is still taken first."""
     out: dict[str, list[tuple[str, Path]]] = defaultdict(list)
     for p in sorted(Path(folder).iterdir()):
         m = IMG_RE.match(p.name)
         if m:
             out[m["fid"]].append((m["date"], p))
+        elif composites and (c := COMP_RE.match(p.name)):
+            out[c["fid"]].append((COMPOSITE, p))
     return {k: sorted(v) for k, v in out.items()}
 
 
