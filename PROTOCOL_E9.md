@@ -66,3 +66,11 @@ measures agreement between two maps. E3's human labels remain the only reference
 
 `scripts/hansen_audit/gfc2020.py`, `hansen_audit/gfc.py` with tests; `results/e9/gfc2020.json`, `results/e9/download_manifest.json`,
 `results/e9/run.log`; a section in `docs/results.md`.
+
+## Deviations
+
+- 15 Nov 2026, before the full fetch: the label rasters on disk predate E7 and keep the old encoding (GeoTIFF nodata 0, no
+  255 anywhere; checked on all 996). So no-data cells cannot be told apart from class 0 here. Loss (class 2) and class 1
+  counts, and so analyses 1, 2 and 4, are unaffected; the class-0 share and the agreement and kappa of analysis 3 count any
+  no-data cells as class 0 (`docs/design.md`: the downloader clipped boxes fully covered by data). A three-farm smoke test
+  of the fetch (shapes, graded percentages) was run before this note; its values were not used for any decision.
