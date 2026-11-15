@@ -71,3 +71,18 @@ with Hansen, not accuracy. Run: `run_e6.py results/e6_features.npz results/e6/ex
 - Limits: everything is agreement with Hansen, whose loss label the audit finds is about half plantation turnover in ID oil
   palm; the composites' scene dates are not recorded per file; image type is tied to country in 8 of 11 groups. `git` in the
   results file is the commit before `run_e6.py` itself was committed (it is committed with these results).
+
+## 9. E4 and E5 on the 106 oil palm farms added by E6 (PROTOCOL_E8; results/e8/)
+The same code as E4 and E5 on the 106 ID oil palm farms that only have composites (all 19 windows fetched, 0.74 GB received by
+the machine during the download against a 1 GB budget; outlines from the main Overpass server, deviation in the protocol).
+Transported S2C output, no reference on these farms.
+- Box (0.01 degree tile): 56 of 106 farms flagged; 9 of them plantation-driven, **0.16 [0.07, 0.25]**, against 0.58 [0.48, 0.70]
+  on the E4 farms. On these farms most box loss is predicted FOREST in 2020 (3,254 of 5,152 loss cells on flagged farms).
+- Outline (102 farms; 4 excluded with no cell of the outline inside the box): **7 flagged, all 7 plantation-driven**. 48 farms
+  flagged in the box are not flagged in their outline, none the other way. No cell lies in two outlines.
+- Transport check: 17 stable-forest cells inside the outlines, under the protocol's 100, so no reading (PLANT share 0.65).
+- Pooled with E4/E5, descriptive: 11 of 185 farms flagged inside outlines, all plantation-driven; in the boxes 135 of 200, of
+  which 55 plantation-driven (0.41 [0.33, 0.49]). No E5 outline overlaps an E8 outline.
+- Reading: the E5 result repeats on a second, disjoint set of farms. Inside the plots, few farms carry 0.5 ha of Hansen loss,
+  and those that do are predicted plantation or other land in 2020, not forest. The box numbers differ a lot between the two
+  sets (0.58 against 0.16 plantation-driven), which says the land around the plots varies; the box is not a farm-level unit.

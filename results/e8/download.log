@@ -1,0 +1,78 @@
+106 farms in 19 windows
+window 00: 3 farms, shape (130, 102)
+  2020: 76 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 0.99, 0.92, 0.91, 0.86, 0.82], using 4
+  2020: 61 items, using 6 descending
+  done in 48.7 s, 51 MB; total 0.05 GB
+window 01: 17 farms, shape (192, 159)
+  2020: 147 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.95, 0.8, 0.42, 0.39], using 4
+  2020: 61 items, using 6 descending
+  done in 33.3 s, 79 MB; total 0.13 GB
+window 02: 2 farms, shape (41, 57)
+  2020: 37 items, clear fractions [1.0, 1.0, 0.99, 0.93, 0.91, 0.88, 0.87, 0.85, 0.64, 0.51], using 4
+  2020: 57 items, using 6 ascending
+  done in 40.5 s, 27 MB; total 0.16 GB
+window 03: 1 farms, shape (40, 40)
+  2020: 40 items, clear fractions [1.0, 1.0, 1.0, 1.0, 0.99, 0.94, 0.76, 0.76, 0.62, 0.56], using 4
+  2020: 57 items, using 6 ascending
+  done in 38.2 s, 27 MB; total 0.18 GB
+window 04: 5 farms, shape (101, 65)
+  2020: 72 items, clear fractions [1.0, 1.0, 0.99, 0.9, 0.85, 0.85, 0.82, 0.77, 0.76, 0.72], using 4
+  2020: 57 items, using 6 ascending
+  done in 37.7 s, 27 MB; total 0.21 GB
+window 05: 7 farms, shape (103, 101)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 0.92, 0.91, 0.85, 0.75, 0.14], using 4
+  2020: 61 items, using 6 descending
+  done in 33.9 s, 42 MB; total 0.25 GB
+window 06: 1 farms, shape (40, 40)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.81, 0.81], using 4
+  2020: 61 items, using 6 descending
+  done in 32.8 s, 26 MB; total 0.28 GB
+window 07: 17 farms, shape (115, 139)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.98, 0.96, 0.95, 0.91], using 4
+  2020: 61 items, using 6 descending
+  done in 25.5 s, 34 MB; total 0.31 GB
+window 08: 2 farms, shape (123, 44)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 0.93, 0.9, 0.8, 0.78, 0.54], using 4
+  2020: 61 items, using 6 descending
+  done in 27.8 s, 25 MB; total 0.34 GB
+window 09: 10 farms, shape (135, 141)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 0.99, 0.99, 0.96, 0.88, 0.86], using 4
+  2020: 61 items, using 6 descending
+  done in 68.9 s, 67 MB; total 0.40 GB
+window 10: 24 farms, shape (68, 65)
+  2020: 147 items, clear fractions [1.0, 1.0, 1.0, 0.97, 0.96, 0.96, 0.94, 0.85, 0.76, 0.74], using 4
+  2020: 61 items, using 6 descending
+  done in 28.8 s, 27 MB; total 0.43 GB
+window 11: 4 farms, shape (92, 167)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.98, 0.93, 0.9, 0.74], using 4
+  2020: 61 items, using 6 descending
+  done in 32.7 s, 42 MB; total 0.47 GB
+window 12: 4 farms, shape (149, 160)
+  2020: 70 items, clear fractions [1.0, 1.0, 1.0, 0.99, 0.97, 0.92, 0.85, 0.64, 0.63, 0.55], using 4
+  2020: 61 items, using 6 descending
+  done in 60.8 s, 67 MB; total 0.54 GB
+window 13: 1 farms, shape (40, 40)
+  2020: 36 items, clear fractions [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.97, 0.89], using 4
+  2020: 61 items, using 6 descending
+  done in 26.7 s, 29 MB; total 0.57 GB
+window 14: 2 farms, shape (41, 44)
+  2020: 71 items, clear fractions [1.0, 1.0, 0.99, 0.99, 0.98, 0.98, 0.88, 0.49, 0.44, 0.4], using 4
+  2020: 61 items, using 6 descending
+  done in 32.7 s, 42 MB; total 0.61 GB
+window 15: 3 farms, shape (46, 41)
+  2020: 44 items, clear fractions [0.6, 0.47, 0.2, 0.16, 0.07, 0.04, 0.03, 0.01, 0.0, 0.0], using 4
+  2020: 61 items, using 6 descending
+  done in 38.4 s, 26 MB; total 0.64 GB
+window 16: 1 farms, shape (40, 40)
+  2020: 33 items, clear fractions [1.0, 1.0, 0.99, 0.96, 0.88, 0.88, 0.8, 0.76, 0.75, 0.71], using 4
+  2020: 61 items, using 6 descending
+  done in 41.9 s, 37 MB; total 0.68 GB
+window 17: 1 farms, shape (40, 40)
+  2020: 37 items, clear fractions [1.0, 1.0, 0.94, 0.93, 0.78, 0.66, 0.6, 0.32, 0.28, 0.26], using 4
+  2020: 57 items, using 6 ascending
+  done in 33.6 s, 27 MB; total 0.70 GB
+window 18: 1 farms, shape (40, 40)
+  2020: 37 items, clear fractions [1.0, 0.98, 0.92, 0.91, 0.9, 0.89, 0.84, 0.67, 0.16, 0.14], using 4
+  2020: 57 items, using 6 ascending
+  done in 25.3 s, 34 MB; total 0.74 GB
+all done

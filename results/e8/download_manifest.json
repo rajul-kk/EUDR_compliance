@@ -1,0 +1,1322 @@
+{
+ "runs": [
+  {
+   "start": "2026-11-15 17:52:07",
+   "bytes_recv": 735701854,
+   "stopped_by_budget": false
+  }
+ ],
+ "windows": {
+  "00": {
+   "s2": {
+    "n_items": 76,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQT_20200923T085619",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9995307524719289
+     },
+     {
+      "id": "S2B_MSIL2A_20200821T032539_R018_T47MQT_20200825T115225",
+      "datetime": "2020-08-21T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9994134405899112
+     },
+     {
+      "id": "S2B_MSIL2A_20200801T032539_R018_T47MQT_20200815T182911",
+      "datetime": "2020-08-01T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9990196078431373
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 48.7,
+   "bytes_recv": 50944153,
+   "failed": false
+  },
+  "01": {
+   "s2": {
+    "n_items": 147,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20200306T031601_R118_T47MQT_20200929T170450",
+      "datetime": "2020-03-06T03:16:01.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9999235674353599
+     },
+     {
+      "id": "S2B_MSIL2A_20200801T032539_R018_T47MQT_20200815T182911",
+      "datetime": "2020-08-01T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9997670626601444
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQT_20200923T085619",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9995996389471232
+     },
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9991046470999301
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 33.3,
+   "bytes_recv": 78636884,
+   "failed": false
+  },
+  "02": {
+   "s2": {
+    "n_items": 37,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T48MUD_20200917T154100",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20201027T031829_R118_T48MUD_20201031T215604",
+      "datetime": "2020-10-27T03:18:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20200106T032121_R118_T48MUD_20201002T233039",
+      "datetime": "2020-01-06T03:21:21.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9867351305091998
+     },
+     {
+      "id": "S2A_MSIL2A_20200614T031551_R118_T48MUD_20200909T180650",
+      "datetime": "2020-06-14T03:15:51.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9337707412161841
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 57,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200107T112456_20200107T112521_030693_0384B0_rtc",
+      "datetime": "2020-01-07T11:25:08.883380Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200319T112455_20200319T112520_031743_03A939_rtc",
+      "datetime": "2020-03-19T11:25:07.791454Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200518T112457_20200518T112522_032618_03C729_rtc",
+      "datetime": "2020-05-18T11:25:10.068297Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200729T112501_20200729T112526_033668_03E6F6_rtc",
+      "datetime": "2020-07-29T11:25:14.477231Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200927T112504_20200927T112529_034543_040549_rtc",
+      "datetime": "2020-09-27T11:25:17.162524Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201220T112503_20201220T112528_035768_042FB5_rtc",
+      "datetime": "2020-12-20T11:25:15.799269Z",
+      "orbit": "ascending"
+     }
+    ]
+   },
+   "seconds": 40.5,
+   "bytes_recv": 26502380,
+   "failed": false
+  },
+  "03": {
+   "s2": {
+    "n_items": 40,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200420T031539_R118_T48MTD_20201108T221644",
+      "datetime": "2020-04-20T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200609T031539_R118_T48MTD_20200826T181406",
+      "datetime": "2020-06-09T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T48MTD_20200917T154056",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9993055555555556
+     },
+     {
+      "id": "S2B_MSIL2A_20200828T031539_R118_T48MTD_20200907T132324",
+      "datetime": "2020-08-28T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9959027777777778
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 57,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200107T112456_20200107T112521_030693_0384B0_rtc",
+      "datetime": "2020-01-07T11:25:08.883380Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200319T112455_20200319T112520_031743_03A939_rtc",
+      "datetime": "2020-03-19T11:25:07.791454Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200518T112457_20200518T112522_032618_03C729_rtc",
+      "datetime": "2020-05-18T11:25:10.068297Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200729T112501_20200729T112526_033668_03E6F6_rtc",
+      "datetime": "2020-07-29T11:25:14.477231Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200927T112504_20200927T112529_034543_040549_rtc",
+      "datetime": "2020-09-27T11:25:17.162524Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201220T112503_20201220T112528_035768_042FB5_rtc",
+      "datetime": "2020-12-20T11:25:15.799269Z",
+      "orbit": "ascending"
+     }
+    ]
+   },
+   "seconds": 38.2,
+   "bytes_recv": 26618527,
+   "failed": false
+  },
+  "04": {
+   "s2": {
+    "n_items": 72,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T48MUD_20200917T154100",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200417T030539_R075_T48MUD_20200923T220454",
+      "datetime": "2020-04-17T03:05:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9983413725987983
+     },
+     {
+      "id": "S2A_MSIL2A_20200820T030551_R075_T48MUD_20200822T202232",
+      "datetime": "2020-08-20T03:05:51.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9877464669543877
+     },
+     {
+      "id": "S2B_MSIL2A_20201027T031829_R118_T48MUD_20201031T215604",
+      "datetime": "2020-10-27T03:18:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.8959465177286959
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 57,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200107T112431_20200107T112456_030693_0384B0_rtc",
+      "datetime": "2020-01-07T11:24:43.882790Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200319T112430_20200319T112455_031743_03A939_rtc",
+      "datetime": "2020-03-19T11:24:42.790885Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200518T112432_20200518T112457_032618_03C729_rtc",
+      "datetime": "2020-05-18T11:24:45.068688Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200729T112436_20200729T112501_033668_03E6F6_rtc",
+      "datetime": "2020-07-29T11:24:49.477758Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200927T112439_20200927T112504_034543_040549_rtc",
+      "datetime": "2020-09-27T11:24:52.162939Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201220T112438_20201220T112503_035768_042FB5_rtc",
+      "datetime": "2020-12-20T11:24:50.798745Z",
+      "orbit": "ascending"
+     }
+    ]
+   },
+   "seconds": 37.7,
+   "bytes_recv": 27133782,
+   "failed": false
+  },
+  "05": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQT_20201205T131123",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9999572772811262
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQT_20201005T181548",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9999145545622523
+     },
+     {
+      "id": "S2A_MSIL2A_20200306T031601_R118_T47MQT_20200929T170450",
+      "datetime": "2020-03-06T03:16:01.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9998718318433785
+     },
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9997650250461939
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 33.9,
+   "bytes_recv": 42047303,
+   "failed": false
+  },
+  "06": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQT_20201205T131123",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200729T031539_R118_T47MQT_20200818T010158",
+      "datetime": "2020-07-29T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T47MQT_20200917T154046",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQT_20201005T181548",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 32.8,
+   "bytes_recv": 25726572,
+   "failed": false
+  },
+  "07": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T47MQT_20200917T154046",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.999881833663504
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQT_20201005T181548",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9998679317415633
+     },
+     {
+      "id": "S2A_MSIL2A_20200306T031601_R118_T47MQT_20200929T170450",
+      "datetime": "2020-03-06T03:16:01.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9997636673270079
+     },
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9993813644736385
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 25.5,
+   "bytes_recv": 33714798,
+   "failed": false
+  },
+  "08": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200729T031539_R118_T47MQT_20200818T010158",
+      "datetime": "2020-07-29T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T47MQT_20200917T154046",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQT_20201005T181548",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20201226T032139_R118_T47MQT_20201226T195703",
+      "datetime": "2020-12-26T03:21:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 27.8,
+   "bytes_recv": 25091056,
+   "failed": false
+  },
+  "09": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20200306T031601_R118_T47MQT_20200929T170450",
+      "datetime": "2020-03-06T03:16:01.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQT_20201205T131123",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20201226T032139_R118_T47MQT_20201226T195703",
+      "datetime": "2020-12-26T03:21:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 68.9,
+   "bytes_recv": 67378507,
+   "failed": false
+  },
+  "10": {
+   "s2": {
+    "n_items": 147,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9993966817496229
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQT_20200923T085619",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9993464052287582
+     },
+     {
+      "id": "S2B_MSIL2A_20200801T032539_R018_T47MQT_20200815T182911",
+      "datetime": "2020-08-01T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9982905982905983
+     },
+     {
+      "id": "S2A_MSIL2A_20200627T032541_R018_T47MQT_20200824T064206",
+      "datetime": "2020-06-27T03:25:41.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9679738562091503
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 28.8,
+   "bytes_recv": 27175568,
+   "failed": false
+  },
+  "11": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQT_20201205T131123",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200729T031539_R118_T47MQT_20200818T010158",
+      "datetime": "2020-07-29T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20201226T032139_R118_T47MQT_20201226T195703",
+      "datetime": "2020-12-26T03:21:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQT_20201005T181548",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9999710723480575
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 32.7,
+   "bytes_recv": 42226116,
+   "failed": false
+  },
+  "12": {
+   "s2": {
+    "n_items": 70,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQU_20201205T130439",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.998993288590604
+     },
+     {
+      "id": "S2B_MSIL2A_20200311T031539_R118_T47MQU_20201005T181555",
+      "datetime": "2020-03-11T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9988627889634601
+     },
+     {
+      "id": "S2A_MSIL2A_20200106T032121_R118_T47MQU_20201002T233029",
+      "datetime": "2020-01-06T03:21:21.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9965370991797167
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQU_20200923T085625",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9945516405667413
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 60.8,
+   "bytes_recv": 66846340,
+   "failed": false
+  },
+  "13": {
+   "s2": {
+    "n_items": 36,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200808T031539_R118_T47MQT_20200815T115450",
+      "datetime": "2020-08-08T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20200306T031601_R118_T47MQT_20200929T170450",
+      "datetime": "2020-03-06T03:16:01.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQT_20201205T131123",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200729T031539_R118_T47MQT_20200818T010158",
+      "datetime": "2020-07-29T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 26.7,
+   "bytes_recv": 28938058,
+   "failed": false
+  },
+  "14": {
+   "s2": {
+    "n_items": 71,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200828T031539_R118_T47MQU_20200907T132320",
+      "datetime": "2020-08-28T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9961813254496181
+     },
+     {
+      "id": "S2A_MSIL2A_20200106T032121_R118_T47MQU_20201002T233029",
+      "datetime": "2020-01-06T03:21:21.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9951958610495196
+     },
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T47MQU_20201205T130439",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9936560729243656
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQU_20200923T085625",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.98989898989899
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 32.7,
+   "bytes_recv": 42420527,
+   "failed": false
+  },
+  "15": {
+   "s2": {
+    "n_items": 44,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20200727T032541_R018_T47MQU_20200817T170549",
+      "datetime": "2020-07-27T03:25:41.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.6008012254035584
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47MQU_20200923T085625",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.46529987039000825
+     },
+     {
+      "id": "S2A_MSIL2A_20200607T032541_R018_T47MQU_20200826T110331",
+      "datetime": "2020-06-07T03:25:41.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.20360551431601273
+     },
+     {
+      "id": "S2A_MSIL2A_20200627T032541_R018_T47MQU_20200824T064210",
+      "datetime": "2020-06-27T03:25:41.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.16407446683162483
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225709_20200101T225734_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:57:22.402884Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225708_20200313T225733_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:57:21.055774Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225711_20200524T225736_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:57:23.876139Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225715_20200804T225740_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:28.056194Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225718_20201015T225743_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:30.890321Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225716_20201226T225741_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:28.921196Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 38.4,
+   "bytes_recv": 26419556,
+   "failed": false
+  },
+  "16": {
+   "s2": {
+    "n_items": 33,
+    "scenes": [
+     {
+      "id": "S2A_MSIL2A_20200816T032541_R018_T47NQA_20200818T151437",
+      "datetime": "2020-08-16T03:25:41.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2B_MSIL2A_20200821T032539_R018_T47NQA_20200825T115201",
+      "datetime": "2020-08-21T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9965277777777778
+     },
+     {
+      "id": "S2B_MSIL2A_20200702T032539_R018_T47NQA_20200824T231039",
+      "datetime": "2020-07-02T03:25:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9875
+     },
+     {
+      "id": "S2B_MSIL2A_20200413T032529_R018_T47NQA_20200923T085648",
+      "datetime": "2020-04-13T03:25:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.958125
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 61,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200101T225644_20200101T225709_030613_0381E1_rtc",
+      "datetime": "2020-01-01T22:56:57.403303Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200313T225643_20200313T225708_031663_03A666_rtc",
+      "datetime": "2020-03-13T22:56:56.055561Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200524T225646_20200524T225711_032713_03CA11_rtc",
+      "datetime": "2020-05-24T22:56:58.875700Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200804T225650_20200804T225715_033763_03E9E0_rtc",
+      "datetime": "2020-08-04T22:57:03.056610Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201015T225653_20201015T225718_034813_040EBB_rtc",
+      "datetime": "2020-10-15T22:57:05.890695Z",
+      "orbit": "descending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201226T225651_20201226T225716_035863_043308_rtc",
+      "datetime": "2020-12-26T22:57:03.921612Z",
+      "orbit": "descending"
+     }
+    ]
+   },
+   "seconds": 41.9,
+   "bytes_recv": 37125565,
+   "failed": false
+  },
+  "17": {
+   "s2": {
+    "n_items": 37,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T48MUD_20200917T154100",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9972916666666667
+     },
+     {
+      "id": "S2B_MSIL2A_20200420T031539_R118_T48MUD_20200924T075514",
+      "datetime": "2020-04-20T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.99625
+     },
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T48MUD_20201205T131103",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9429861111111111
+     },
+     {
+      "id": "S2B_MSIL2A_20200629T031539_R118_T48MUD_20200824T141509",
+      "datetime": "2020-06-29T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9256944444444445
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 57,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200107T112431_20200107T112456_030693_0384B0_rtc",
+      "datetime": "2020-01-07T11:24:43.882790Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200319T112430_20200319T112455_031743_03A939_rtc",
+      "datetime": "2020-03-19T11:24:42.790885Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200518T112432_20200518T112457_032618_03C729_rtc",
+      "datetime": "2020-05-18T11:24:45.068688Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200729T112436_20200729T112501_033668_03E6F6_rtc",
+      "datetime": "2020-07-29T11:24:49.477758Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200927T112439_20200927T112504_034543_040549_rtc",
+      "datetime": "2020-09-27T11:24:52.162939Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201220T112438_20201220T112503_035768_042FB5_rtc",
+      "datetime": "2020-12-20T11:24:50.798745Z",
+      "orbit": "ascending"
+     }
+    ]
+   },
+   "seconds": 33.6,
+   "bytes_recv": 26668311,
+   "failed": false
+  },
+  "18": {
+   "s2": {
+    "n_items": 37,
+    "scenes": [
+     {
+      "id": "S2B_MSIL2A_20200510T031539_R118_T48MUD_20200917T154100",
+      "datetime": "2020-05-10T03:15:39.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 1.0
+     },
+     {
+      "id": "S2A_MSIL2A_20200106T032121_R118_T48MUD_20201002T233039",
+      "datetime": "2020-01-06T03:21:21.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9753472222222223
+     },
+     {
+      "id": "S2B_MSIL2A_20201027T031829_R118_T48MUD_20201031T215604",
+      "datetime": "2020-10-27T03:18:29.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9170138888888889
+     },
+     {
+      "id": "S2A_MSIL2A_20201201T032111_R118_T48MUD_20201205T131103",
+      "datetime": "2020-12-01T03:21:11.024000Z",
+      "baseline": "02.12",
+      "clear_frac": 0.9059722222222222
+     }
+    ]
+   },
+   "s1": {
+    "n_items": 57,
+    "scenes": [
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200107T112431_20200107T112456_030693_0384B0_rtc",
+      "datetime": "2020-01-07T11:24:43.882790Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200319T112430_20200319T112455_031743_03A939_rtc",
+      "datetime": "2020-03-19T11:24:42.790885Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200518T112432_20200518T112457_032618_03C729_rtc",
+      "datetime": "2020-05-18T11:24:45.068688Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200729T112436_20200729T112501_033668_03E6F6_rtc",
+      "datetime": "2020-07-29T11:24:49.477758Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20200927T112439_20200927T112504_034543_040549_rtc",
+      "datetime": "2020-09-27T11:24:52.162939Z",
+      "orbit": "ascending"
+     },
+     {
+      "id": "S1A_IW_GRDH_1SDV_20201220T112438_20201220T112503_035768_042FB5_rtc",
+      "datetime": "2020-12-20T11:24:50.798745Z",
+      "orbit": "ascending"
+     }
+    ]
+   },
+   "seconds": 25.3,
+   "bytes_recv": 34026330,
+   "failed": false
+  }
+ }
+}
