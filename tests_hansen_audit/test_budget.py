@@ -4,7 +4,7 @@ import time
 
 import pytest
 
-from hansen_audit.budget import DownloadBudget, exclusive_download
+from hansen_audit.budget import DownloadBudget, exclusive_download, run_guarded
 
 
 class Net:
@@ -67,3 +67,27 @@ def test_only_one_guarded_download_at_a_time(tmp_path):
                 pass
     with exclusive_download(lock):  # released after the first one ends
         pass
+
+
+def test_run_guarded_records_a_raising_fetch_as_failed_with_the_secret_scrubbed(tmp_path):
+    net = Net()
+    b = DownloadBudget(str(tmp_path), 1.0, "grids", heartbeat_s=0, net_bytes=net)
+
+    def fetch(item):
+        if item == "bad":
+            raise ValueError("projects/secret-123 refused")
+        return {"bytes_recv": 10}
+
+    n_fail = run_guarded(b, ["ok", "bad"], fetch, workers=2, scrub=lambda s: s.replace("secret-123", "<p>"), log=lambda m: None)
+    assert n_fail == 1
+    assert b.items["ok"] == {"bytes_recv": 10, "failed": False}
+    assert b.items["bad"]["failed"] and "secret" not in b.items["bad"]["error"]
+
+
+def test_run_guarded_reserves_a_whole_batch_before_starting_it(tmp_path):
+    net = Net()
+    b = DownloadBudget(str(tmp_path), 1.0, "grids", heartbeat_s=0, net_bytes=net)
+    b.record("seen", {"bytes_recv": 200_000_000}, failed=False)   # largest item so far: 0.2 GB
+    calls = []
+    run_guarded(b, list("abcdefgh"), lambda it: calls.append(it) or {"bytes_recv": 1}, workers=8, log=lambda m: None)
+    assert calls == []   # 8 x 0.2 GB would pass the 1 GB budget, so the batch never starts

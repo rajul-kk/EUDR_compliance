@@ -98,7 +98,7 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
     Output file: {output_dir}/{farm_id}_hansen_label.tif
     Pixel values:
       0 = non-forest or unknown
-      1 = forest as of 2020 (no post-2020 loss detected)
+      1 = forest as of 2020 with no loss in 2021-2024 (loss in 2025 or later stays 1)
       2 = post-EUDR loss (lossyear 21-24, i.e. 2021-2024)
       255 = no data (Hansen datamask 0)
     """

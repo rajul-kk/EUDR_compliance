@@ -15,7 +15,6 @@ import json
 import os
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +24,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import gfc  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
+from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
 from hansen_audit.io import index_labels  # noqa: E402
 
 ASSETS = {"V3": "JRC/GFC2020/V3", "V4": "JRC/GFC2020/V4"}
@@ -40,6 +40,7 @@ def label_grids(data_root):
     out = {}
     for k, p in index_labels(Path(data_root) / "hansen_labels").items():
         with rasterio.open(p) as s:
+            assert s.crs.to_string() == CRS, (k, s.crs)
             out[k] = (tuple(s.transform)[:6], s.shape)
     return out
 
@@ -58,22 +59,16 @@ def fetch_grid(asset, transform, shape):
     """uint8 (H, W) GFC forest percentage on the grid, computed server-side."""
     import ee
 
-    a, b, c, d, e, f = transform
     img = (ee.Image(asset).select("Map").eq(1).unmask(0)
            .reduceResolution(ee.Reducer.mean(), maxPixels=1024).multiply(100).round().toUint8())
-    arr = ee.data.computePixels({
-        "expression": img, "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": int(shape[1]), "height": int(shape[0])},
-                 "affineTransform": {"scaleX": a, "shearX": b, "translateX": c, "shearY": d, "scaleY": e, "translateY": f},
-                 "crsCode": "EPSG:4326"}})
-    return np.asarray(arr["Map"], np.uint8)
+    return np.asarray(compute_pixels(img, transform, shape)["Map"], np.uint8)
 
 
 def download(a):
     import ee
     from dotenv import dotenv_values
 
-    from hansen_audit.budget import DownloadBudget
+    from hansen_audit.budget import DownloadBudget, run_guarded
 
     project = dotenv_values(a.env_file).get("GEE_PROJECT_ID")
     if not project:
@@ -88,33 +83,23 @@ def download(a):
             if not budget.done(f"{v}/{g}", os.path.join(a.out_dir, v, f"{g}.npy"))]
     print(f"{len(grids)} grids x {len(ASSETS)} versions, {len(todo)} to fetch", flush=True)
 
-    def one(item):
+    def fetch(item):
         v, g = item
         out = os.path.join(a.out_dir, v, f"{g}.npy")
         t0 = time.time()
-        try:
-            arr = fetch_grid(ASSETS[v], *grids[g])
-        except Exception as ex:  # noqa: BLE001 - recorded per item, retried with --retry-failed
-            return item, {"error": f"{type(ex).__name__}: {str(ex).replace(project, '<project>')}"[:300]}, True
+        arr = fetch_grid(ASSETS[v], *grids[g])
         os.makedirs(os.path.dirname(out), exist_ok=True)
         tmp = out[:-4] + ".part.npy"
         np.save(tmp, arr)
         os.replace(tmp, out)
-        # bytes_recv: the guard's per-item estimate (next_item_estimate); the array is sent uncompressed
-        return item, {"shape": list(arr.shape), "seconds": round(time.time() - t0, 2), "bytes_recv": int(arr.nbytes)}, False
+        # bytes_recv: the guard's per-item estimate; the array is sent uncompressed
+        return {"shape": list(arr.shape), "seconds": round(time.time() - t0, 2), "bytes_recv": int(arr.nbytes)}
 
-    n_fail = 0
-    with ThreadPoolExecutor(WORKERS) as pool:
-        for i in range(0, len(todo), WORKERS):
-            if budget.exhausted():
-                print(f"budget reached ({budget.used() / 1e9:.3f} GB), stopping", flush=True)
-                break
-            for (v, g), meta, failed in pool.map(one, todo[i:i + WORKERS]):
-                budget.record(f"{v}/{g}", meta, failed=failed)
-                n_fail += failed
-            if (i // WORKERS) % 25 == 0:
-                print(f"{min(i + WORKERS, len(todo))}/{len(todo)} done, {n_fail} failed, {budget.used() / 1e9:.3f} GB", flush=True)
-    budget.close()
+    try:
+        run_guarded(budget, todo, fetch, key=lambda it: f"{it[0]}/{it[1]}", workers=WORKERS,
+                    scrub=lambda s: s.replace(project, "<project>"), log=lambda m: print(m, flush=True))
+    finally:
+        budget.close()
     print("all done", flush=True)
 
 
@@ -242,7 +227,8 @@ def run(a):
     R["analysis_5_sensitivity"] = sens
     R["seconds"] = round(time.time() - t0, 1)
     os.makedirs(a.results_dir, exist_ok=True)
-    json.dump(R, open(os.path.join(a.results_dir, "gfc2020.json"), "w"), indent=1)
+    with open(os.path.join(a.results_dir, "gfc2020.json"), "w") as fh:
+        json.dump(R, fh, indent=1)
     print(json.dumps(sens, indent=1), "\nsaved", R["seconds"], flush=True)
 
 

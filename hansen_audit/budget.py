@@ -12,12 +12,14 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, Optional, Sequence
 
-LOCK_PATH = os.path.join(os.path.expanduser("~"), ".hansen_audit_download.lock")
+LOCK_PATH = os.path.join(tempfile.gettempdir(), "hansen_audit_download.lock")
 
 
 def _net_bytes() -> int:
@@ -44,7 +46,14 @@ def exclusive_download(path: str = LOCK_PATH) -> Iterator[None]:
                 fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError:
             raise RuntimeError(f"another guarded download holds {path}; run downloads one at a time") from None
-        yield
+        try:
+            yield
+        finally:
+            if os.name == "nt":
+                import msvcrt
+
+                fh.seek(0)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)  # Windows releases a closed handle's lock lazily
     finally:
         fh.close()
 
@@ -99,9 +108,9 @@ class DownloadBudget:
     def next_item_estimate(self) -> int:
         return max((int(m.get("bytes_recv", 0)) for m in self.items.values()), default=0)
 
-    def exhausted(self) -> bool:
-        """True (and recorded) when one more item would likely take the total over the budget."""
-        if self.used() + self.next_item_estimate() <= self.limit:
+    def exhausted(self, n_next: int = 1) -> bool:
+        """True (and recorded) when `n_next` more items would likely take the total over the budget."""
+        if self.used() + n_next * self.next_item_estimate() <= self.limit:
             return False
         self.run["stopped_by_budget"] = True
         self.save()
@@ -117,3 +126,31 @@ class DownloadBudget:
         if self._beat is not None:
             self._beat.join()
         self.save()
+
+
+def run_guarded(budget: "DownloadBudget", items: Sequence, fetch: Callable[[object], dict], key: Callable[[object], str] = str,
+                workers: int = 8, scrub: Callable[[str], str] = str, log: Callable[[str], None] = print) -> int:
+    """Fetch `items` in parallel batches of `workers`, stopping before a batch that would likely pass the budget.
+
+    fetch(item) does the download and returns the item's meta (with bytes_recv, the guard's per-item estimate); if it
+    raises, the item is recorded as failed with the error passed through `scrub` (to remove secrets) and cut to 300
+    characters. Every item is recorded under key(item). Returns the number of failed items; closing the budget is the
+    caller's job."""
+    def one(item):
+        try:
+            return item, fetch(item), False
+        except Exception as ex:  # noqa: BLE001 - recorded per item, retried with retry_failed
+            return item, {"error": scrub(f"{type(ex).__name__}: {ex}")[:300]}, True
+
+    n_fail = 0
+    with ThreadPoolExecutor(workers) as pool:
+        for i in range(0, len(items), workers):
+            if budget.exhausted(n_next=workers):
+                log(f"budget reached ({budget.used() / 1e9:.3f} GB), stopping")
+                break
+            for item, meta, failed in pool.map(one, items[i:i + workers]):
+                budget.record(key(item), meta, failed=failed)
+                n_fail += failed
+            if (i // workers) % 25 == 0:
+                log(f"{min(i + workers, len(items))}/{len(items)} done, {n_fail} failed, {budget.used() / 1e9:.3f} GB")
+    return n_fail

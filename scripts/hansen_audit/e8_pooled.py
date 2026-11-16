@@ -60,7 +60,8 @@ def main(e4, e5, e8b, e8o, out5, out8, out):
          "outline_overlap_e5_e8": {"pairs": len(pairs), "hectares": round(sum(p[2] for p in pairs), 3),
                                    "list": [list(p) for p in pairs]},
          "caveat": "transported S2C predictions; farm bootstrap intervals are optimistic where boxes overlap"}
-    json.dump(R, open(out, "w"), indent=1)
+    with open(out, "w") as fh:
+        json.dump(R, fh, indent=1)
     print(json.dumps({k: R[k] for k in ("box", "outline", "transport_reading_e8_outline", "transport_reading_pooled_outline")},
                      indent=1), R["outline_overlap_e5_e8"]["pairs"])
 

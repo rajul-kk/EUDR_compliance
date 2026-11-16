@@ -100,7 +100,8 @@ jobs:
 
       - name: Lint the Hansen label audit (blocking)
         run: |
-          ruff check hansen_audit/ scripts/hansen_audit/ tests_hansen_audit/             --output-format=github
+          ruff check hansen_audit/ scripts/hansen_audit/ tests_hansen_audit/ \
+            --output-format=github
 
       - name: Lint GEE_dynamic/ and NDVI_pred/ (informational)
         run: |

@@ -13,7 +13,6 @@ import json
 import os
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +20,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit.budget import exclusive_download  # noqa: E402
+from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
 from hansen_audit.io import index_labels  # noqa: E402
 from hansen_audit.reference import hansen_label  # noqa: E402
 
@@ -39,15 +39,10 @@ def label_from_bands(treecover, lossyear, datamask):
 def fetch_bands(transform, shape):
     import ee
 
-    a, b, c, d, e, f = transform
     h = ee.Image(ASSET)
     img = (h.select("treecover2000").rename("tc").addBands(h.select("lossyear").unmask(0).rename("ly"))
            .addBands(h.select("datamask").rename("dm")).toUint8())
-    arr = ee.data.computePixels({
-        "expression": img, "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": int(shape[1]), "height": int(shape[0])},
-                 "affineTransform": {"scaleX": a, "shearX": b, "translateX": c, "shearY": d, "scaleY": e, "translateY": f},
-                 "crsCode": "EPSG:4326"}})
+    arr = compute_pixels(img, transform, shape)
     return np.asarray(arr["tc"]), np.asarray(arr["ly"]), np.asarray(arr["dm"])
 
 
@@ -65,7 +60,7 @@ def download(a):
     import rasterio
     from dotenv import dotenv_values
 
-    from hansen_audit.budget import DownloadBudget
+    from hansen_audit.budget import DownloadBudget, run_guarded
 
     project = dotenv_values(a.env_file).get("GEE_PROJECT_ID")
     if not project:
@@ -77,29 +72,20 @@ def download(a):
     todo = [k for k in old if not budget.done(k, os.path.join(a.out_dir, old[k].name))]
     print(f"{len(old)} farms, {len(todo)} to fetch", flush=True)
 
-    def one(k):
+    def fetch(k):
         t0 = time.time()
         with rasterio.open(old[k]) as s:
+            assert s.crs.to_string() == CRS, (k, s.crs)
             profile, transform, shape = s.profile, tuple(s.transform)[:6], s.shape
-        try:
-            tc, ly, dm = fetch_bands(transform, shape)
-        except Exception as ex:  # noqa: BLE001 - recorded per farm, retried with --retry-failed
-            return k, {"error": f"{type(ex).__name__}: {str(ex).replace(project, '<project>')}"[:300]}, True
+        tc, ly, dm = fetch_bands(transform, shape)
         write_label(os.path.join(a.out_dir, old[k].name), label_from_bands(tc, ly, dm), profile)
-        return k, {"seconds": round(time.time() - t0, 2), "bytes_recv": int(tc.nbytes * 3)}, False
+        return {"seconds": round(time.time() - t0, 2), "bytes_recv": int(tc.nbytes * 3)}
 
-    n_fail = 0
-    with ThreadPoolExecutor(WORKERS) as pool:
-        for i in range(0, len(todo), WORKERS):
-            if budget.exhausted():
-                print(f"budget reached ({budget.used() / 1e9:.3f} GB), stopping", flush=True)
-                break
-            for k, meta, failed in pool.map(one, todo[i:i + WORKERS]):
-                budget.record(k, meta, failed=failed)
-                n_fail += failed
-            if (i // WORKERS) % 25 == 0:
-                print(f"{min(i + WORKERS, len(todo))}/{len(todo)} done, {n_fail} failed, {budget.used() / 1e9:.3f} GB", flush=True)
-    budget.close()
+    try:
+        run_guarded(budget, todo, fetch, workers=WORKERS, scrub=lambda s: s.replace(project, "<project>"),
+                    log=lambda m: print(m, flush=True))
+    finally:
+        budget.close()
     print("all done", flush=True)
 
 
@@ -140,7 +126,8 @@ def compare(a):
          "shares_new_by_group": {g: class_shares(new, [k for k in keys if group.get(k) == g])
                                  for g in sorted({group.get(k, "?") for k in keys})}}
     os.makedirs(os.path.dirname(a.results) or ".", exist_ok=True)
-    json.dump(R, open(a.results, "w"), indent=1)
+    with open(a.results, "w") as fh:
+        json.dump(R, fh, indent=1)
     print(json.dumps({k: v for k, v in R.items() if k != "shares_new_by_group"}, indent=1))
 
 
