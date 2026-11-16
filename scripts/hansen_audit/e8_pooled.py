@@ -11,10 +11,11 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import outlines as O  # noqa: E402
+from hansen_audit.io import read_json  # noqa: E402
 
 
 def load(d):
-    return json.load(open(os.path.join(d, "farms.json")))
+    return read_json(os.path.join(d, "farms.json"))
 
 
 def plant_share(rows):
@@ -35,7 +36,7 @@ def transport_reading(share):
 
 
 def polygons(d, keys):
-    els = {O.farm_key(e): e for e in json.load(open(os.path.join(d, "overpass.json")))["elements"]}
+    els = {O.farm_key(e): e for e in read_json(os.path.join(d, "overpass.json"))["elements"]}
     return {k: poly for k in keys if k in els and (poly := O.element_polygon(els[k])) is not None}
 
 
@@ -60,7 +61,7 @@ def main(e4, e5, e8b, e8o, out5, out8, out):
          "outline_overlap_e5_e8": {"pairs": len(pairs), "hectares": round(sum(p[2] for p in pairs), 3),
                                    "list": [list(p) for p in pairs]},
          "caveat": "transported S2C predictions; farm bootstrap intervals are optimistic where boxes overlap"}
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps({k: R[k] for k in ("box", "outline", "transport_reading_e8_outline", "transport_reading_pooled_outline")},
                      indent=1), R["outline_overlap_e5_e8"]["pairs"])

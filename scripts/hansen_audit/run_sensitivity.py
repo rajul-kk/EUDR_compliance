@@ -13,9 +13,10 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import decisions  # noqa: E402
 from hansen_audit import model as M  # noqa: E402
+from hansen_audit.io import read_json, write_json  # noqa: E402
 
 z = np.load(sys.argv[1], allow_pickle=True)
-ref = json.load(open(sys.argv[2]))
+ref = read_json(sys.argv[2])
 P, y, f = M.make_patches(z["X"], z["Y"], z["V"])
 farms = np.where((z["country"] == "ID") & (z["crop"] == "Oil Palm"))[0]
 loss = np.array([(y[f == k] == 1).sum() for k in farms])
@@ -49,5 +50,5 @@ for lab, d in (("all_grids", ref["pooled"]), ("ref_year_le_2021", ref["by_label_
 res["reference_anchored"] = anchors
 res["caveat"] = ("precision = 1 - P(reference PLANT | Hansen loss); counts OTHER (shrub, bare, built...) as true loss, so it is an optimistic "
                  "precision. Reference grids are outside the farms; transport is an assumption.")
-json.dump(res, open(sys.argv[3], "w"), indent=1)
+write_json(res, sys.argv[3], indent=1)
 print(json.dumps(res, indent=1))

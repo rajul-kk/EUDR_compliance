@@ -39,7 +39,7 @@ def anchor_point_T(probs: np.ndarray, percentile: float = 97.0) -> np.ndarray:
     Anchor for class i = example at the given percentile of p_i; T[i,:] = probs[anchor_i].
     Assumes each class has at least one clean, unambiguous example.
     """
-    n, k = probs.shape
+    _, k = probs.shape
     T = np.zeros((k, k))
     for i in range(k):
         thr = np.percentile(probs[:, i], percentile)

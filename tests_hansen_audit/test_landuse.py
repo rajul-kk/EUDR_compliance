@@ -33,7 +33,7 @@ def test_assign_folds_balanced_and_deterministic():
     isl = ["A"] * 6 + ["B"] * 6
     f1 = L.assign_folds(gids, isl, k=3)
     assert f1 == L.assign_folds(gids, isl, k=3)
-    for isl_name, block in (("A", gids[:6]), ("B", gids[6:])):
+    for block in (gids[:6], gids[6:]):
         counts = np.bincount([f1[g] for g in block], minlength=3)
         assert counts.tolist() == [2, 2, 2]
 

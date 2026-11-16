@@ -6,7 +6,6 @@ Grid/periods that failed before are skipped unless --retry-failed. Budget: bytes
 hansen_audit.budget.
 """
 import argparse
-import csv
 import os
 import sys
 import time
@@ -16,6 +15,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import s1  # noqa: E402
 from hansen_audit.budget import DownloadBudget, exclusive_download  # noqa: E402
+from hansen_audit.io import read_csv  # noqa: E402
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
                  GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff").items():
@@ -44,7 +44,7 @@ def main():
     ref = np.load(a.ref_npz)
     tok = s1.Token()
 
-    for r in csv.DictReader(open(a.grid_index)):
+    for r in read_csv(a.grid_index):
         gid = r["grid_id"]
         if want and gid not in want:
             continue

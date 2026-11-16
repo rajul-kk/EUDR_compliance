@@ -56,7 +56,7 @@ def export_deforestation_vector(mask_2020, mask_2024, transform, crs, output_pat
         }
     }
 
-    with open(output_path, 'w') as f:
+    with open(output_path, 'w', encoding="utf-8") as f:
         json.dump(geojson, f)
 
     return output_path
@@ -255,7 +255,7 @@ def generate_summary_stats(report_df, output_json_path):
         'worst_offender': report_df.iloc[0]['farm_id'] if len(report_df) > 0 else None
     }
     summary['flagged_or_violation'] = sum(n(level) for level in FLAG_LEVELS)
-    with open(output_json_path, 'w') as f:
+    with open(output_json_path, 'w', encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     return summary
 

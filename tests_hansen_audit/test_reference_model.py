@@ -62,7 +62,7 @@ def test_make_patches_drops_invalid():
     Y = np.full((1, 5, 5), 2, np.uint8)
     V = np.ones((1, 5, 5), np.float32)
     V[0, 0, 0] = 0.1
-    P, y, f = M.make_patches(X, Y, V)
+    _, y, _ = M.make_patches(X, Y, V)
     assert len(y) == 25 - 2
 
 

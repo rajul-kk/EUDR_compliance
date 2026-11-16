@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import outlines as O  # noqa: E402
-from hansen_audit.io import index_labels, labels_root  # noqa: E402
+from hansen_audit.io import index_labels, labels_root, read_json, write_json  # noqa: E402
 
 OVERPASS = "https://overpass.kumi.systems/api/interpreter"  # mirror used by src/find_farms.py; overpass-api.de returned 502
 
@@ -33,7 +33,7 @@ def fetch(a):
     if os.path.exists(out):
         print(f"{out} exists; not fetching again")
         return
-    farms = json.load(open(os.path.join(a.e4_out_dir, "windows.json")))["farms"]
+    farms = read_json(os.path.join(a.e4_out_dir, "windows.json"))["farms"]
     ways = [f.split("_", 1)[1] for f in farms if f.startswith("way_")]
     rels = [f.split("_", 1)[1] for f in farms if f.startswith("relation_")]
     q = f"[out:json][timeout:180];(way(id:{','.join(ways)});relation(id:{','.join(rels)}););out geom meta;"
@@ -42,24 +42,44 @@ def fetch(a):
     r.raise_for_status()
     d = r.json()
     tmp = out + ".tmp"
-    json.dump(d, open(tmp, "w"))
+    write_json(d, tmp)
     os.replace(tmp, out)
     els = d.get("elements", [])
     man = {"fetched_utc": t, "endpoint": a.endpoint, "query": q, "bytes": len(r.content), "requested": len(farms),
            "returned": len(els), "missing": sorted(set(farms) - {O.farm_key(e) for e in els}),
            "objects": {O.farm_key(e): {"version": e.get("version"), "timestamp": e.get("timestamp")} for e in els},
            "licence": "(c) OpenStreetMap contributors, ODbL 1.0"}
-    json.dump(man, open(os.path.join(a.outlines_dir, "manifest.json"), "w"), indent=1)
+    write_json(man, os.path.join(a.outlines_dir, "manifest.json"), indent=1)
     print(json.dumps({k: man[k] for k in ("fetched_utc", "bytes", "requested", "returned", "missing")}, indent=1))
 
 
-def run(a):
+def outline_row(el, box, origin, shape, p, valid, label_path):
+    """(row, outline cells, None) for one farm in an E4 window, or (None, None, reason) when it is excluded. The label
+    is read only for farms that get a row."""
     from e4_farms import label_on_window
 
-    W = json.load(open(os.path.join(a.e4_out_dir, "windows.json")))
+    if el is None:
+        return None, None, "not returned by Overpass"
+    poly = O.element_polygon(el)
+    if poly is None:
+        return None, None, "not a closed area"
+    cells = O.outline_cells(origin, shape, poly) & E.farm_cells(origin, shape, box)
+    if not cells.any():
+        return None, None, "no cell inside the box"
+    lab = label_on_window(label_path, origin, shape)
+    loss, stable = cells & (lab == 2) & valid, cells & (lab == 1) & valid
+    return {"cells": int(cells.sum()), "outline_ha": round(float(O.equal_area(poly).area / 1e4), 2),
+            "coverage": round(O.coverage(poly, box), 4),
+            "loss_pred_2020": np.bincount(p[loss], minlength=3).tolist(),
+            "stable_pred_2020": np.bincount(p[stable], minlength=3).tolist()}, cells, None
+
+
+def run(a):
+
+    W = read_json(os.path.join(a.e4_out_dir, "windows.json"))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-    els = {O.farm_key(e): e for e in json.load(open(os.path.join(a.outlines_dir, "overpass.json")))["elements"]}
-    e4 = json.load(open(os.path.join(a.e4_results_dir, "farms.json")))["per_farm"]
+    els = {O.farm_key(e): e for e in read_json(os.path.join(a.outlines_dir, "overpass.json"))["elements"]}
+    e4 = read_json(os.path.join(a.e4_results_dir, "farms.json"))["per_farm"]
     preds = np.load(os.path.join(a.e4_results_dir, "farm_preds.npz"))
     labels = index_labels(labels_root(a.data_root, a.labels_dir))
     per_farm, excluded, owner = {}, {}, {}
@@ -73,24 +93,11 @@ def run(a):
         p = preds[name]
         valid = p >= 0
         for k in w["farms"]:
-            if k not in els:
-                excluded[k] = "not returned by Overpass"
+            row, cells, why = outline_row(els.get(k), boxes[k], origin, shape, p, valid, labels[k])
+            if why:
+                excluded[k] = why
                 continue
-            poly = O.element_polygon(els[k])
-            if poly is None:
-                excluded[k] = "not a closed area"
-                continue
-            cells = O.outline_cells(origin, shape, poly) & E.farm_cells(origin, shape, boxes[k])
-            if not cells.any():
-                excluded[k] = "no cell inside the box"
-                continue
-            lab = label_on_window(labels[k], origin, shape)
-            loss, stable = cells & (lab == 2) & valid, cells & (lab == 1) & valid
-            area_ha = float(O.equal_area(poly).area / 1e4)
-            per_farm[k] = {"window": w["id"], "cells": int(cells.sum()), "outline_ha": round(area_ha, 2),
-                           "coverage": round(O.coverage(poly, boxes[k]), 4),
-                           "loss_pred_2020": np.bincount(p[loss], minlength=3).tolist(),
-                           "stable_pred_2020": np.bincount(p[stable], minlength=3).tolist()}
+            per_farm[k] = {"window": w["id"], **row}
             lon = origin[0] + (np.nonzero(cells)[1] + 0.5) * E.HANSEN_RES
             lat = origin[1] - (np.nonzero(cells)[0] + 0.5) * E.HANSEN_RES
             for g in zip(np.floor(lon / E.HANSEN_RES).astype(int).tolist(), np.floor(lat / E.HANSEN_RES).astype(int).tolist()):
@@ -130,7 +137,7 @@ def run(a):
         "caveat": "transported S2C predictions as in E4; outlines from OpenStreetMap (ODbL), clipped to the E4 boxes",
     }
     os.makedirs(a.results_dir, exist_ok=True)
-    json.dump(out, open(os.path.join(a.results_dir, "farms.json"), "w"), indent=1)
+    write_json(out, os.path.join(a.results_dir, "farms.json"), indent=1)
     print(json.dumps({k: out[k] for k in ("n_included", "excluded", "primary", "flag_changes", "overlap", "transport_check")}, indent=1))
     print(json.dumps(out["secondary_not_partial"], indent=1))
 

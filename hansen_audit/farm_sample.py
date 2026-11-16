@@ -82,7 +82,7 @@ def write_sheets(path_sheet: str, path_key: str, lon, lat, key_rows: list, seed:
     stratum and source. Run twice with different seeds and prefixes for a blind second pass."""
     rng = np.random.default_rng(seed)
     order = rng.permutation(len(lon))
-    with open(path_sheet, "w", newline="") as fs, open(path_key, "w", newline="") as fk:
+    with open(path_sheet, "w", newline="", encoding="utf-8") as fs, open(path_key, "w", newline="", encoding="utf-8") as fk:
         ws, wk = csv.writer(fs), None
         ws.writerow(["sample_id", "lon", "lat", "label", "confidence", "imagery_date", "note"])
         for rank, i in enumerate(order):

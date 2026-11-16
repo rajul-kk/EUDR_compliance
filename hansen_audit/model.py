@@ -15,7 +15,7 @@ def make_patches(X: np.ndarray, Y: np.ndarray, V: np.ndarray, min_valid: float =
     """X (F,C,G,G), Y (F,G,G) in {0,1,2}, V (F,G,G).
     Returns patches (N,C,3,3) float32, label (N,) {0 stable-forest,1 loss}, farm index (N,).
     Only cells with Hansen class 1 or 2, valid share >= min_valid, and a fully valid 3x3 window (no NaN) are kept."""
-    Fn, C, G, _ = X.shape
+    Fn, _, _, _ = X.shape
     Xp = np.nan_to_num(np.pad(X, ((0, 0), (0, 0), (1, 1), (1, 1)), constant_values=np.nan), nan=0.0)
     ps, ys, fs = [], [], []
     for f in range(Fn):
@@ -71,7 +71,7 @@ def train_model(Xtr, ytr, Xva, yva, loss_name="ce", T=None, seed=0, epochs=15, b
     Xt, yt = torch.from_numpy(Xtr), torch.from_numpy(ytr)
     Xv, yv = torch.from_numpy(Xva), torch.from_numpy(yva)
     best, best_state = np.inf, None
-    for ep in range(epochs):
+    for _ in range(epochs):
         m.train()
         perm = torch.randperm(len(Xt))
         for i in range(0, len(perm), bs):

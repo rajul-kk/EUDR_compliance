@@ -318,7 +318,7 @@ def run_baseline_metrics(
         )
 
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-    with open(output_csv, "w", newline="") as fp:
+    with open(output_csv, "w", newline="", encoding="utf-8") as fp:
         writer = csv.DictWriter(
             fp,
             fieldnames=[
@@ -408,7 +408,7 @@ def run_benchmark(
         )
 
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-    with open(output_csv, "w", newline="") as fp:
+    with open(output_csv, "w", newline="", encoding="utf-8") as fp:
         writer = csv.DictWriter(fp, fieldnames=["model", "samples", "miou", "forest_f1", "change_f1", "sec_per_image"])
         writer.writeheader()
         writer.writerows(rows)

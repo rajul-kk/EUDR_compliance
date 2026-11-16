@@ -9,7 +9,6 @@ run:      fits the S2C classifier once on all reference grids, predicts 2020 lan
           and <results_dir>/farm_preds.npz.
 """
 import argparse
-import csv
 import json
 import os
 import sys
@@ -23,7 +22,14 @@ from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import landuse as L  # noqa: E402
 from hansen_audit import s1, s2  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
-from hansen_audit.io import index_images, index_labels, labels_root  # noqa: E402
+from hansen_audit.io import (  # noqa: E402
+    index_images,
+    index_labels,
+    labels_root,
+    read_csv,
+    read_json,
+    write_json,
+)
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
                  GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff").items():
@@ -37,7 +43,7 @@ def farms_and_windows(root, features_npz, composites=False, exclude=None):
     z = np.load(features_npz, allow_pickle=True)
     keys = [str(k) for k in z["keys"][(z["country"] == "ID") & (z["crop"] == "Oil Palm")]]
     if exclude:
-        done = set(json.load(open(exclude))["farms"])
+        done = set(read_json(exclude)["farms"])
         keys = [k for k in keys if k not in done]
     imgs = index_images(Path(root) / "2020_baseline", composites=composites)
     boxes = []
@@ -57,7 +63,7 @@ def download(a):
 
     os.makedirs(a.out_dir, exist_ok=True)
     keys, boxes, wins = farms_and_windows(a.data_root, a.features, a.composites, a.exclude)
-    json.dump({"farms": keys, "boxes": boxes.tolist(), "windows": wins}, open(os.path.join(a.out_dir, "windows.json"), "w"), indent=1)
+    write_json({"farms": keys, "boxes": boxes.tolist(), "windows": wins}, os.path.join(a.out_dir, "windows.json"), indent=1)
     budget = DownloadBudget(a.out_dir, a.budget_gb, "windows", retry_failed=a.retry_failed)
 
     t2, t1 = s2.Token(), s1.Token()
@@ -102,7 +108,7 @@ def label_on_window(label_path, origin, shape):
 def fit_s2c(ref_npz, grid_index, s2_dir, s1_dir):
     import lightgbm as lgb
 
-    rows = list(csv.DictReader(open(grid_index)))
+    rows = read_csv(grid_index)
     ref = np.load(ref_npz)
     rng = np.random.default_rng(0)
     X, Y = [], []
@@ -126,7 +132,7 @@ def fit_s2c(ref_npz, grid_index, s2_dir, s1_dir):
 def run(a):
     t0 = time.time()
     os.makedirs(a.results_dir, exist_ok=True)
-    W = json.load(open(os.path.join(a.out_dir, "windows.json")))
+    W = read_json(os.path.join(a.out_dir, "windows.json"))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
     labels = index_labels(labels_root(a.data_root, a.labels_dir))
     saved = np.load(a.preds) if a.preds else None
@@ -163,7 +169,7 @@ def run(a):
            "labels": str(labels_root(a.data_root, a.labels_dir).name), "n_train_cells": n_train, "missing_farms": missing,
            "summary": E.farm_summary(counts), "per_farm": per_farm,
            "caveat": "transported model output: no reference covers these farms; raw predictions, no per-cell correction"}
-    json.dump(out, open(os.path.join(a.results_dir, "farms.json"), "w"), indent=1)
+    write_json(out, os.path.join(a.results_dir, "farms.json"), indent=1)
     np.savez_compressed(os.path.join(a.results_dir, "farm_preds.npz"), **preds)
     print(json.dumps(out["summary"], indent=1))
     print(f"done in {time.time() - t0:.0f} s", flush=True)

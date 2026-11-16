@@ -1,6 +1,5 @@
 """CPU experiments per PROTOCOL.md.
 usage: python -I run_experiments.py <features.npz> <reference_metrics.json|none> <out.json> [epochs] [seeds]"""
-import json
 import os
 import sys
 import time
@@ -10,6 +9,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import decisions, noise, uncertainty  # noqa: E402
 from hansen_audit import model as M  # noqa: E402
+from hansen_audit.io import read_json, write_json  # noqa: E402
 
 feat, refjson, out = sys.argv[1], sys.argv[2], sys.argv[3]
 EPOCHS = int(sys.argv[4]) if len(sys.argv) > 4 else 15
@@ -146,7 +146,7 @@ print("C", C, flush=True)
 
 # ---------- Exp D: transported false-flag sensitivity from reference precision ----------
 if refjson != "none" and os.path.exists(refjson):
-    ref = json.load(open(refjson))
+    ref = read_json(refjson)
     hl = np.array([(y[f == k] == 1).sum() for k in idp])
     flagged = hl >= decisions.DEFAULT_MIN_CELLS
     Dd = {"id_palm_farms": int(len(idp)), "hansen_flagged_farms": int(flagged.sum()),
@@ -163,5 +163,5 @@ if refjson != "none" and os.path.exists(refjson):
                                     "expected_false_flag_share_of_flagged_farms": float(pf.mean()) if len(pf) else None}
     R["expD_transported_false_flag_sensitivity"] = Dd
     print("D", Dd, flush=True)
-json.dump(R, open(out, "w"), indent=1, default=float)
+write_json(R, out, indent=1, default=float)
 print("saved", out, time.time() - t0)

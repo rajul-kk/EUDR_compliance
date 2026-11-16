@@ -108,7 +108,7 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
 
 def main(root: str, out: str) -> None:
     inv = inventory(Path(root))
-    Path(out).write_text(json.dumps(inv, indent=1, default=str))
+    Path(out).write_text(json.dumps(inv, indent=1, default=str), encoding="utf-8")
     print(json.dumps({k: v for k, v in inv.items() if not k.startswith("_")}, indent=1, default=str))
 
 

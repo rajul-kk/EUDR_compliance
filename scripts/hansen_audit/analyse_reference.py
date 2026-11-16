@@ -6,6 +6,8 @@ import sys
 import numpy as np
 import pandas as pd
 
+from hansen_audit.io import write_json
+
 GROUPS = {1: "FOREST", 2: "PLANT", 3: "OTHER"}
 
 
@@ -84,7 +86,7 @@ def main(npz, gi, out, n_boot=2000):
     lc = [(g, per[g][2]) for g in gids if per[g][2].sum() > 0]
     res["grids_with_loss"] = len(lc)
     res["grids_loss_majority_plant"] = int(sum(1 for g, t in lc if t[1] > t[0] and t[1] > t[2]))
-    json.dump(res, open(out, "w"), indent=1)
+    write_json(res, out, indent=1)
     print(json.dumps({k: res[k] for k in ("n_grids", "pooled", "ci95", "by_island", "grids_with_loss", "grids_loss_majority_plant")}, indent=1))
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ The optional last argument picks the feature set (default s2 = PROTOCOL_S2; s2b 
 Writes <out_dir>/landuse.json (E1), <out_dir>/decompose.json (E2, E3) and <out_dir>/pred_2020.npz (per-grid predicted class map, -1 = invalid).
 Breakdowns (island, label_year <= 2021) re-estimate the confusion matrix from the same subset of grids.
 """
-import csv
 import json
 import os
 import sys
@@ -15,6 +14,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import landuse as L  # noqa: E402
+from hansen_audit.io import read_csv, write_json  # noqa: E402
 
 N_BOOT = 2000
 
@@ -57,7 +57,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2", s1_dir=None):
     os.makedirs(out_dir, exist_ok=True)
     import lightgbm as lgb
 
-    rows = {r["grid_id"]: r for r in csv.DictReader(open(grid_index))}
+    rows = {r["grid_id"]: r for r in read_csv(grid_index)}
     ref = np.load(ref_npz)
     grids, missing, s1_missing = {}, [], []
     for gid, r in rows.items():
@@ -141,7 +141,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2", s1_dir=None):
     rt = e1["tree_covered"]
     e1["quality_gate"] = {"recall_FOREST_tree": rt["recall_FOREST"]["est"], "recall_PLANT_tree": rt["recall_PLANT"]["est"],
                           "passed": bool(min(rt["recall_FOREST"]["est"], rt["recall_PLANT"]["est"]) >= 0.70)}
-    json.dump(e1, open(os.path.join(out_dir, "landuse.json"), "w"), indent=1)
+    write_json(e1, os.path.join(out_dir, "landuse.json"), indent=1)
 
     # ---- E2, E3
     def decomp(sel, key):
@@ -164,7 +164,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2", s1_dir=None):
     }
     p = dec["E2_loss_by_2020_landuse"]["all"]["corrected"]["PLANT"]
     dec["E2_headline_allowed"] = bool(p["lo"] > 0.20 or p["hi"] < 0.20) and e1["quality_gate"]["passed"]
-    json.dump(dec, open(os.path.join(out_dir, "decompose.json"), "w"), indent=1)
+    write_json(dec, os.path.join(out_dir, "decompose.json"), indent=1)
     print(json.dumps({"transfer_rule": e1["transfer_rule"], "quality_gate": e1["quality_gate"],
                       "E2_all": dec["E2_loss_by_2020_landuse"]["all"], "headline_allowed": dec["E2_headline_allowed"]}, indent=1))
     print(f"done in {time.time() - t0:.0f} s", flush=True)

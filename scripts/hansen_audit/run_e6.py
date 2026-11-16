@@ -11,6 +11,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import decisions, uncertainty  # noqa: E402
 from hansen_audit import model as M  # noqa: E402
+from hansen_audit.io import write_json  # noqa: E402
 
 MIN_GROUP = 20
 MIN_TYPE = 10
@@ -175,7 +176,7 @@ def main(feat, out, EPOCHS=15, SEEDS=5):
     R["image_type"] = IT
     R["seconds"] = time.time() - t0
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
-    json.dump(R, open(out, "w"), indent=1)
+    write_json(R, out, indent=1)
     print("saved", out, R["seconds"])
 
 

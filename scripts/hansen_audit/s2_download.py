@@ -6,7 +6,6 @@ Resumable: finished grid/period files, and ones that failed before (unless --ret
 Budget: bytes received over all runs, see hansen_audit.budget.
 """
 import argparse
-import csv
 import os
 import sys
 import time
@@ -16,6 +15,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit import s2  # noqa: E402
 from hansen_audit.budget import DownloadBudget, exclusive_download  # noqa: E402
+from hansen_audit.io import read_csv  # noqa: E402
 
 os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
 os.environ.setdefault("GDAL_HTTP_MERGE_CONSECUTIVE_RANGES", "YES")
@@ -42,7 +42,7 @@ def main():
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)
     budget = DownloadBudget(a.out_dir, a.budget_gb, "grids", retry_failed=a.retry_failed)
-    rows = list(csv.DictReader(open(a.grid_index)))
+    rows = read_csv(a.grid_index)
     want = set(a.grids.split(",")) if a.grids else None
     ref = np.load(a.ref_npz)
     tok = s2.Token()

@@ -342,7 +342,7 @@ def run_pipeline(
             summary_json = os.path.join(project_root, 'reports', 'summary_stats.json')
             summary = {}
             if os.path.exists(summary_json):
-                with open(summary_json, 'r') as f:
+                with open(summary_json, 'r', encoding="utf-8") as f:
                     summary = json.load(f)
 
             try:
