@@ -161,7 +161,27 @@ cells and cannot be flagged at all. Labels `hansen_labels_v2` (loss only); GFC20
   Cameroon and Ghana cocoa, where about half also survives the GFC2020 gate. Both maps are models; E3 labels remain the
   reference, and nothing here changes a product outcome.
 
-## 13. Hansen loss against oil palm planting year (PROTOCOL_E13): stopped at the encoding check
-The Descals et al. (2024) planting-year layer (Zenodo 13379129 v1.2, CC BY 4.0; 147 MB, MD5s match) holds 0, the years
-1990-2021, and two values neither the record nor the paper defines: 1989 (5.6 % of palm pixels) and 2022 (0.06 %). As
-registered, no analysis was run (`results/e13/encoding.json`); the reading of those two values waits on the owner.
+## 13. Hansen loss against oil palm planting year (PROTOCOL_E13; results/e13/descals.json)
+Descals et al. (2024) planting-year layer (Zenodo 13379129 v1.2, CC BY 4.0; 147 MB, MD5s match). The tiles hold two values
+the record and paper do not define, 1989 (5.6 % of palm pixels) and 2022 (0.06 %); the run first stopped there, and the owner
+then chose the reading: 1989 = planted 1989 or earlier (palm by 2020), 2022 its own category. The tiles share the label
+rasters' cell size and line up with them (offset 0.02 cell), so each label cell is one Descals pixel and the 30/50/70 % share
+thresholds give identical results.
+- **Only 0.011 [0.007, 0.015] of Hansen's 661,505 loss cells on the farms are oil palm planted by 2020** (ID Oil Palm 0.011
+  [0.007, 0.017]; highest TH Rubber 0.065, ID Coffee 0.041, CI Cocoa 0.025). Palm planted in 2021: 0.001.
+- No Hansen flag is removed by the Descals gate (895 of 895 survive; ID Oil Palm 200 of 200). Inside the E12 outlines:
+  0.002 of 10,645 loss cells, 138 of 138 flags survive. Counting 1989 as not palm changes nothing (0.010).
+- Analysis 3: every one of the 7,259 palm-by-2020 loss cells is GFC2020 non-forest ("the two maps agree" on those cells), but
+  they are few.
+- Analysis 5 (E4/E8 windows): of the loss cells S2C calls PLANT, Descals calls 0.19 palm by 2020; of those S2C calls FOREST,
+  0.997 not palm. Pre-registered reading: "S2C and Descals disagree".
+- Analysis 6: the palm-by-2020 loss cells on ID Oil Palm farms were planted across 1989-2020, most in 2005-2011.
+- Diagnostic, not registered (`results/e13/diagnostic_outline_palm.log`): Descals maps 0.061 of the cells inside the ID Oil
+  Palm OSM outlines as palm (any year to 2021), and the raw tile around the first farm checked is 0.03 palm against 0.27 for
+  its 100 km tile, so this is the data, not the resampling.
+- Reading: Descals does not support "the loss is oil palm replanting": by its map these farms are mostly not oil palm, and
+  nearly all Hansen loss on them is outside mapped palm. GFC2020 (E9) says most of the same loss is not 2020 forest. So the two
+  maps together place most of it on land that is neither 2020 forest nor oil palm (other tree crops, plantation forestry,
+  shrub or regrowth are candidates; none is measured here). Either the OSM crop tags, Descals, or both are wrong on these
+  farms; the E3 labels (FOREST / PLANT / OTHER) are what can settle it. The E4/E8 "plantation-driven" shares rest on S2C,
+  which disagrees with both maps.

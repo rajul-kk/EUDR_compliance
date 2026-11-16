@@ -1,0 +1,178 @@
+{
+ "n_farms": 996,
+ "loss_cells": 661505,
+ "share_loss_palm_by_2020": {
+  "est": 0.010973462029765459,
+  "lo": 0.007273267446832156,
+  "hi": 0.015367219050637907
+ },
+ "share_loss_palm_planted_2021": {
+  "est": 0.000952373753788709,
+  "lo": 0.000563275116300376,
+  "hi": 0.001433422611481299
+ },
+ "share_loss_value_2022": {
+  "est": 3.023408742186378e-06,
+  "lo": 0.0,
+  "hi": 7.715703245271012e-06
+ },
+ "hansen_flagged": 895,
+ "gated_flagged": 895,
+ "share_flags_not_surviving": {
+  "est": 0.0,
+  "lo": 0.0,
+  "hi": 0.0
+ },
+ "palm2020_loss_cells": 7259,
+ "palm2020_loss_cells_gfc_nonforest": 7259,
+ "gfc_forest_loss_cells_not_palm2020": 231651
+}
+{
+ "analysis_3_vs_gfc2020": {
+  "id_oil_palm_share_palm2020_loss_gfc_nonforest": 1.0,
+  "reading": "the two maps agree that this loss was not on 2020 forest",
+  "all_groups_share": 1.0
+ },
+ "analysis_5_s2c": {
+  "windows_used": 40,
+  "windows_missing": [],
+  "loss_cells_s2c_by_palm2020": {
+   "FOREST": {
+    "not_palm": 4573,
+    "palm_by_2020": 13
+   },
+   "PLANT": {
+    "not_palm": 1079,
+    "palm_by_2020": 250
+   },
+   "OTHER": {
+    "not_palm": 2834,
+    "palm_by_2020": 0
+   }
+  },
+  "share_s2c_plant_palm_by_2020": 0.18811136192626035,
+  "share_s2c_forest_not_palm": 0.9971652856519843,
+  "reading": "S2C and Descals disagree",
+  "note": "farm boxes overlap within a window, so a cell can count for more than one farm (as in E4)"
+ },
+ "analysis_6_yop_hist_id_oil_palm": {
+  "1989": 156,
+  "1990": 4,
+  "1991": 10,
+  "1992": 31,
+  "1993": 25,
+  "1994": 31,
+  "1995": 24,
+  "1996": 95,
+  "1997": 15,
+  "1998": 31,
+  "1999": 86,
+  "2000": 102,
+  "2001": 28,
+  "2002": 9,
+  "2003": 15,
+  "2004": 79,
+  "2005": 93,
+  "2006": 111,
+  "2007": 149,
+  "2008": 140,
+  "2009": 382,
+  "2010": 99,
+  "2011": 170,
+  "2012": 13,
+  "2013": 117,
+  "2014": 45,
+  "2015": 47,
+  "2016": 17,
+  "2017": 39,
+  "2018": 14,
+  "2019": 26,
+  "2020": 46
+ },
+ "analysis_7_sensitivity": {
+  "share_0.3": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010973462029765459,
+    "lo": 0.007273267446832156,
+    "hi": 0.015367219050637907
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010858701687468315,
+     "lo": 0.00673976306913205,
+     "hi": 0.0166198953976553
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  },
+  "share_0.7": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010973462029765459,
+    "lo": 0.007273267446832156,
+    "hi": 0.015367219050637907
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010858701687468315,
+     "lo": 0.00673976306913205,
+     "hi": 0.0166198953976553
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  },
+  "1989_not_palm": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010480646404789079,
+    "lo": 0.00687078339027989,
+    "hi": 0.014833172231815833
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010105496946141032,
+     "lo": 0.006175439126634049,
+     "hi": 0.015708165919139403
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  }
+ }
+}

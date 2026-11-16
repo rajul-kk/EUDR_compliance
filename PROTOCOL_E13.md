@@ -75,3 +75,12 @@ download manifest, run.log); a section in `docs/results.md`. Attribution: Descal
   (`results/e13/encoding.json`, `encoding_counts.log`). As registered, nothing was run; the owner decides how to read 1989
   and 2022. The paper defines the planting year as the year the current (2021) plantation was established, new or
   replanted, and says it may be later than the first establishment.
+- 15 Nov 2026, owner's decision ("run it", on the recommended reading): 1989 is read as "planted in 1989 or earlier" and
+  counts as palm by 2020; 2022 is reported as its own category and never counts as palm by 2020. Sensitivity: 1989 counted
+  as not palm. The encoding check accepts exactly these two extra values; any other value still stops the run. To allow
+  this sensitivity without recomputing, `grids` stores the cell shares of 1989, 1990-2020, 2021 and 2022 separately, plus
+  the nearest-neighbour planting year at each cell centre (for the histogram, analysis 6).
+- 15 Nov 2026, run: the tiles share the label rasters' cell size and align with them, so each label cell is one Descals
+  pixel and the 30/50/70 % thresholds coincide (reported, not a change of rule). After the run, a diagnostic outside the
+  registered analyses was added because the result looked implausible: the Descals palm share of the ID Oil Palm outline
+  cells, and the raw tile read at one farm (`results/e13/diagnostic_outline_palm.log`); it changes no registered number.

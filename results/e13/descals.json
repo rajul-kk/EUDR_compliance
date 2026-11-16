@@ -1,0 +1,1384 @@
+{
+ "protocol": "PROTOCOL_E13.md",
+ "labels": "hansen_labels_v2",
+ "reading_1989_2022": "1989 = planted 1989 or earlier (palm by 2020); 2022 own category (owner, 15 Nov)",
+ "missing_farms": [],
+ "analyses_1_2": {
+  "n_farms": 996,
+  "loss_cells": 661505,
+  "share_loss_palm_by_2020": {
+   "est": 0.010973462029765459,
+   "lo": 0.007273267446832156,
+   "hi": 0.015367219050637907
+  },
+  "share_loss_palm_planted_2021": {
+   "est": 0.000952373753788709,
+   "lo": 0.000563275116300376,
+   "hi": 0.001433422611481299
+  },
+  "share_loss_value_2022": {
+   "est": 3.023408742186378e-06,
+   "lo": 0.0,
+   "hi": 7.715703245271012e-06
+  },
+  "hansen_flagged": 895,
+  "gated_flagged": 895,
+  "share_flags_not_surviving": {
+   "est": 0.0,
+   "lo": 0.0,
+   "hi": 0.0
+  },
+  "palm2020_loss_cells": 7259,
+  "palm2020_loss_cells_gfc_nonforest": 7259,
+  "gfc_forest_loss_cells_not_palm2020": 231651,
+  "by_group": {
+   "AR|Cattle": {
+    "n_farms": 33,
+    "loss_cells": 15,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "AU|Cattle": {
+    "n_farms": 9,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "BR|Cattle": {
+    "n_farms": 69,
+    "loss_cells": 16000,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 69,
+    "gated_flagged": 69,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 9312
+   },
+   "BR|Cocoa": {
+    "n_farms": 15,
+    "loss_cells": 3796,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 15,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 885
+   },
+   "BR|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 17934,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 31,
+    "gated_flagged": 31,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 2959
+   },
+   "BR|Soy": {
+    "n_farms": 73,
+    "loss_cells": 13430,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 62,
+    "gated_flagged": 62,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 8976
+   },
+   "CI|Cocoa": {
+    "n_farms": 35,
+    "loss_cells": 36253,
+    "share_loss_palm_by_2020": {
+     "est": 0.024770363831958735,
+     "lo": 0.013244799428576468,
+     "hi": 0.036936375195912176
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0003310070890684909,
+     "lo": 0.00011889466622107838,
+     "hi": 0.0005767674557394067
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 35,
+    "gated_flagged": 35,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 898,
+    "palm2020_loss_cells_gfc_nonforest": 898,
+    "gfc_forest_loss_cells_not_palm2020": 71
+   },
+   "CM|Cocoa": {
+    "n_farms": 96,
+    "loss_cells": 166125,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 96,
+    "gated_flagged": 96,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 108526
+   },
+   "CR|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 2773,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 15,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 570
+   },
+   "ET|Coffee": {
+    "n_farms": 9,
+    "loss_cells": 1544,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 9,
+    "gated_flagged": 9,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 403
+   },
+   "GH|Cocoa": {
+    "n_farms": 88,
+    "loss_cells": 71289,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 88,
+    "gated_flagged": 88,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 57068
+   },
+   "ID|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 20855,
+    "share_loss_palm_by_2020": {
+     "est": 0.04075761208343323,
+     "lo": 0.0,
+     "hi": 0.11813323147620668
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.004075761208343323,
+     "lo": 0.0,
+     "hi": 0.011813323147620668
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 31,
+    "gated_flagged": 31,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 850,
+    "palm2020_loss_cells_gfc_nonforest": 850,
+    "gfc_forest_loss_cells_not_palm2020": 2520
+   },
+   "ID|Oil Palm": {
+    "n_farms": 200,
+    "loss_cells": 207115,
+    "share_loss_palm_by_2020": {
+     "est": 0.010858701687468315,
+     "lo": 0.00673976306913205,
+     "hi": 0.0166198953976553
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.001038070637085677,
+     "lo": 0.00030800373949704937,
+     "hi": 0.002056836183640496
+    },
+    "share_loss_value_2022": {
+     "est": 9.65647104265746e-06,
+     "lo": 0.0,
+     "hi": 2.486847810592259e-05
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 2249,
+    "palm2020_loss_cells_gfc_nonforest": 2249,
+    "gfc_forest_loss_cells_not_palm2020": 27581
+   },
+   "IN|Coffee": {
+    "n_farms": 1,
+    "loss_cells": 265,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 42
+   },
+   "IN|Rubber": {
+    "n_farms": 80,
+    "loss_cells": 29681,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 77,
+    "gated_flagged": 77,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 4
+   },
+   "IT|Cattle": {
+    "n_farms": 12,
+    "loss_cells": 492,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 6,
+    "gated_flagged": 6,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 447
+   },
+   "KE|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 3570,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 24,
+    "gated_flagged": 24,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 2121
+   },
+   "PA|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 3990,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0007518796992481203,
+     "lo": 0.0,
+     "hi": 0.002794402678682825
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 15,
+    "gated_flagged": 15,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 401
+   },
+   "TH|Rubber": {
+    "n_farms": 40,
+    "loss_cells": 50223,
+    "share_loss_palm_by_2020": {
+     "est": 0.06495032156581645,
+     "lo": 0.040462699409371555,
+     "hi": 0.08604709211891193
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.006272026760647512,
+     "lo": 0.0042605631118611854,
+     "hi": 0.008020706517530701
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 40,
+    "gated_flagged": 40,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 3262,
+    "palm2020_loss_cells_gfc_nonforest": 3262,
+    "gfc_forest_loss_cells_not_palm2020": 9284
+   },
+   "US|Cattle": {
+    "n_farms": 26,
+    "loss_cells": 6,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 6
+   },
+   "US|Soy": {
+    "n_farms": 20,
+    "loss_cells": 613,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 13,
+    "gated_flagged": 13,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 475
+   },
+   "VN|Coffee": {
+    "n_farms": 67,
+    "loss_cells": 15536,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 67,
+    "gated_flagged": 67,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   }
+  }
+ },
+ "analysis_3_vs_gfc2020": {
+  "id_oil_palm_share_palm2020_loss_gfc_nonforest": 1.0,
+  "reading": "the two maps agree that this loss was not on 2020 forest",
+  "all_groups_share": 1.0
+ },
+ "analysis_4_outlines": {
+  "n_farms": 969,
+  "loss_cells": 10645,
+  "share_loss_palm_by_2020": {
+   "est": 0.0020666979802724285,
+   "lo": 9.509344916450334e-05,
+   "hi": 0.005513929128630493
+  },
+  "share_loss_palm_planted_2021": {
+   "est": 9.394081728511038e-05,
+   "lo": 0.0,
+   "hi": 0.00033223350877682365
+  },
+  "share_loss_value_2022": {
+   "est": 0.0,
+   "lo": 0.0,
+   "hi": 0.0
+  },
+  "hansen_flagged": 138,
+  "gated_flagged": 138,
+  "share_flags_not_surviving": {
+   "est": 0.0,
+   "lo": 0.0,
+   "hi": 0.0
+  },
+  "palm2020_loss_cells": 22,
+  "palm2020_loss_cells_gfc_nonforest": 22,
+  "gfc_forest_loss_cells_not_palm2020": 2554,
+  "by_group": {
+   "AR|Cattle": {
+    "n_farms": 31,
+    "loss_cells": 15,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "AU|Cattle": {
+    "n_farms": 6,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "BR|Cattle": {
+    "n_farms": 69,
+    "loss_cells": 114,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 5,
+    "gated_flagged": 5,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 55
+   },
+   "BR|Cocoa": {
+    "n_farms": 15,
+    "loss_cells": 97,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 2,
+    "gated_flagged": 2,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "BR|Coffee": {
+    "n_farms": 31,
+    "loss_cells": 129,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 4,
+    "gated_flagged": 4,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 1
+   },
+   "BR|Soy": {
+    "n_farms": 73,
+    "loss_cells": 79,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 4,
+    "gated_flagged": 4,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 40
+   },
+   "CI|Cocoa": {
+    "n_farms": 34,
+    "loss_cells": 74,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 3,
+    "gated_flagged": 3,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "CM|Cocoa": {
+    "n_farms": 96,
+    "loss_cells": 7447,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 71,
+    "gated_flagged": 71,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 1945
+   },
+   "CR|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 5,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 2
+   },
+   "ET|Coffee": {
+    "n_farms": 9,
+    "loss_cells": 65,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "GH|Cocoa": {
+    "n_farms": 88,
+    "loss_cells": 1232,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 20,
+    "gated_flagged": 20,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 476
+   },
+   "ID|Coffee": {
+    "n_farms": 28,
+    "loss_cells": 255,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 3,
+    "gated_flagged": 3,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 1
+   },
+   "ID|Oil Palm": {
+    "n_farms": 185,
+    "loss_cells": 507,
+    "share_loss_palm_by_2020": {
+     "est": 0.0039447731755424065,
+     "lo": 0.0,
+     "hi": 0.027522935779816515
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 10,
+    "gated_flagged": 10,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 2,
+    "palm2020_loss_cells_gfc_nonforest": 2,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "IN|Coffee": {
+    "n_farms": 1,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "IN|Rubber": {
+    "n_farms": 80,
+    "loss_cells": 20,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 1,
+    "gated_flagged": 1,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "IT|Cattle": {
+    "n_farms": 12,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "KE|Coffee": {
+    "n_farms": 29,
+    "loss_cells": 2,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 1
+   },
+   "PA|Coffee": {
+    "n_farms": 15,
+    "loss_cells": 79,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 3,
+    "gated_flagged": 3,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 8
+   },
+   "TH|Rubber": {
+    "n_farms": 39,
+    "loss_cells": 491,
+    "share_loss_palm_by_2020": {
+     "est": 0.04073319755600815,
+     "lo": 0.0,
+     "hi": 0.06790342041758471
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.002036659877800407,
+     "lo": 0.0,
+     "hi": 0.004878048780487805
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 7,
+    "gated_flagged": 7,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 20,
+    "palm2020_loss_cells_gfc_nonforest": 20,
+    "gfc_forest_loss_cells_not_palm2020": 25
+   },
+   "US|Cattle": {
+    "n_farms": 26,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "US|Soy": {
+    "n_farms": 20,
+    "loss_cells": 0,
+    "share_loss_palm_by_2020": null,
+    "share_loss_palm_planted_2021": null,
+    "share_loss_value_2022": null,
+    "hansen_flagged": 0,
+    "gated_flagged": 0,
+    "share_flags_not_surviving": null,
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   },
+   "VN|Coffee": {
+    "n_farms": 67,
+    "loss_cells": 34,
+    "share_loss_palm_by_2020": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_palm_planted_2021": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "share_loss_value_2022": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "hansen_flagged": 3,
+    "gated_flagged": 3,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "palm2020_loss_cells": 0,
+    "palm2020_loss_cells_gfc_nonforest": 0,
+    "gfc_forest_loss_cells_not_palm2020": 0
+   }
+  }
+ },
+ "analysis_5_s2c": {
+  "windows_used": 40,
+  "windows_missing": [],
+  "loss_cells_s2c_by_palm2020": {
+   "FOREST": {
+    "not_palm": 4573,
+    "palm_by_2020": 13
+   },
+   "PLANT": {
+    "not_palm": 1079,
+    "palm_by_2020": 250
+   },
+   "OTHER": {
+    "not_palm": 2834,
+    "palm_by_2020": 0
+   }
+  },
+  "share_s2c_plant_palm_by_2020": 0.18811136192626035,
+  "share_s2c_forest_not_palm": 0.9971652856519843,
+  "reading": "S2C and Descals disagree",
+  "note": "farm boxes overlap within a window, so a cell can count for more than one farm (as in E4)"
+ },
+ "analysis_6_yop_hist_id_oil_palm": {
+  "1989": 156,
+  "1990": 4,
+  "1991": 10,
+  "1992": 31,
+  "1993": 25,
+  "1994": 31,
+  "1995": 24,
+  "1996": 95,
+  "1997": 15,
+  "1998": 31,
+  "1999": 86,
+  "2000": 102,
+  "2001": 28,
+  "2002": 9,
+  "2003": 15,
+  "2004": 79,
+  "2005": 93,
+  "2006": 111,
+  "2007": 149,
+  "2008": 140,
+  "2009": 382,
+  "2010": 99,
+  "2011": 170,
+  "2012": 13,
+  "2013": 117,
+  "2014": 45,
+  "2015": 47,
+  "2016": 17,
+  "2017": 39,
+  "2018": 14,
+  "2019": 26,
+  "2020": 46
+ },
+ "analysis_7_sensitivity": {
+  "share_0.3": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010973462029765459,
+    "lo": 0.007273267446832156,
+    "hi": 0.015367219050637907
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010858701687468315,
+     "lo": 0.00673976306913205,
+     "hi": 0.0166198953976553
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  },
+  "share_0.7": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010973462029765459,
+    "lo": 0.007273267446832156,
+    "hi": 0.015367219050637907
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010858701687468315,
+     "lo": 0.00673976306913205,
+     "hi": 0.0166198953976553
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  },
+  "1989_not_palm": {
+   "share_loss_palm_by_2020": {
+    "est": 0.010480646404789079,
+    "lo": 0.00687078339027989,
+    "hi": 0.014833172231815833
+   },
+   "hansen_flagged": 895,
+   "gated_flagged": 895,
+   "share_flags_not_surviving": {
+    "est": 0.0,
+    "lo": 0.0,
+    "hi": 0.0
+   },
+   "id_oil_palm": {
+    "share_loss_palm_by_2020": {
+     "est": 0.010105496946141032,
+     "lo": 0.006175439126634049,
+     "hi": 0.015708165919139403
+    },
+    "hansen_flagged": 200,
+    "gated_flagged": 200,
+    "share_flags_not_surviving": {
+     "est": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    }
+   }
+  }
+ },
+ "seconds": 36.1
+}

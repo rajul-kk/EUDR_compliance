@@ -41,6 +41,6 @@
   2022
  ],
  "n_distinct": 35,
- "encoding_ok": false,
- "reading": "unexpected non-year values [0, 1989, 2022]"
+ "encoding_ok": true,
+ "reading": "years 1990-2021, read as extra [1989, 2022], non-palm value [0]"
 }
