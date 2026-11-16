@@ -25,7 +25,7 @@ from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import gfc  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import index_labels, labels_root  # noqa: E402
 
 ASSETS = {"V3": "JRC/GFC2020/V3", "V4": "JRC/GFC2020/V4"}
 PRIMARY = "V3"
@@ -108,12 +108,12 @@ def load(gfc_dir, version, name):
     return np.load(p) if os.path.exists(p) else None
 
 
-def read_labels(data_root):
+def read_labels(data_root, labels_dir=None):
     """{farm: Hansen label array}, read once."""
     import rasterio
 
     out = {}
-    for k, p in index_labels(Path(data_root) / "hansen_labels").items():
+    for k, p in index_labels(labels_root(data_root, labels_dir)).items():
         with rasterio.open(p) as s:
             out[k] = s.read(1)
     return out
@@ -157,11 +157,11 @@ def summarise(table, group):
             **flag_block(col), "agreement_forest_2020": gfc.agreement_from_counts(col), "by_group": by_group}
 
 
-def s2c_check(data_root, gfc_dir, boxes_pairs):
+def s2c_check(data_root, gfc_dir, boxes_pairs, labels_dir=None):
     """PROTOCOL_E9 analysis 4 on the E4/E8 windows, primary version and threshold."""
     from e4_farms import label_on_window
 
-    labels = index_labels(Path(data_root) / "hansen_labels")
+    labels = index_labels(labels_root(data_root, labels_dir))
     loss = np.zeros((3, 2), int)   # S2C class x GFC (non-forest, forest)
     stable = np.zeros(2, int)
     used, missing = [], []
@@ -206,7 +206,7 @@ def run(a):
         sys.exit("--boxes takes pairs: windows.json farm_preds.npz")
     z = np.load(a.features, allow_pickle=True)
     group = {str(k): f"{c}|{p}" for k, c, p in zip(z["keys"], z["country"], z["crop"])}
-    labels = read_labels(a.data_root)
+    labels = read_labels(a.data_root, a.labels_dir)
     fracs = {v: read_fracs(labels, a.gfc_dir, v) for v in ASSETS}
     if not fracs[PRIMARY]:
         sys.exit(f"no {PRIMARY} grids in {a.gfc_dir}")
@@ -214,7 +214,7 @@ def run(a):
          "missing_farms": sorted(set(labels) - set(fracs[PRIMARY]))}
     R["analyses_1_to_3"] = summarise(farm_table(labels, fracs[PRIMARY], gfc.FOREST_PCT), group)
     print(json.dumps({k: v for k, v in R["analyses_1_to_3"].items() if k != "by_group"}, indent=1), flush=True)
-    R["analysis_4_s2c"] = s2c_check(a.data_root, a.gfc_dir, list(zip(a.boxes[::2], a.boxes[1::2])))
+    R["analysis_4_s2c"] = s2c_check(a.data_root, a.gfc_dir, list(zip(a.boxes[::2], a.boxes[1::2])), a.labels_dir)
     print(json.dumps(R["analysis_4_s2c"], indent=1), flush=True)
     sens = {}
     for v in ASSETS:
@@ -245,6 +245,7 @@ def main():
     for n in ("data_root", "features", "gfc_dir", "results_dir"):
         r.add_argument(n)
     r.add_argument("--boxes", nargs="*", default=[], help="pairs: windows.json farm_preds.npz")
+    r.add_argument("--labels-dir", help="label rasters (default <data_root>/hansen_labels)")
     a = ap.parse_args()
     if a.cmd == "download":
         with exclusive_download():

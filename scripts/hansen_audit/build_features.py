@@ -1,5 +1,5 @@
 """Build results/features.npz for all complete (baseline+current+label+csv) farms.
-usage: python -I build_features.py <data_root> <out.npz> [--composites]
+usage: python -I build_features.py <data_root> <out.npz> [--composites] [--labels-dir D]
 --composites also reads the undated median composites (E6) and saves each farm's image type in `product`."""
 import os
 import sys
@@ -9,14 +9,14 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from hansen_audit.features import CHANNELS, farm_features
-from hansen_audit.io import COMPOSITE, index_images, index_labels, load_farms
+from hansen_audit.io import COMPOSITE, index_images, index_labels, labels_root, load_farms
 
 
-def main(root, out, composites=False):
+def main(root, out, composites=False, labels_dir=None):
     root = Path(root)
     farms = load_farms(root).drop_duplicates("key").set_index("key")
     b, c = index_images(root / "2020_baseline", composites), index_images(root / "2024_current", composites)
-    labels = index_labels(root / "hansen_labels")
+    labels = index_labels(labels_root(root, labels_dir))
     keys = sorted(set(b) & set(c) & set(labels) & set(farms.index))
     X, Y, V, K, T = [], [], [], [], []
     for i, k in enumerate(keys):
@@ -35,4 +35,6 @@ def main(root, out, composites=False):
     print("saved", len(K))
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], "--composites" in sys.argv[3:])
+    rest = sys.argv[3:]
+    main(sys.argv[1], sys.argv[2], "--composites" in rest,
+         rest[rest.index("--labels-dir") + 1] if "--labels-dir" in rest else None)

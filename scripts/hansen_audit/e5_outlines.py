@@ -13,7 +13,6 @@ import json
 import os
 import sys
 import time
-from pathlib import Path
 
 import numpy as np
 
@@ -21,7 +20,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import outlines as O  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import index_labels, labels_root  # noqa: E402
 
 OVERPASS = "https://overpass.kumi.systems/api/interpreter"  # mirror used by src/find_farms.py; overpass-api.de returned 502
 
@@ -62,7 +61,7 @@ def run(a):
     els = {O.farm_key(e): e for e in json.load(open(os.path.join(a.outlines_dir, "overpass.json")))["elements"]}
     e4 = json.load(open(os.path.join(a.e4_results_dir, "farms.json")))["per_farm"]
     preds = np.load(os.path.join(a.e4_results_dir, "farm_preds.npz"))
-    labels = index_labels(Path(a.data_root) / "hansen_labels")
+    labels = index_labels(labels_root(a.data_root, a.labels_dir))
     per_farm, excluded, owner = {}, {}, {}
     for w in W["windows"]:
         name = f"win_{w['id']}"
@@ -146,6 +145,7 @@ def main():
     r = sub.add_parser("run")
     for n in ("data_root", "e4_out_dir", "outlines_dir", "e4_results_dir", "results_dir"):
         r.add_argument(n)
+    r.add_argument("--labels-dir", help="label rasters (default <data_root>/hansen_labels)")
     a = ap.parse_args()
     fetch(a) if a.cmd == "fetch" else run(a)
 

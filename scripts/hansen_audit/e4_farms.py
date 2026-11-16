@@ -2,7 +2,7 @@
 
 usage:
   python -I e4_farms.py download <data_root> <features.npz> <out_dir> [--budget-gb 2] [--composites] [--exclude <windows.json>]
-  python -I e4_farms.py run <data_root> <features.npz> <out_dir> <reference_cells.npz> <grid_index.csv> <s2_dir> <s1_dir> <results_dir>
+  python -I e4_farms.py run <data_root> <features.npz> <out_dir> <reference_cells.npz> <grid_index.csv> <s2_dir> <s1_dir> <results_dir> [--labels-dir D] [--preds farm_preds.npz]
 download: groups farms into <= 0.05 deg windows, writes <out_dir>/windows.json and <out_dir>/win_XX.npz (S2 + S1 2020 cells), resumable,
           atomic writes, own byte guard (system-wide received bytes summed over runs).
 run:      fits the S2C classifier once on all reference grids, predicts 2020 land use in each window, writes <results_dir>/farms.json
@@ -23,7 +23,7 @@ from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import landuse as L  # noqa: E402
 from hansen_audit import s1, s2  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
-from hansen_audit.io import index_images, index_labels  # noqa: E402
+from hansen_audit.io import index_images, index_labels, labels_root  # noqa: E402
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
                  GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff").items():
@@ -128,22 +128,27 @@ def run(a):
     os.makedirs(a.results_dir, exist_ok=True)
     W = json.load(open(os.path.join(a.out_dir, "windows.json")))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-    labels = index_labels(Path(a.data_root) / "hansen_labels")
-    clf, n_train = fit_s2c(a.ref_npz, a.grid_index, a.s2_dir, a.s1_dir)
+    labels = index_labels(labels_root(a.data_root, a.labels_dir))
+    saved = np.load(a.preds) if a.preds else None
+    clf, n_train = (None, None) if saved is not None else fit_s2c(a.ref_npz, a.grid_index, a.s2_dir, a.s1_dir)
     per_farm, preds, missing = {}, {}, []
     for w in W["windows"]:
         f = os.path.join(a.out_dir, f"win_{w['id']}.npz")
         if not os.path.exists(f):
             missing += w["farms"]
             continue
-        z = np.load(f)
         origin, shape = np.array(w["origin"]), tuple(w["shape"])
-        c1 = z["s1"] if z["s1"].size else None
-        F = L.s2c_features(z["s2"], tuple(z["s2_channels"].tolist()), c1, tuple(z["s1_channels"].tolist()))
-        valid = np.isfinite(F[0])
-        p = np.full(shape, -1, np.int8)
-        if valid.any():
-            p[valid] = clf.predict(F[:, valid].T)
+        if saved is not None:
+            p = saved[f"win_{w['id']}"]
+            valid = p >= 0
+        else:
+            z = np.load(f)
+            c1 = z["s1"] if z["s1"].size else None
+            F = L.s2c_features(z["s2"], tuple(z["s2_channels"].tolist()), c1, tuple(z["s1_channels"].tolist()))
+            valid = np.isfinite(F[0])
+            p = np.full(shape, -1, np.int8)
+            if valid.any():
+                p[valid] = clf.predict(F[:, valid].T)
         preds[f"win_{w['id']}"] = p
         for k in w["farms"]:
             cells = E.farm_cells(origin, shape, boxes[k])
@@ -154,7 +159,8 @@ def run(a):
                            "loss_pred_2020": np.bincount(p[lv], minlength=3).tolist(),
                            "stable_pred_2020": np.bincount(p[cells & (lab == 1) & valid], minlength=3).tolist()}
     counts = np.array([v["loss_pred_2020"] for v in per_farm.values()])
-    out = {"classifier": "S2C features, fit on all 72 reference grids", "n_train_cells": n_train, "missing_farms": missing,
+    out = {"classifier": "S2C features, fit on all 72 reference grids" + (f" (predictions reused from {a.preds})" if a.preds else ""),
+           "labels": str(labels_root(a.data_root, a.labels_dir).name), "n_train_cells": n_train, "missing_farms": missing,
            "summary": E.farm_summary(counts), "per_farm": per_farm,
            "caveat": "transported model output: no reference covers these farms; raw predictions, no per-cell correction"}
     json.dump(out, open(os.path.join(a.results_dir, "farms.json"), "w"), indent=1)
@@ -176,6 +182,8 @@ def main():
     r = sub.add_parser("run")
     for n in ("data_root", "features", "out_dir", "ref_npz", "grid_index", "s2_dir", "s1_dir", "results_dir"):
         r.add_argument(n)
+    r.add_argument("--labels-dir", help="label rasters (default <data_root>/hansen_labels)")
+    r.add_argument("--preds", help="farm_preds.npz of an earlier run: reuse its S2C predictions instead of refitting")
     a = ap.parse_args()
     if a.cmd == "download":
         with exclusive_download():
