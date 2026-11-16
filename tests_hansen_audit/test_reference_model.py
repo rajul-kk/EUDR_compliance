@@ -38,22 +38,28 @@ def test_rasterise_reference_majority():
     assert cid.tolist() == [[9, 1], [9, 1]] and (cov == 1).all()
 
 
-def test_patches_and_training_smoke():
-    rng = np.random.default_rng(0)
-    Fn, C, G = 6, 15, 8
+def _separable(seed=0, Fn=6, C=15, G=8):
+    """Random farms where loss cells (class 2) have channel 0 shifted, so the classes are separable."""
+    rng = np.random.default_rng(seed)
     X = rng.normal(size=(Fn, C, G, G)).astype(np.float32)
     Y = rng.integers(0, 3, size=(Fn, G, G)).astype(np.uint8)
-    V = np.ones((Fn, G, G), np.float32)
-    # make class separable: loss cells have channel 0 shifted
     X[:, 0] += (Y == 2) * 3.0
+    return X, Y, np.ones((Fn, G, G), np.float32)
+
+
+def test_make_patches_keeps_classes_1_and_2_as_3x3_patches():
+    X, Y, V = _separable()
     P, y, f = M.make_patches(X, Y, V)
-    assert P.shape[1:] == (C, 3, 3) and set(np.unique(y)) <= {0, 1} and len(P) == len(y) == len(f)
+    assert P.shape[1:] == (15, 3, 3) and set(np.unique(y)) <= {0, 1} and len(P) == len(y) == len(f)
     assert len(y) == ((Y >= 1)).sum()
+
+
+def test_training_learns_a_separable_task():
+    P, y, _ = M.make_patches(*_separable())
     Pa, = M.standardise(P)[:1]
     m = M.train_model(Pa, y, Pa, y, "ce", epochs=80, bs=64)
     pred = (M.predict_proba(m, Pa)[:, 1] > .5).astype(int)
     assert (pred == y).mean() > 0.8
-    assert M.f1_binary(np.array([1, 1, 0, 0]), np.array([1, 0, 0, 1])) == pytest.approx(0.5)
 
 
 def test_make_patches_drops_invalid():

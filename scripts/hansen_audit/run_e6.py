@@ -9,58 +9,21 @@ import time
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from hansen_audit import decisions, uncertainty  # noqa: E402
 from hansen_audit import model as M  # noqa: E402
-from hansen_audit.io import write_json  # noqa: E402
+from hansen_audit.experiments import farm_decisions  # noqa: E402
+from hansen_audit.io import farms_in_group, write_json  # noqa: E402
+from hansen_audit.metrics import (  # noqa: E402
+    balanced_accuracy,
+    boot_f1_diff,
+    boot_f1_diff_unpaired,
+    f1,
+    per_farm_counts,
+)
 
 MIN_GROUP = 20
 MIN_TYPE = 10
 GAP = 0.05
 N_BOOT = 2000
-
-
-def split_farms(farm_ids, seed=0):
-    ids = np.random.default_rng(seed).permutation(farm_ids)
-    n = len(ids)
-    a, b = int(.6 * n), int(.8 * n)
-    return ids[:a], ids[a:b], ids[b:]
-
-
-def counts(yt, pred):
-    return np.array([((yt == 1) & (pred == 1)).sum(), ((yt == 0) & (pred == 1)).sum(), ((yt == 1) & (pred == 0)).sum()],
-                    float)
-
-
-def f1(c):
-    tp, fp, fn = c
-    return float(2 * tp / max(2 * tp + fp + fn, 1))
-
-
-def bal_acc(yt, pred):
-    return float(0.5 * ((pred[yt == 1] == 1).mean() + (pred[yt == 0] == 0).mean()))
-
-
-def farm_counts(yt, pred, f, farms):
-    return np.array([counts(yt[f == k], pred[f == k]) for k in farms])
-
-
-def boot_gap(ca, cb, seed=0):
-    """F1(ca) - F1(cb) over resamples of farms (rows), pooled counts per resample: mean, 2.5 and 97.5 percentiles."""
-    rng = np.random.default_rng(seed)
-    d = np.empty(N_BOOT)
-    for i in range(N_BOOT):
-        j = rng.integers(0, len(ca), len(ca))
-        d[i] = f1(ca[j].sum(0)) - f1(cb[j].sum(0))
-    return [float(d.mean()), float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))]
-
-
-def boot_diff_groups(ca, cb, seed=0):
-    """F1(ca) - F1(cb) for two disjoint sets of farms, each resampled on its own."""
-    rng = np.random.default_rng(seed)
-    d = np.empty(N_BOOT)
-    for i in range(N_BOOT):
-        d[i] = (f1(ca[rng.integers(0, len(ca), len(ca))].sum(0)) - f1(cb[rng.integers(0, len(cb), len(cb))].sum(0)))
-    return [float(d.mean()), float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))]
 
 
 def ensemble_prob(P, y, f, train_farms, test_mask, seeds, epochs, seed=0):
@@ -72,41 +35,6 @@ def ensemble_prob(P, y, f, train_farms, test_mask, seeds, epochs, seed=0):
     Ptr, Pva, Pte = M.standardise(P[mtr], P[mva], P[test_mask])
     return np.mean([M.predict_proba(M.train_model(Ptr, y[mtr], Pva, y[mva], "ce", seed=s, epochs=epochs), Pte)[:, 1]
                     for s in range(seeds)], 0)
-
-
-def exp_c(P, y, f, idp, SEEDS, EPOCHS):
-    # verbatim from run_experiments.py, block "Exp C"
-    tr, va, te = split_farms(idp, seed=1)
-    cal_n = len(te) // 2
-
-    def sel(farms):
-        return np.isin(f, farms)
-
-    mu = P[sel(tr)].mean((0, 2, 3), keepdims=True)
-    sd = P[sel(tr)].std((0, 2, 3), keepdims=True) + 1e-6
-    Ptr, Pva = (P[sel(tr)] - mu) / sd, (P[sel(va)] - mu) / sd
-    members = [M.train_model(Ptr, y[sel(tr)], Pva, y[sel(va)], "ce", seed=s, epochs=EPOCHS) for s in range(SEEDS)]
-    area = np.zeros((SEEDS, len(te)))
-    hansen = np.zeros(len(te))
-    for j, k in enumerate(te):
-        mk = f == k
-        Pk = (P[mk] - mu) / sd
-        hansen[j] = (y[mk] == 1).sum()
-        for s, mm in enumerate(members):
-            area[s, j] = (M.predict_proba(mm, Pk)[:, 1] > .5).sum()
-    summ = uncertainty.ensemble_summary(area, decisions.DEFAULT_MIN_CELLS)
-    cal, tst = np.arange(len(te)) < cal_n, np.arange(len(te)) >= cal_n
-    hw = uncertainty.split_conformal_halfwidth(np.abs(summ["mean"][cal] - hansen[cal]), 0.1)
-    dec = uncertainty.decision_with_interval(summ["mean"][tst], hw, decisions.DEFAULT_MIN_CELLS)
-    hflag = decisions.farm_flag(hansen[tst])
-    mflag = decisions.farm_flag(summ["mean"][tst])
-    C = {"n_farms_eval": int(len(te)), "n_cal": int(cal.sum()), "n_test": int(tst.sum()),
-         "conformal_halfwidth_cells": hw, "hansen_flag_rate_test": float(hflag.mean()),
-         "model_flag_rate_test": float(mflag.mean()), "agreement": float((hflag == mflag).mean()),
-         "uncertain_share": float((dec == 2).mean()), "decision_counts_0_1_2": np.bincount(dec, minlength=3).tolist(),
-         "mean_ensemble_std_cells": float(summ["std"][tst].mean()),
-         "note": "Coverage is w.r.t. the noisy Hansen count, not truth."}
-    return C, te[tst], hflag, mflag
 
 
 def main(feat, out, EPOCHS=15, SEEDS=5):
@@ -122,8 +50,9 @@ def main(feat, out, EPOCHS=15, SEEDS=5):
          "git": commit, "epochs": EPOCHS, "seeds": SEEDS, "n_farms": int(len(farms)), "n_cells": int(len(y)),
          "farms_by_product": {p: int((product[farms] == p).sum()) for p in ("scene", "composite")}}
 
-    idp = np.array([k for k in farms if country[k] == "ID" and crop[k] == "Oil Palm"])
-    C, test_farms, hflag, mflag = exp_c(P, y, f, idp, SEEDS, EPOCHS)
+    idp = np.intersect1d(farms_in_group(z), farms)
+    C, test_farms, hflag, mflag = farm_decisions(P, y, f, idp, SEEDS, EPOCHS)
+    C["note"] = "Coverage is w.r.t. the noisy Hansen count, not truth."
     C["n_id_oil_palm_farms"] = int(len(idp))
     C["agreement_by_product"] = {p: {"n": int((product[test_farms] == p).sum()),
                                      "agreement": float((hflag == mflag)[product[test_farms] == p].mean())
@@ -146,13 +75,13 @@ def main(feat, out, EPOCHS=15, SEEDS=5):
         gm = group[f] == g
         gf = np.unique(f[gm])
         pred_out = (ensemble_prob(P, y, f, np.setdiff1d(farms, gf), gm, SEEDS, EPOCHS) > .5).astype(int)
-        ci, co = farm_counts(y[gm], pred_in[gm], f[gm], gf), farm_counts(y[gm], pred_out, f[gm], gf)
-        gap = boot_gap(ci, co)
+        ci, co = per_farm_counts(y[gm], pred_in[gm], f[gm], gf), per_farm_counts(y[gm], pred_out, f[gm], gf)
+        gap = boot_f1_diff(ci, co, N_BOOT)
         T[g] = {"n_farms": int(len(gf)), "n_cells": int(gm.sum()), "loss_share": float(y[gm].mean()),
-                "f1_in_group": f1(ci.sum(0)), "f1_held_out": f1(co.sum(0)),
-                "bal_acc_in_group": bal_acc(y[gm], pred_in[gm]), "bal_acc_held_out": bal_acc(y[gm], pred_out),
+                "f1_in_group": f1(ci), "f1_held_out": f1(co),
+                "bal_acc_in_group": balanced_accuracy(y[gm], pred_in[gm]), "bal_acc_held_out": balanced_accuracy(y[gm], pred_out),
                 "f1_gap_mean_lo_hi": gap,
-                "reading": "does not transfer" if (f1(ci.sum(0)) - f1(co.sum(0)) >= GAP and gap[1] > 0) else "transfers"}
+                "reading": "does not transfer" if (f1(ci) - f1(co) >= GAP and gap[1] > 0) else "transfers"}
         print("T", g, json.dumps(T[g]), time.time() - t0, flush=True)
     R["transfer"] = T
     R["group_sizes"] = sizes
@@ -167,10 +96,10 @@ def main(feat, out, EPOCHS=15, SEEDS=5):
         cs = {}
         for p, fp in by.items():
             m = np.isin(f, fp)
-            cs[p] = farm_counts(y[m], pred_in[m], f[m], fp)
+            cs[p] = per_farm_counts(y[m], pred_in[m], f[m], fp)
             res[p] = {"n_farms": int(len(fp)), "n_cells": int(m.sum()), "loss_share": float(y[m].mean()),
-                      "f1_in_group": f1(cs[p].sum(0)), "bal_acc_in_group": bal_acc(y[m], pred_in[m])}
-        res["f1_scene_minus_composite_mean_lo_hi"] = boot_diff_groups(cs["scene"], cs["composite"])
+                      "f1_in_group": f1(cs[p]), "bal_acc_in_group": balanced_accuracy(y[m], pred_in[m])}
+        res["f1_scene_minus_composite_mean_lo_hi"] = boot_f1_diff_unpaired(cs["scene"], cs["composite"], N_BOOT)
         IT[g] = res
         print("I", g, json.dumps(res), flush=True)
     R["image_type"] = IT

@@ -93,10 +93,3 @@ def predict_proba(m, X, bs=4096):
     m.eval()
     out = [F.softmax(m(torch.from_numpy(X[i:i + bs])), 1).numpy() for i in range(0, len(X), bs)]
     return np.concatenate(out)
-
-
-def f1_binary(y, pred):
-    tp = int(((y == 1) & (pred == 1)).sum())
-    fp = int(((y == 0) & (pred == 1)).sum())
-    fn = int(((y == 1) & (pred == 0)).sum())
-    return 2 * tp / max(2 * tp + fp + fn, 1)
