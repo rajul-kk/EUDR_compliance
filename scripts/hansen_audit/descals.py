@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import descals as D  # noqa: E402
 from hansen_audit.budget import OverBudget, capped_download, exclusive_download  # noqa: E402
-from hansen_audit.io import farm_groups, index_labels  # noqa: E402
+from hansen_audit.io import ID_OIL_PALM, farm_groups, index_labels  # noqa: E402
 
 RECORD = "https://zenodo.org/api/records/13379129"
 FILES = ("GlobalOilPalm_OP-YoP.zip", "Grid_OilPalm2016-2021.zip", "Validation_points_GlobalOP2016-2021.zip")
@@ -243,32 +243,24 @@ def summary(rows, group):
 
 def s2c_check(labels, grids_dir, boxes_pairs):
     """Analysis 5 on the E4/E8 windows: S2C 2020 class of loss cells in the farm boxes against palm by 2020."""
-    from e4_farms import label_on_window
-
     from hansen_audit import farms_e4 as E
     from hansen_audit import gfc
 
     t = np.zeros((3, 2), int)   # S2C class x (not palm by 2020, palm by 2020)
     used, missing = 0, []
     for wj, pj in boxes_pairs:
-        with open(wj, encoding="utf-8") as fh:
-            W = json.load(fh)
         tag = Path(wj).parent.name
-        boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-        preds = np.load(pj)
-        for w in W["windows"]:
-            name = f"win_{w['id']}"
+        boxes = E.read_boxes(wj)
+        for name, w, origin, shape, p in E.iter_windows(wj, pj):
             g = load_grid(grids_dir, f"{tag}_{name}")
-            if name not in preds.files or g is None:
+            if p is None or g is None:
                 missing.append(f"{tag}_{name}")
                 continue
-            origin, shape = np.array(w["origin"]), tuple(w["shape"])
-            p = preds[name]
             p20 = masks(g)[0]
             assert p20.shape == p.shape == shape, (tag, name)
             used += 1
             for k in w["farms"]:
-                lab = label_on_window(labels[k], origin, shape)
+                lab = E.label_on_window(labels[k], origin, shape)
                 cells = E.farm_cells(origin, shape, boxes[k]) & (p >= 0) & (lab == 2)
                 for c in range(3):
                     m = cells & (p == c)
@@ -279,7 +271,7 @@ def s2c_check(labels, grids_dir, boxes_pairs):
             "loss_cells_s2c_by_palm2020": {n: {"not_palm": int(t[i, 0]), "palm_by_2020": int(t[i, 1])}
                                            for i, n in enumerate(("FOREST", "PLANT", "OTHER"))},
             "share_s2c_plant_palm_by_2020": plant_palm, "share_s2c_forest_not_palm": forest_not,
-            "reading": gfc.s2c_reading(plant_palm, forest_not).replace("GFC2020", "Descals"),
+            "reading": gfc.s2c_reading(plant_palm, forest_not, "Descals"),
             "note": "farm boxes overlap within a window, so a cell can count for more than one farm (as in E4)"}
 
 
@@ -290,7 +282,7 @@ def yop_hist(data, group):
     """Analysis 6: planting year of the palm-by-2020 loss cells on ID Oil Palm farms (nearest value at the cell centre)."""
     counts = np.zeros(HIST_LAST - HIST_FIRST + 1, np.int64)
     for k, (lab, g, _, _) in data.items():
-        if group[k] == "ID|Oil Palm":
+        if group[k] == ID_OIL_PALM:
             y = g["yop"][(lab == 2) & masks(g)[0]].astype(int)
             y = y[(y >= HIST_FIRST) & (y <= HIST_LAST)]
             counts += np.bincount(y - HIST_FIRST, minlength=len(counts))
@@ -350,8 +342,8 @@ def run(a):
     missing_group = [k for k in data if k not in group]
     assert not missing_group, f"farms without a group in {a.features}: {missing_group[:5]}"
     primary = summary(farm_rows(data), group)
-    assert "ID|Oil Palm" in primary["by_group"], "no ID oil palm farm read; analysis 3 needs them"
-    idp = primary["by_group"]["ID|Oil Palm"]
+    assert ID_OIL_PALM in primary["by_group"], "no ID oil palm farm read; analysis 3 needs them"
+    idp = primary["by_group"][ID_OIL_PALM]
     share3 = ratio(idp["palm2020_loss_cells_gfc_nonforest"], idp["palm2020_loss_cells"])
     R = {"protocol": "PROTOCOL_E13.md", "labels": Path(a.labels_dir).name,
          "reading_1989_2022": "1989 = planted 1989 or earlier (palm by 2020); 2022 own category (owner, 15 Nov)",
@@ -368,7 +360,7 @@ def run(a):
                      "1989_not_palm": {"count_1989": False}}.items():
         s = summary(farm_rows(data, **kw), group)
         R["analysis_7_sensitivity"][name] = {f: s[f] for f in fields} | {
-            "id_oil_palm": {f: s["by_group"]["ID|Oil Palm"][f] for f in fields} if "ID|Oil Palm" in s["by_group"] else None}
+            "id_oil_palm": {f: s["by_group"][ID_OIL_PALM][f] for f in fields} if ID_OIL_PALM in s["by_group"] else None}
     R["seconds"] = round(time.time() - t0, 1)
     os.makedirs(a.results_dir, exist_ok=True)
     with open(os.path.join(a.results_dir, "descals.json"), "w", encoding="utf-8") as fh:

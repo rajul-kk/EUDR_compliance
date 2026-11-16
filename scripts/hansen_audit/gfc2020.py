@@ -28,7 +28,6 @@ from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
 from hansen_audit.io import farm_groups, index_labels, labels_root, read_json  # noqa: E402
 
 ASSETS = {"V3": "JRC/GFC2020/V3", "V4": "JRC/GFC2020/V4"}
-PRIMARY = "V3"
 THRESHOLDS = (30, 50, 70)
 WORKERS = 8
 
@@ -47,7 +46,7 @@ def label_grids(data_root):
 
 def window_grids(windows_json):
     """{window id: (transform, shape)} on the Hansen grid used by e4_farms.py."""
-    from hansen_audit.s1 import hansen_transform
+    from hansen_audit.s2 import hansen_transform
 
     W = read_json(windows_json)
     tag = Path(windows_json).parent.name
@@ -103,11 +102,6 @@ def download(a):
     print("all done", flush=True)
 
 
-def load(gfc_dir, version, name):
-    p = os.path.join(gfc_dir, version, f"{name}.npy")
-    return np.load(p) if os.path.exists(p) else None
-
-
 def read_labels(data_root, labels_dir=None):
     """{farm: Hansen label array}, read once."""
     import rasterio
@@ -123,7 +117,7 @@ def read_fracs(labels, gfc_dir, version):
     """{farm: GFC forest percentage} for farms whose grid was fetched; the grid must match the label raster."""
     out = {}
     for k, lab in labels.items():
-        frac = load(gfc_dir, version, f"farm_{k}")
+        frac = gfc.load(gfc_dir, version, f"farm_{k}")
         if frac is not None:
             assert lab.shape == frac.shape, (k, lab.shape, frac.shape)
             out[k] = frac
@@ -134,56 +128,26 @@ def farm_table(labels, fracs, threshold):
     return {k: gfc.farm_counts(labels[k], gfc.gfc_forest(f, threshold)) for k, f in fracs.items()}
 
 
-def flag_block(col, m=None):
-    """Flag counts and the share of Hansen flags that do not survive GFC gating, over farms m (all if None)."""
-    hflag, gflag = gfc.gated_flags(col["class2"], col["class2_gfc"])
-    m = np.ones(len(hflag), bool) if m is None else m
-    return {"hansen_flagged": int(hflag[m].sum()), "gated_flagged": int(gflag[m].sum()),
-            "share_flags_not_surviving": gfc.ratio_ci((hflag & ~gflag)[m].astype(float), hflag[m].astype(float))}
-
-
-def summarise(table, group):
-    keys = sorted(table)
-    col = {c: np.array([table[k][c] for k in keys]) for c in table[keys[0]]}
-    by_group = {}
-    for g in sorted({group[k] for k in keys}):
-        m = np.array([group[k] == g for k in keys])
-        by_group[g] = {"n_farms": int(m.sum()), "loss_cells": int(col["class2"][m].sum()),
-                       "share_loss_on_gfc_forest": gfc.ratio_ci(col["class2_gfc"][m], col["class2"][m])} | flag_block(col, m)
-    return {"n_farms": len(keys), "loss_cells": int(col["class2"].sum()),
-            "share_loss_on_gfc_forest": gfc.ratio_ci(col["class2_gfc"], col["class2"]),
-            "share_class1_on_gfc_forest": gfc.ratio_ci(col["class1_gfc"], col["class1"]),
-            "share_class0_on_gfc_forest": gfc.ratio_ci(col["class0_gfc"], col["class0"]),
-            **flag_block(col), "agreement_forest_2020": gfc.agreement_from_counts(col), "by_group": by_group}
-
-
 def s2c_check(data_root, gfc_dir, boxes_pairs, labels_dir=None):
     """PROTOCOL_E9 analysis 4 on the E4/E8 windows, primary version and threshold."""
-    from e4_farms import label_on_window
-
     labels = index_labels(labels_root(data_root, labels_dir))
     loss = np.zeros((3, 2), int)   # S2C class x GFC (non-forest, forest)
     stable = np.zeros(2, int)
     used, missing = [], []
     for wj, pj in boxes_pairs:
-        W = read_json(wj)
         tag = Path(wj).parent.name
-        boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-        preds = np.load(pj)
-        for w in W["windows"]:
-            name = f"win_{w['id']}"
-            frac = load(gfc_dir, PRIMARY, f"{tag}_{name}")
-            if name not in preds.files or frac is None:
+        boxes = E.read_boxes(wj)
+        for name, w, origin, shape, p in E.iter_windows(wj, pj):
+            frac = gfc.load(gfc_dir, gfc.PRIMARY, f"{tag}_{name}")
+            if p is None or frac is None:
                 missing.append(f"{tag}_{name}")
                 continue
-            origin, shape = np.array(w["origin"]), tuple(w["shape"])
-            p = preds[name]
             assert frac.shape == p.shape == shape, (tag, name, frac.shape, p.shape, shape)
             forest = gfc.gfc_forest(frac)
             used.append(f"{tag}_{name}")
             for k in w["farms"]:
                 cells = E.farm_cells(origin, shape, boxes[k]) & (p >= 0)
-                lab = label_on_window(labels[k], origin, shape)
+                lab = E.label_on_window(labels[k], origin, shape)
                 for c in range(3):
                     m = cells & (lab == 2) & (p == c)
                     loss[c] += [int((m & ~forest).sum()), int((m & forest).sum())]
@@ -208,20 +172,20 @@ def run(a):
     group = farm_groups(z)
     labels = read_labels(a.data_root, a.labels_dir)
     fracs = {v: read_fracs(labels, a.gfc_dir, v) for v in ASSETS}
-    if not fracs[PRIMARY]:
-        sys.exit(f"no {PRIMARY} grids in {a.gfc_dir}")
-    R = {"protocol": "PROTOCOL_E9.md", "primary": {"version": PRIMARY, "threshold_pct": gfc.FOREST_PCT},
-         "missing_farms": sorted(set(labels) - set(fracs[PRIMARY]))}
-    R["analyses_1_to_3"] = summarise(farm_table(labels, fracs[PRIMARY], gfc.FOREST_PCT), group)
+    if not fracs[gfc.PRIMARY]:
+        sys.exit(f"no {gfc.PRIMARY} grids in {a.gfc_dir}")
+    R = {"protocol": "PROTOCOL_E9.md", "primary": {"version": gfc.PRIMARY, "threshold_pct": gfc.FOREST_PCT},
+         "missing_farms": sorted(set(labels) - set(fracs[gfc.PRIMARY]))}
+    R["analyses_1_to_3"] = gfc.summarise(farm_table(labels, fracs[gfc.PRIMARY], gfc.FOREST_PCT), group)
     print(json.dumps({k: v for k, v in R["analyses_1_to_3"].items() if k != "by_group"}, indent=1), flush=True)
     R["analysis_4_s2c"] = s2c_check(a.data_root, a.gfc_dir, list(zip(a.boxes[::2], a.boxes[1::2])), a.labels_dir)
     print(json.dumps(R["analysis_4_s2c"], indent=1), flush=True)
     sens = {}
     for v in ASSETS:
         for t in THRESHOLDS:
-            if (v, t) == (PRIMARY, gfc.FOREST_PCT) or not fracs[v]:
+            if (v, t) == (gfc.PRIMARY, gfc.FOREST_PCT) or not fracs[v]:
                 continue
-            s = summarise(farm_table(labels, fracs[v], t), group)
+            s = gfc.summarise(farm_table(labels, fracs[v], t), group)
             sens[f"{v}_{t}"] = {k: s[k] for k in ("n_farms", "share_loss_on_gfc_forest", "hansen_flagged", "gated_flagged",
                                                    "share_flags_not_surviving")}
     R["analysis_5_sensitivity"] = sens

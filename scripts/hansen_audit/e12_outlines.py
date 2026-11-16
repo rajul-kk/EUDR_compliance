@@ -21,7 +21,6 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
-from gfc2020 import PRIMARY, load, summarise  # noqa: E402
 
 from hansen_audit import gfc  # noqa: E402
 from hansen_audit import outlines as O  # noqa: E402
@@ -112,7 +111,7 @@ def farm_rows(labels, els, gfc_dir):
     rows, excluded, holders = {}, {}, Counter()
     for k in sorted(labels):
         poly = O.element_polygon(els[k]) if k in els else None
-        frac = load(gfc_dir, PRIMARY, f"farm_{k}")
+        frac = gfc.load(gfc_dir, gfc.PRIMARY, f"farm_{k}")
         reason = ("not returned by Overpass" if k not in els else "not a closed area" if poly is None else
                   "no GFC2020 grid" if frac is None else None)
         if reason:
@@ -144,7 +143,7 @@ def flag_compare(rows, keys):
 
 def block(rows, keys, group):
     """Analyses 1 and 2 over `keys`, overall and by group."""
-    s = summarise({k: rows[k]["outline"] for k in keys}, group)
+    s = gfc.summarise({k: rows[k]["outline"] for k in keys}, group)
     return {"analysis_1_flags": flag_compare(rows, keys),
             "analysis_2_gfc_gate_in_outlines": {f: s[f] for f in GATE_FIELDS},
             "by_group": {g: {"analysis_1_flags": flag_compare(rows, [k for k in keys if group[k] == g]),
@@ -182,7 +181,7 @@ def run(a):
     missing_group = [k for k in keys if k not in group]
     assert not missing_group, f"farms without a group in {a.features}: {missing_group[:5]}"
     cells = np.array([rows[k]["outline_cells"] for k in keys])
-    R = {"protocol": "PROTOCOL_E12.md", "labels": Path(a.labels_dir).name, "gfc": f"{PRIMARY} at {gfc.FOREST_PCT} %",
+    R = {"protocol": "PROTOCOL_E12.md", "labels": Path(a.labels_dir).name, "gfc": f"{gfc.PRIMARY} at {gfc.FOREST_PCT} %",
          "n_farms": len(labels), "n_included": len(keys), "excluded_by_reason": dict(Counter(excluded.values())),
          "excluded": excluded, "primary": block(rows, keys, group),
          "analysis_3": {"outline_ha_quartiles": np.percentile([rows[k]["outline_ha"] for k in keys], [25, 50, 75]).round(2).tolist(),

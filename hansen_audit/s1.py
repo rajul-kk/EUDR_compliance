@@ -5,9 +5,7 @@ Hansen 0.00025 deg grid with average resampling; per-cell statistics over the ch
 """
 from __future__ import annotations
 
-import json
 import time
-import urllib.request
 
 import numpy as np
 
@@ -19,14 +17,6 @@ N_SCENES = 6
 MIN_OBS = 3
 OVERVIEW_LEVEL = 0  # first overview, 20 m
 CHANNELS = ("VV_med", "VH_med", "RATIO_med", "VV_tstd", "VH_tstd", "NOBS")
-
-
-class Token(s2.Token):
-    def get(self) -> str:
-        if self._tok is None or time.time() > self._exp - 300:
-            self._tok = json.load(urllib.request.urlopen(TOKEN_URL, timeout=60))["token"]
-            self._exp = time.time() + 45 * 60
-        return self._tok
 
 
 def pick_scenes(records):
@@ -63,12 +53,6 @@ def stats_to_cells(vv: np.ndarray, vh: np.ndarray) -> np.ndarray:
     return np.concatenate([out, nobs[None].astype(np.float32)])
 
 
-def hansen_transform(origin):
-    from rasterio.transform import from_origin
-
-    return from_origin(float(origin[0]), float(origin[1]), s2.HANSEN_RES, s2.HANSEN_RES)
-
-
 def warp_overview(href: str, origin, shape, retries=3) -> np.ndarray:
     import rasterio
     from rasterio.enums import Resampling
@@ -78,7 +62,7 @@ def warp_overview(href: str, origin, shape, retries=3) -> np.ndarray:
     for k in range(retries):
         try:
             with rasterio.open(href, overview_level=OVERVIEW_LEVEL) as src, WarpedVRT(
-                src, crs="EPSG:4326", transform=hansen_transform(origin), width=shape[1], height=shape[0],
+                src, crs="EPSG:4326", transform=s2.hansen_transform(origin), width=shape[1], height=shape[0],
                 resampling=Resampling.average, nodata=0,
             ) as vrt:
                 return vrt.read(1).astype(np.float32)
@@ -88,7 +72,7 @@ def warp_overview(href: str, origin, shape, retries=3) -> np.ndarray:
     raise last
 
 
-def build_s1(origin, shape, start: str, end: str, token: Token, log=print):
+def build_s1(origin, shape, start: str, end: str, token: s2.Token, log=print):
     from pystac_client import Client
 
     bounds = s2.grid_bounds(origin, shape)

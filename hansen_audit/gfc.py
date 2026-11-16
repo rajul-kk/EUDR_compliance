@@ -3,11 +3,14 @@
 Hansen classes: 0 not forest in 2000 or lost by 2020, 1 forest through 2024, 2 lost 2021-2024, 255 nodata.
 GFC forest fraction: integer percent of the cell covered by GFC2020 forest pixels (0-100).
 """
+import os
+
 import numpy as np
 
 from .decisions import farm_flag, rate_ci
+from .reference import LABEL_NODATA
 
-NODATA = 255
+NODATA = LABEL_NODATA
 FOREST_PCT = 50
 
 
@@ -55,12 +58,45 @@ def agreement_from_counts(col: dict) -> dict:
     return agreement(both=hg, hansen_only=h - hg, gfc_only=g0, neither=n0 - g0)
 
 
-def s2c_reading(plant_nonforest, forest_forest) -> str:
+def s2c_reading(plant_nonforest, forest_forest, map_name="GFC2020") -> str:
     """PROTOCOL_E9 analysis 4: agree if both shares >= 0.70, disagree if either <= 0.50, else mixed."""
     if plant_nonforest is None or forest_forest is None:
         return "too few cells"
     if plant_nonforest <= 0.5 or forest_forest <= 0.5:
-        return "S2C and GFC2020 disagree"
+        return f"S2C and {map_name} disagree"
     if plant_nonforest >= 0.7 and forest_forest >= 0.7:
-        return "S2C and GFC2020 agree"
+        return f"S2C and {map_name} agree"
     return "mixed"
+
+
+PRIMARY = "V3"   # PROTOCOL_E9: GFC2020 version of the primary analysis
+
+
+def load(gfc_dir, version, name):
+    """A saved GFC2020 forest-percentage grid, or None if it was not fetched."""
+    p = os.path.join(gfc_dir, version, f"{name}.npy")
+    return np.load(p) if os.path.exists(p) else None
+
+
+def flag_block(col, m=None):
+    """Flag counts and the share of Hansen flags that do not survive GFC gating, over farms m (all if None)."""
+    hflag, gflag = gated_flags(col["class2"], col["class2_gfc"])
+    m = np.ones(len(hflag), bool) if m is None else m
+    return {"hansen_flagged": int(hflag[m].sum()), "gated_flagged": int(gflag[m].sum()),
+            "share_flags_not_surviving": ratio_ci((hflag & ~gflag)[m].astype(float), hflag[m].astype(float))}
+
+
+def summarise(table, group):
+    """PROTOCOL_E9 analyses 1-3 over a {farm: farm_counts} table, overall and by group."""
+    keys = sorted(table)
+    col = {c: np.array([table[k][c] for k in keys]) for c in table[keys[0]]}
+    by_group = {}
+    for g in sorted({group[k] for k in keys}):
+        m = np.array([group[k] == g for k in keys])
+        by_group[g] = {"n_farms": int(m.sum()), "loss_cells": int(col["class2"][m].sum()),
+                       "share_loss_on_gfc_forest": ratio_ci(col["class2_gfc"][m], col["class2"][m])} | flag_block(col, m)
+    return {"n_farms": len(keys), "loss_cells": int(col["class2"].sum()),
+            "share_loss_on_gfc_forest": ratio_ci(col["class2_gfc"], col["class2"]),
+            "share_class1_on_gfc_forest": ratio_ci(col["class1_gfc"], col["class1"]),
+            "share_class0_on_gfc_forest": ratio_ci(col["class0_gfc"], col["class0"]),
+            **flag_block(col), "agreement_forest_2020": agreement_from_counts(col), "by_group": by_group}

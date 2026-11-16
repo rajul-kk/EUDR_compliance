@@ -43,7 +43,6 @@ def labels_dir(a):
 
 
 def population(labels_root, e4_out_dir, preds_npz):
-    from e4_farms import label_on_window
 
     W = read_json(os.path.join(e4_out_dir, "windows.json"))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
@@ -60,7 +59,7 @@ def population(labels_root, e4_out_dir, preds_npz):
         lat = origin[1] - (np.arange(shape[0]) + 0.5) * HANSEN_RES
         for k in w["farms"]:
             m = E.farm_cells(origin, shape, boxes[k])
-            lab = label_on_window(labels[k], origin, shape)
+            lab = E.label_on_window(labels[k], origin, shape)
             st = S.stratum_id(lab, p)
             for r, c in zip(*np.nonzero(m)):
                 g = (int(np.floor(lon[c] / HANSEN_RES)), int(np.floor(lat[r] / HANSEN_RES)))

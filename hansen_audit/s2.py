@@ -48,6 +48,13 @@ def grid_bounds(origin, shape):
     return w, n - H * HANSEN_RES, w + W * HANSEN_RES, n
 
 
+def hansen_transform(origin):
+    """North-up EPSG:4326 transform of a window on Hansen's grid, from its (west, north) origin."""
+    from rasterio.transform import from_origin
+
+    return from_origin(float(origin[0]), float(origin[1]), HANSEN_RES, HANSEN_RES)
+
+
 def fine_transform(origin):
     from rasterio.transform import from_origin
 
@@ -108,15 +115,25 @@ def composite_to_cells(stack: np.ndarray, clear: np.ndarray) -> np.ndarray:
 
 
 class Token:
-    def __init__(self):
-        self._tok, self._exp = None, 0.0
+    """Planetary Computer SAS token for one collection (`url`: its token endpoint), fetched again before it expires."""
+
+    def __init__(self, url=TOKEN_URL):
+        self.url, self._tok, self._exp = url, None, 0.0
 
     def get(self) -> str:
         if self._tok is None or time.time() > self._exp - 300:
-            d = json.load(urllib.request.urlopen(TOKEN_URL, timeout=60))
-            self._tok = d["token"]
+            with urllib.request.urlopen(self.url, timeout=60) as r:
+                self._tok = json.load(r)["token"]
             self._exp = time.time() + 45 * 60  # tokens last ~1 h; refresh early
         return self._tok
+
+
+def periods(label_year: int):
+    """{"2020": whole of 2020, "ref": the label's own year when it is not 2020} as (start, end) dates."""
+    out = {"2020": ("2020-01-01", "2020-12-31")}
+    if label_year != 2020:
+        out["ref"] = (f"{label_year}-01-01", f"{label_year}-12-31")
+    return out
 
 
 def search(bounds, start: str, end: str):

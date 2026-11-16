@@ -29,3 +29,17 @@ def test_farm_summary_rule():
     assert (s["n_flagged"], s["n_plantation_driven"]) == (3, 2)
     assert abs(s["share_plantation_driven"]["est"] - 2 / 3) < 1e-12
     assert s["flagged_farms_loss_cells_by_2020_class"] == {"FOREST": 12, "PLANT": 16, "OTHER": 5}
+
+
+def test_iter_windows_and_read_boxes(tmp_path):
+    import json
+
+    (tmp_path / "windows.json").write_text(json.dumps({
+        "farms": ["a", "b"], "boxes": [[0, 0, 1, 1], [1, 1, 2, 2]],
+        "windows": [{"id": "00", "origin": [0, 2], "shape": [3, 4], "farms": ["a"]},
+                    {"id": "01", "origin": [1, 2], "shape": [3, 4], "farms": ["b"]}]}), encoding="utf-8")
+    np.savez(tmp_path / "p.npz", win_00=np.zeros((3, 4), int))
+    assert E.read_boxes(tmp_path / "windows.json")["b"].tolist() == [1, 1, 2, 2]
+    got = list(E.iter_windows(tmp_path / "windows.json", tmp_path / "p.npz"))
+    assert [g[0] for g in got] == ["win_00", "win_01"]
+    assert got[0][3] == (3, 4) and got[0][4].shape == (3, 4) and got[1][4] is None

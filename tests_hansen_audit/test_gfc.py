@@ -54,3 +54,7 @@ def test_agreement_from_counts_maps_classes():
                                       (None, 0.9, "too few cells")])
 def test_s2c_reading(p, f, want):
     assert gfc.s2c_reading(p, f) == want
+
+
+def test_s2c_reading_names_the_map_it_compares():
+    assert gfc.s2c_reading(0.1, 0.9, "Descals") == "S2C and Descals disagree"

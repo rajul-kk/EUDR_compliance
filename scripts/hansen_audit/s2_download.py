@@ -24,13 +24,6 @@ os.environ.setdefault("GDAL_HTTP_RETRY_DELAY", "2")
 os.environ.setdefault("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", ".tif")
 
 
-def periods(label_year: int):
-    out = {"2020": ("2020-01-01", "2020-12-31")}
-    if label_year != 2020:
-        out["ref"] = (f"{label_year}-01-01", f"{label_year}-12-31")
-    return out
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ref_npz")
@@ -52,7 +45,7 @@ def main():
         if want and gid not in want:
             continue
         origin, shape = ref[f"origin_{gid}"], ref[f"hansen_{gid}"].shape
-        for pname, (start, end) in periods(int(r["label_year"])).items():
+        for pname, (start, end) in s2.periods(int(r["label_year"])).items():
             f = os.path.join(a.out_dir, f"grid_{gid}_{pname}.npz")
             if budget.done(f"{gid}_{pname}", f):
                 continue

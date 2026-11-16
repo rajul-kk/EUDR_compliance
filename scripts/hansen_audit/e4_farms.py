@@ -23,6 +23,7 @@ from hansen_audit import landuse as L  # noqa: E402
 from hansen_audit import s1, s2  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.io import (  # noqa: E402
+    farms_in_group,
     index_images,
     index_labels,
     labels_root,
@@ -41,7 +42,7 @@ def farms_and_windows(root, features_npz, composites=False, exclude=None):
     import rasterio
 
     z = np.load(features_npz, allow_pickle=True)
-    keys = [str(k) for k in z["keys"][(z["country"] == "ID") & (z["crop"] == "Oil Palm")]]
+    keys = [str(k) for k in z["keys"][farms_in_group(z)]]
     if exclude:
         done = set(read_json(exclude)["farms"])
         keys = [k for k in keys if k not in done]
@@ -66,7 +67,7 @@ def download(a):
     write_json({"farms": keys, "boxes": boxes.tolist(), "windows": wins}, os.path.join(a.out_dir, "windows.json"), indent=1)
     budget = DownloadBudget(a.out_dir, a.budget_gb, "windows", retry_failed=a.retry_failed)
 
-    t2, t1 = s2.Token(), s1.Token()
+    t2, t1 = s2.Token(), s2.Token(s1.TOKEN_URL)
     print(f"{len(keys)} farms in {len(wins)} windows", flush=True)
     for w in wins:
         f = os.path.join(a.out_dir, f"win_{w['id']}.npz")
@@ -92,17 +93,6 @@ def download(a):
         print(f"  done in {meta['seconds']} s, {meta['bytes_recv'] / 1e6:.0f} MB; total {budget.used() / 1e9:.2f} GB", flush=True)
     budget.close()
     print("all done", flush=True)
-
-
-def label_on_window(label_path, origin, shape):
-    import rasterio
-    from rasterio.warp import Resampling, reproject
-
-    out = np.full(shape, 255, np.uint8)
-    with rasterio.open(label_path) as src:
-        reproject(rasterio.band(src, 1), out, dst_transform=s1.hansen_transform(origin), dst_crs="EPSG:4326",
-                  resampling=Resampling.nearest, dst_nodata=255)
-    return out
 
 
 def fit_s2c(ref_npz, grid_index, s2_dir, s1_dir):
@@ -158,7 +148,7 @@ def run(a):
         preds[f"win_{w['id']}"] = p
         for k in w["farms"]:
             cells = E.farm_cells(origin, shape, boxes[k])
-            lab = label_on_window(labels[k], origin, shape)
+            lab = E.label_on_window(labels[k], origin, shape)
             loss = cells & (lab == 2)
             lv = loss & valid
             per_farm[k] = {"window": w["id"], "cells": int(cells.sum()), "loss_cells": int(loss.sum()), "loss_cells_valid": int(lv.sum()),

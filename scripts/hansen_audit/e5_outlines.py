@@ -56,7 +56,6 @@ def fetch(a):
 def outline_row(el, box, origin, shape, p, valid, label_path):
     """(row, outline cells, None) for one farm in an E4 window, or (None, None, reason) when it is excluded. The label
     is read only for farms that get a row."""
-    from e4_farms import label_on_window
 
     if el is None:
         return None, None, "not returned by Overpass"
@@ -66,7 +65,7 @@ def outline_row(el, box, origin, shape, p, valid, label_path):
     cells = O.outline_cells(origin, shape, poly) & E.farm_cells(origin, shape, box)
     if not cells.any():
         return None, None, "no cell inside the box"
-    lab = label_on_window(label_path, origin, shape)
+    lab = E.label_on_window(label_path, origin, shape)
     loss, stable = cells & (lab == 2) & valid, cells & (lab == 1) & valid
     return {"cells": int(cells.sum()), "outline_ha": round(float(O.equal_area(poly).area / 1e4), 2),
             "coverage": round(O.coverage(poly, box), 4),

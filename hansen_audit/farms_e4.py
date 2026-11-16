@@ -3,9 +3,38 @@ from __future__ import annotations
 
 import numpy as np
 
-from .s2 import HANSEN_RES
+from .io import read_json
+from .reference import LABEL_NODATA
+from .s2 import HANSEN_RES, hansen_transform
 
 MIN_LOSS_CELLS = 6
+
+
+def read_boxes(windows_json) -> dict:
+    """{farm: (west, south, east, north)} from an E4/E8 windows.json."""
+    W = read_json(windows_json)
+    return dict(zip(W["farms"], np.array(W["boxes"])))
+
+
+def iter_windows(windows_json, preds_npz):
+    """(name, window, origin, shape, S2C predictions or None) for each window of an E4/E8 windows.json; the name is
+    `win_<id>` and the predictions are None when farm_preds.npz has no entry for it."""
+    preds = np.load(preds_npz)
+    for w in read_json(windows_json)["windows"]:
+        name = f"win_{w['id']}"
+        yield name, w, np.array(w["origin"]), tuple(w["shape"]), preds[name] if name in preds.files else None
+
+
+def label_on_window(label_path, origin, shape):
+    """A farm's label raster resampled (nearest) onto a window on Hansen's grid; 255 outside the raster."""
+    import rasterio
+    from rasterio.warp import Resampling, reproject
+
+    out = np.full(shape, LABEL_NODATA, np.uint8)
+    with rasterio.open(label_path) as src:
+        reproject(rasterio.band(src, 1), out, dst_transform=hansen_transform(origin), dst_crs="EPSG:4326",
+                  resampling=Resampling.nearest, dst_nodata=LABEL_NODATA)
+    return out
 
 
 def group_windows(boxes, span: float = 0.05):

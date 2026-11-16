@@ -13,20 +13,13 @@ import time
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from hansen_audit import s1  # noqa: E402
+from hansen_audit import s1, s2  # noqa: E402
 from hansen_audit.budget import DownloadBudget, exclusive_download  # noqa: E402
 from hansen_audit.io import read_csv  # noqa: E402
 
 for k, v in dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES", GDAL_HTTP_MAX_RETRY="4",
                  GDAL_HTTP_RETRY_DELAY="2", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff").items():
     os.environ.setdefault(k, v)
-
-
-def periods(label_year: int):
-    out = {"2020": ("2020-01-01", "2020-12-31")}
-    if label_year != 2020:
-        out["ref"] = (f"{label_year}-01-01", f"{label_year}-12-31")
-    return out
 
 
 def main():
@@ -42,14 +35,14 @@ def main():
     budget = DownloadBudget(a.out_dir, a.budget_gb, "grids", retry_failed=a.retry_failed)
     want = set(a.grids.split(",")) if a.grids else None
     ref = np.load(a.ref_npz)
-    tok = s1.Token()
+    tok = s2.Token(s1.TOKEN_URL)
 
     for r in read_csv(a.grid_index):
         gid = r["grid_id"]
         if want and gid not in want:
             continue
         origin, shape = ref[f"origin_{gid}"], ref[f"hansen_{gid}"].shape
-        for pname, (start, end) in periods(int(r["label_year"])).items():
+        for pname, (start, end) in s2.periods(int(r["label_year"])).items():
             f = os.path.join(a.out_dir, f"grid_{gid}_{pname}.npz")
             if budget.done(f"{gid}_{pname}", f):
                 continue

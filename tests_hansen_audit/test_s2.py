@@ -61,3 +61,13 @@ def test_composite_median_and_validity():
     assert np.isnan(out[ch["B08"], 1, 0])
     assert out[ch["VALID_FRAC"], 1, 0] == 0.0
     assert out[ch["NOBS"], 1, 0] == 1.0
+
+
+def test_periods_adds_the_label_year_only_when_it_is_not_2020():
+    assert s2.periods(2020) == {"2020": ("2020-01-01", "2020-12-31")}
+    assert s2.periods(2023)["ref"] == ("2023-01-01", "2023-12-31")
+
+
+def test_token_keeps_its_own_endpoint():
+    assert s2.Token().url == s2.TOKEN_URL
+    assert s2.Token("https://example.org/token").url == "https://example.org/token"
