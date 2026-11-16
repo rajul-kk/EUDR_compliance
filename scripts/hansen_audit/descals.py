@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import descals as D  # noqa: E402
 from hansen_audit.budget import OverBudget, capped_download, exclusive_download  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import farm_groups, index_labels  # noqa: E402
 
 RECORD = "https://zenodo.org/api/records/13379129"
 FILES = ("GlobalOilPalm_OP-YoP.zip", "Grid_OilPalm2016-2021.zip", "Validation_points_GlobalOP2016-2021.zip")
@@ -79,7 +79,7 @@ def download(a):
                 os.remove(path)
                 sys.exit(f"{k}: MD5 mismatch; file removed")
     man["bytes_received"] = used
-    with open(os.path.join(a.out_dir, "download_manifest.json"), "w") as fh:
+    with open(os.path.join(a.out_dir, "download_manifest.json"), "w", encoding="utf-8") as fh:
         json.dump(man, fh, indent=1)
     print(json.dumps(man, indent=1))
 
@@ -120,7 +120,7 @@ def encoding(a):
     R = {"tiles": len(paths), "dtype_nodata_crs_res": info, "distinct_values": sorted(seen)[:80], "n_distinct": len(seen),
          "encoding_ok": ok, "reading": why}
     os.makedirs(a.results_dir, exist_ok=True)
-    with open(os.path.join(a.results_dir, "encoding.json"), "w") as fh:
+    with open(os.path.join(a.results_dir, "encoding.json"), "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps(R, indent=1))
     if not ok:
@@ -173,7 +173,7 @@ def grids(a):
             assert s.crs.to_string() == "EPSG:4326", (k, s.crs)
             todo[f"farm_{k}"] = (tuple(s.transform)[:6], s.shape)
     for wj in a.windows or []:
-        with open(wj) as fh:
+        with open(wj, encoding="utf-8") as fh:
             W = json.load(fh)
         tag = Path(wj).parent.name
         for w in W["windows"]:
@@ -251,7 +251,7 @@ def s2c_check(labels, grids_dir, boxes_pairs):
     t = np.zeros((3, 2), int)   # S2C class x (not palm by 2020, palm by 2020)
     used, missing = 0, []
     for wj, pj in boxes_pairs:
-        with open(wj) as fh:
+        with open(wj, encoding="utf-8") as fh:
             W = json.load(fh)
         tag = Path(wj).parent.name
         boxes = dict(zip(W["farms"], np.array(W["boxes"])))
@@ -340,14 +340,17 @@ def run(a):
 
     t0 = time.time()
     z = np.load(a.features, allow_pickle=True)
-    group = {str(k): f"{c}|{p}" for k, c, p in zip(z["keys"], z["country"], z["crop"])}
+    group = farm_groups(z)
     labels = index_labels(Path(a.labels_dir))
     els = {}
     if a.outlines:
         with open(os.path.join(a.outlines, "overpass.json"), encoding="utf-8") as fh:
             els = {O.farm_key(e): e for e in json.load(fh)["elements"]}
     data, missing = read_farms(labels, a.grids_dir, a.gfc_dir, els)
+    missing_group = [k for k in data if k not in group]
+    assert not missing_group, f"farms without a group in {a.features}: {missing_group[:5]}"
     primary = summary(farm_rows(data), group)
+    assert "ID|Oil Palm" in primary["by_group"], "no ID oil palm farm read; analysis 3 needs them"
     idp = primary["by_group"]["ID|Oil Palm"]
     share3 = ratio(idp["palm2020_loss_cells_gfc_nonforest"], idp["palm2020_loss_cells"])
     R = {"protocol": "PROTOCOL_E13.md", "labels": Path(a.labels_dir).name,
@@ -365,10 +368,10 @@ def run(a):
                      "1989_not_palm": {"count_1989": False}}.items():
         s = summary(farm_rows(data, **kw), group)
         R["analysis_7_sensitivity"][name] = {f: s[f] for f in fields} | {
-            "id_oil_palm": {f: s["by_group"]["ID|Oil Palm"][f] for f in fields}}
+            "id_oil_palm": {f: s["by_group"]["ID|Oil Palm"][f] for f in fields} if "ID|Oil Palm" in s["by_group"] else None}
     R["seconds"] = round(time.time() - t0, 1)
     os.makedirs(a.results_dir, exist_ok=True)
-    with open(os.path.join(a.results_dir, "descals.json"), "w") as fh:
+    with open(os.path.join(a.results_dir, "descals.json"), "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps({k: v for k, v in primary.items() if k != "by_group"}, indent=1))
     print(json.dumps({k: R[k] for k in ("analysis_3_vs_gfc2020", "analysis_5_s2c", "analysis_6_yop_hist_id_oil_palm",

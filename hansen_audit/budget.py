@@ -12,14 +12,15 @@ from __future__ import annotations
 
 import json
 import os
-import tempfile
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import Callable, Iterator, Optional, Sequence
 
-LOCK_PATH = os.path.join(tempfile.gettempdir(), "hansen_audit_download.lock")
+from hansen_audit.io import read_json
+
+LOCK_PATH = os.path.join(os.path.expanduser("~"), ".hansen_audit_download.lock")
 
 
 def _net_bytes() -> int:
@@ -32,7 +33,7 @@ def _net_bytes() -> int:
 def exclusive_download(path: str = LOCK_PATH) -> Iterator[None]:
     """Hold a machine-wide lock for the length of a guarded download. The byte count is system-wide, so two guarded
     downloads at once would each count the other's traffic; the second one stops here instead."""
-    fh = open(path, "a+")  # noqa: SIM115 - the open handle is the lock
+    fh = open(path, "a+", encoding="utf-8")  # noqa: SIM115 - the open handle is the lock
     try:
         try:
             if os.name == "nt":
@@ -67,7 +68,7 @@ class DownloadBudget:
         self.retry_failed = retry_failed
         self._net = net_bytes
         self._lock = threading.Lock()
-        self.manifest = json.load(open(self.path)) if os.path.exists(self.path) else {"runs": []}
+        self.manifest = read_json(self.path) if os.path.exists(self.path) else {"runs": []}
         self.manifest.setdefault("runs", [])
         self.manifest.setdefault(section, {})
         self.used_before = sum(r.get("bytes_recv", 0) for r in self.manifest["runs"])
@@ -91,7 +92,7 @@ class DownloadBudget:
         with self._lock:
             self.run["bytes_recv"] = self._net() - self.net0
             tmp = self.path + ".part"
-            with open(tmp, "w") as fh:
+            with open(tmp, "w", encoding="utf-8") as fh:
                 json.dump(self.manifest, fh, indent=1)
             os.replace(tmp, self.path)
 
@@ -145,7 +146,7 @@ def run_guarded(budget: "DownloadBudget", items: Sequence, fetch: Callable[[obje
     n_fail = 0
     with ThreadPoolExecutor(workers) as pool:
         for i in range(0, len(items), workers):
-            if budget.exhausted(n_next=workers):
+            if budget.exhausted(n_next=min(workers, len(items) - i)):
                 log(f"budget reached ({budget.used() / 1e9:.3f} GB), stopping")
                 break
             for item, meta, failed in pool.map(one, items[i:i + workers]):
@@ -163,15 +164,18 @@ class OverBudget(RuntimeError):
 def capped_download(response, path: str, cap_bytes: int, chunk: int = 1 << 20) -> int:
     """Stream an HTTP response (requests, stream=True) to `path`, counting the job's own bytes; refuse when the declared
     Content-Length already passes `cap_bytes`, and stop (deleting the partial file) once the bytes received pass it.
-    Writes through `<path>.part` and returns the number of bytes written."""
+    Bytes are counted on the wire (`response.raw.tell()`, the compressed size when the server gzips), the same unit as
+    Content-Length; a response without a raw stream is counted by decoded bytes. Writes through `<path>.part` and
+    returns the number of bytes received."""
     declared = response.headers.get("Content-Length")
     if declared is not None and int(declared) > cap_bytes:
         raise OverBudget(f"declared size {int(declared)} bytes passes the cap of {cap_bytes}")
     tmp, n = path + ".part", 0
+    wire = getattr(getattr(response, "raw", None), "tell", None)
     try:
         with open(tmp, "wb") as fh:
             for block in response.iter_content(chunk):
-                n += len(block)
+                n = wire() if wire else n + len(block)
                 if n > cap_bytes:
                     raise OverBudget(f"received more than the cap of {cap_bytes} bytes")
                 fh.write(block)

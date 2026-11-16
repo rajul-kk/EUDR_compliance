@@ -20,7 +20,6 @@ census-estimate: estimate 5 on the outline census: class shares overall and by S
             agreement when a second pass is given.
 """
 import argparse
-import csv
 import json
 import os
 import sys
@@ -32,7 +31,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit import farm_sample as S  # noqa: E402
 from hansen_audit import farms_e4 as E  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import index_labels, labels_root, read_csv, read_json, write_json  # noqa: E402
 from hansen_audit.s2 import HANSEN_RES  # noqa: E402
 
 LOSS_DOMAIN = (6, 7, 8)
@@ -40,13 +39,13 @@ LOSS_DOMAIN = (6, 7, 8)
 
 def labels_dir(a):
     """The label rasters: --labels-dir if given, else <data_root>/hansen_labels (the files the frozen E3 draw used)."""
-    return Path(a.labels_dir) if a.labels_dir else Path(a.data_root) / "hansen_labels"
+    return labels_root(a.data_root, a.labels_dir)
 
 
 def population(labels_root, e4_out_dir, preds_npz):
     from e4_farms import label_on_window
 
-    W = json.load(open(os.path.join(e4_out_dir, "windows.json")))
+    W = read_json(os.path.join(e4_out_dir, "windows.json"))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
     labels = index_labels(Path(labels_root))
     preds = np.load(preds_npz)
@@ -82,13 +81,18 @@ def cmd_population(a):
            "labels_dir": labels_dir(a).name, "N_h": N_h, "strata": "3 * hansen (0 non-forest, 1 stable, 2 loss) + S2C 2020 prediction (0 FOREST, 1 PLANT, 2 OTHER)",
            "loss_cells": loss,
            "n_for_halfwidth_p05": {str(d): S.n_for_halfwidth(0.5, d) for d in (0.05, 0.07, 0.1)}}
-    json.dump(out, open(a.out_json, "w"), indent=1)
+    write_json(out, a.out_json, indent=1)
     print(json.dumps(out, indent=1))
 
 
+def protocol_frozen(path):
+    """True if the protocol file has a line 'Status: frozen'."""
+    with open(path, encoding="utf-8") as fh:
+        return "Status: frozen" in fh.read().splitlines()
+
+
 def cmd_draw(a):
-    text = open(a.protocol).read()
-    if "Status: frozen" not in text.splitlines():
+    if not protocol_frozen(a.protocol):
         sys.exit(f"{a.protocol} is not frozen (needs a line 'Status: frozen'); nothing drawn")
     cells = population(labels_dir(a), a.e4_out_dir, a.preds)
     keys = list(cells)
@@ -102,8 +106,7 @@ def cmd_draw(a):
     rows = [{"cell": f"{keys[i][0]}_{keys[i][1]}", "stratum": cells[keys[i]]["stratum"], "hansen": cells[keys[i]]["hansen"], "pred": cells[keys[i]]["pred"],
              "window": cells[keys[i]]["window"], "farms": ";".join(sorted(cells[keys[i]]["farms"]))} for i in idx]
     n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
-    json.dump({"labels_dir": labels_dir(a).name, "N_h": N_h, "n_h": n_h, "seed": a.seed, "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
-              open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
+    write_json({"labels_dir": labels_dir(a).name, "N_h": N_h, "n_h": n_h, "seed": a.seed, "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol}, os.path.join(a.out_dir, "design.json"), indent=1)
     print(json.dumps({"N_h": N_h, "n_h": n_h, "n_second_pass": n_b}, indent=1))
 
 
@@ -122,9 +125,9 @@ def outline_set(e4_out_dir, outlines_dir):
     each mapped to the set of farms whose outline holds it."""
     from hansen_audit import outlines as O
 
-    W = json.load(open(os.path.join(e4_out_dir, "windows.json")))
+    W = read_json(os.path.join(e4_out_dir, "windows.json"))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-    els = {O.farm_key(e): e for e in json.load(open(os.path.join(outlines_dir, "overpass.json")))["elements"]}
+    els = {O.farm_key(e): e for e in read_json(os.path.join(outlines_dir, "overpass.json"))["elements"]}
     out: dict = {}
     for w in W["windows"]:
         origin, shape = np.array(w["origin"]), tuple(w["shape"])
@@ -141,8 +144,7 @@ def outline_set(e4_out_dir, outlines_dir):
 
 
 def cmd_census(a):
-    text = open(a.protocol).read()
-    if "Status: frozen" not in text.splitlines():
+    if not protocol_frozen(a.protocol):
         sys.exit(f"{a.protocol} is not frozen (needs a line 'Status: frozen'); nothing written")
     cells = population(labels_dir(a), a.e4_out_dir, a.preds)
     inside = outline_set(a.e4_out_dir, a.outlines_dir)
@@ -153,31 +155,30 @@ def cmd_census(a):
              "window": cells[g]["window"], "farms": ";".join(sorted(cells[g]["farms"]))} for g in keys]
     n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
     N_h = {h: sum(r["stratum"] == h for r in rows) for h in LOSS_DOMAIN}
-    json.dump({"census": "loss cells inside the OSM outlines", "labels_dir": labels_dir(a).name, "N_h": N_h, "n": len(rows), "seed": a.seed,
-               "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
-              open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
+    write_json({"census": "loss cells inside the OSM outlines", "labels_dir": labels_dir(a).name, "N_h": N_h, "n": len(rows), "seed": a.seed,
+               "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol}, os.path.join(a.out_dir, "design.json"), indent=1)
     print(json.dumps({"N_h": N_h, "n": len(rows), "n_second_pass": n_b}, indent=1))
 
 
 def read_labels(key_csv, labels_csv):
-    key = {r["sample_id"]: r for r in csv.DictReader(open(key_csv))}
-    lab = {r["sample_id"]: r["label"].strip().upper() for r in csv.DictReader(open(labels_csv))}
+    key = {r["sample_id"]: r for r in read_csv(key_csv)}
+    lab = {r["sample_id"]: r["label"].strip().upper() for r in read_csv(labels_csv)}
     ids = sorted(key)
     cell = [key[i]["cell"] for i in ids]
     return ids, cell, np.array([int(key[i]["stratum"]) for i in ids]), [lab.get(i, "") for i in ids], key
 
 
 def cmd_estimate(a):
-    pop = json.load(open(a.population))
+    pop = read_json(a.population)
     N_all = {int(k): v for k, v in pop["N_h"].items()}
-    _, cell, s, y, key = read_labels(a.key, a.labels)
+    _, cell, s, y, _ = read_labels(a.key, a.labels)
     dom = [h for h in LOSS_DOMAIN if N_all.get(h, 0) > 0]
     out = {"loss_domain_shares": S.stratified_shares({h: N_all[h] for h in dom}, s, y, domain=dom)}
     sampled = sorted(set(s.tolist()))
     out["s2c_on_farms"] = S.map_accuracy({h: N_all[h] for h in sampled}, {h: h % 3 for h in sampled}, s, y)
     out["s2c_on_farms"]["note"] = "within the sampled strata only"
     if a.farms:
-        f = json.load(open(a.farms))["per_farm"]
+        f = read_json(a.farms)["per_farm"]
         counts = np.array([v["loss_pred_2020"] for v in f.values()])
         ok = np.isin(np.array(y, dtype=object), list(S.CLASSES)) & np.isin(s, LOSS_DOMAIN)
         out["plantation_driven_flags"] = S.plantation_driven_rate(counts, s[ok] % 3, np.array(y, dtype=object)[ok] == "FOREST")

@@ -11,6 +11,7 @@ kind is "relation" or "way". A farm can have several image dates per year.
 """
 from __future__ import annotations
 
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -45,6 +46,31 @@ def labels_root(data_root, labels_dir=None) -> Path:
     """The label rasters to read: `labels_dir` if given (the PROTOCOL_E10 rebuild, hansen_labels_v2), else
     <data_root>/hansen_labels, the files every result before 15 Nov 2026 used."""
     return Path(labels_dir) if labels_dir else Path(data_root) / "hansen_labels"
+
+
+def read_json(path):
+    """Load a JSON file as UTF-8 (Windows would otherwise use cp1252), closing it."""
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def read_csv(path) -> list[dict]:
+    """All rows of a CSV file as dicts (UTF-8), closing it."""
+    import csv
+
+    with open(path, encoding="utf-8", newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def write_json(obj, path, **kw):
+    """Write `obj` as JSON in UTF-8, closing the file; keyword arguments go to json.dump."""
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(obj, fh, **kw)
+
+
+def farm_groups(features) -> dict[str, str]:
+    """{farm key: "country|crop"} from a loaded features.npz."""
+    return {str(k): f"{c}|{p}" for k, c, p in zip(features["keys"], features["country"], features["crop"])}
 
 
 def index_labels(folder: Path) -> dict[str, Path]:

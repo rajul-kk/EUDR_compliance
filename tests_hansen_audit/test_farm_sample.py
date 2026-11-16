@@ -1,10 +1,10 @@
-import csv
 import math
 
 import numpy as np
 import pytest
 
 from hansen_audit import farm_sample as S
+from hansen_audit.io import read_csv
 
 
 def test_stratum_id_and_invalid_cells():
@@ -91,8 +91,8 @@ def test_sheets_hide_strata_and_shuffle(tmp_path):
     lon, lat = np.array([101.0, 101.1, 101.2]), np.array([-1.0, -1.1, -1.2])
     key = [{"stratum": 8, "farm": "way_1"}, {"stratum": 6, "farm": "way_2"}, {"stratum": 7, "farm": "way_3"}]
     S.write_sheets(tmp_path / "sheet.csv", tmp_path / "key.csv", lon, lat, key, seed=1, prefix="A")
-    sheet = list(csv.DictReader(open(tmp_path / "sheet.csv")))
-    k = {r["sample_id"]: r for r in csv.DictReader(open(tmp_path / "key.csv"))}
+    sheet = read_csv(tmp_path / "sheet.csv")
+    k = {r["sample_id"]: r for r in read_csv(tmp_path / "key.csv")}
     assert "stratum" not in sheet[0] and "farm" not in sheet[0]
     assert {r["sample_id"] for r in sheet} == set(k)
     for r in sheet:
@@ -177,3 +177,16 @@ def test_make_patches_ignores_label_255():
     Y = np.array([[[1, 2, 255], [0, 1, 255], [2, 2, 0]]], np.uint8)
     _, y, _ = make_patches(X, Y, np.ones((1, 3, 3), np.float32))
     assert sorted(y.tolist()) == [0, 0, 1, 1, 1]
+
+
+def test_farm_groups_and_labels_root():
+    from pathlib import Path
+
+    import numpy as np
+
+    from hansen_audit.io import farm_groups, labels_root
+
+    z = {"keys": np.array(["a", "b"]), "country": np.array(["ID", "GH"]), "crop": np.array(["Oil Palm", "Cocoa"])}
+    assert farm_groups(z) == {"a": "ID|Oil Palm", "b": "GH|Cocoa"}
+    assert labels_root("root") == Path("root") / "hansen_labels"
+    assert labels_root("root", "v2") == Path("v2")

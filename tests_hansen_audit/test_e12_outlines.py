@@ -43,3 +43,19 @@ def test_flag_compare_counts_box_flags_lost_inside_outlines():
     assert (r["box_flagged"], r["outline_flagged"], r["flagged_outline_not_box"]) == (2, 1, 0)
     assert r["share_box_flags_not_flagged_in_outline"]["est"] == 0.5
     assert m.flag_compare(rows, []) is None
+
+
+def test_reject_partial_moves_a_reply_with_a_remark_aside(tmp_path):
+    import json
+
+    import pytest
+
+    m = _script()
+    p = tmp_path / "overpass.json"
+    p.write_text(json.dumps({"elements": [], "remark": "runtime error: Query timed out"}), encoding="utf-8")
+    with pytest.raises(SystemExit, match="partial"):
+        m.reject_partial(str(p))
+    assert not p.exists() and (tmp_path / "overpass.json.rejected").exists()
+    p.write_text(json.dumps({"elements": [{"type": "way", "id": 1}]}), encoding="utf-8")
+    m.reject_partial(str(p))
+    assert p.exists()

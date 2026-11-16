@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import farm_groups, index_labels  # noqa: E402
 from hansen_audit.reference import hansen_label  # noqa: E402
 
 ASSET = "UMD/hansen/global_forest_change_2025_v1_13"
@@ -117,7 +117,7 @@ def compare(a):
         if ((old[k] == 1) & ok & (new[k] != 1)).any():
             old1_not_new1.append(k)
     z = np.load(a.features, allow_pickle=True)
-    group = {str(k): f"{c}|{p}" for k, c, p in zip(z["keys"], z["country"], z["crop"])}
+    group = farm_groups(z)
     R = {"protocol": "PROTOCOL_E10.md", "asset": ASSET, "n_rebuilt": len(keys),
          "missing": sorted(set(old_paths) - set(new_paths)),
          "class2_identical_outside_nodata": not class2_differs, "farms_class2_differs": class2_differs,
@@ -126,7 +126,7 @@ def compare(a):
          "shares_new_by_group": {g: class_shares(new, [k for k in keys if group.get(k) == g])
                                  for g in sorted({group.get(k, "?") for k in keys})}}
     os.makedirs(os.path.dirname(a.results) or ".", exist_ok=True)
-    with open(a.results, "w") as fh:
+    with open(a.results, "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps({k: v for k, v in R.items() if k != "shares_new_by_group"}, indent=1))
 

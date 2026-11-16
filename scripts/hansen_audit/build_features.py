@@ -1,6 +1,7 @@
 """Build results/features.npz for all complete (baseline+current+label+csv) farms.
 usage: python -I build_features.py <data_root> <out.npz> [--composites] [--labels-dir D]
 --composites also reads the undated median composites (E6) and saves each farm's image type in `product`."""
+import argparse
 import os
 import sys
 from pathlib import Path
@@ -35,6 +36,10 @@ def main(root, out, composites=False, labels_dir=None):
     print("saved", len(K))
 
 if __name__ == "__main__":
-    rest = sys.argv[3:]
-    main(sys.argv[1], sys.argv[2], "--composites" in rest,
-         rest[rest.index("--labels-dir") + 1] if "--labels-dir" in rest else None)
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("data_root")
+    ap.add_argument("out")
+    ap.add_argument("--composites", action="store_true")
+    ap.add_argument("--labels-dir", help="label rasters (default <data_root>/hansen_labels)")
+    a = ap.parse_args()
+    main(a.data_root, a.out, a.composites, a.labels_dir)

@@ -14,8 +14,9 @@ from rasterio.windows import from_bounds
 def label_on_image_grid(label_path, image_path, out_shape=None):
     """Return (label_aligned uint8 [H,W], coverage_fraction, native_window_array).
 
-    coverage_fraction: fraction of the image footprint covered by the label raster
-    (cells outside the label raster are filled with 255 = no data / out of extent).
+    coverage_fraction: fraction of the image footprint inside the label raster's bounds (cells outside are filled
+    with 255). 255 can also sit inside the footprint: the rebuilt labels (PROTOCOL_E10) mark Hansen no-data with it, so
+    readers must keep the classes they want (`1 <= y <= 2`, as model.make_patches does), never test `y >= 1` or `!= 0`.
     """
     with rasterio.open(image_path) as im:
         b, H, W = im.bounds, im.height, im.width

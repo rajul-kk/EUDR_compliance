@@ -25,7 +25,7 @@ from hansen_audit import farms_e4 as E  # noqa: E402
 from hansen_audit import gfc  # noqa: E402
 from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
-from hansen_audit.io import index_labels, labels_root  # noqa: E402
+from hansen_audit.io import farm_groups, index_labels, labels_root, read_json  # noqa: E402
 
 ASSETS = {"V3": "JRC/GFC2020/V3", "V4": "JRC/GFC2020/V4"}
 PRIMARY = "V3"
@@ -49,7 +49,7 @@ def window_grids(windows_json):
     """{window id: (transform, shape)} on the Hansen grid used by e4_farms.py."""
     from hansen_audit.s1 import hansen_transform
 
-    W = json.load(open(windows_json))
+    W = read_json(windows_json)
     tag = Path(windows_json).parent.name
     return {f"{tag}_win_{w['id']}": (tuple(hansen_transform(np.array(w["origin"])))[:6], tuple(w["shape"]))
             for w in W["windows"]}
@@ -166,7 +166,7 @@ def s2c_check(data_root, gfc_dir, boxes_pairs, labels_dir=None):
     stable = np.zeros(2, int)
     used, missing = [], []
     for wj, pj in boxes_pairs:
-        W = json.load(open(wj))
+        W = read_json(wj)
         tag = Path(wj).parent.name
         boxes = dict(zip(W["farms"], np.array(W["boxes"])))
         preds = np.load(pj)
@@ -205,7 +205,7 @@ def run(a):
     if len(a.boxes) % 2:
         sys.exit("--boxes takes pairs: windows.json farm_preds.npz")
     z = np.load(a.features, allow_pickle=True)
-    group = {str(k): f"{c}|{p}" for k, c, p in zip(z["keys"], z["country"], z["crop"])}
+    group = farm_groups(z)
     labels = read_labels(a.data_root, a.labels_dir)
     fracs = {v: read_fracs(labels, a.gfc_dir, v) for v in ASSETS}
     if not fracs[PRIMARY]:
@@ -227,7 +227,7 @@ def run(a):
     R["analysis_5_sensitivity"] = sens
     R["seconds"] = round(time.time() - t0, 1)
     os.makedirs(a.results_dir, exist_ok=True)
-    with open(os.path.join(a.results_dir, "gfc2020.json"), "w") as fh:
+    with open(os.path.join(a.results_dir, "gfc2020.json"), "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps(sens, indent=1), "\nsaved", R["seconds"], flush=True)
 

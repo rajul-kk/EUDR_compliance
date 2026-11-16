@@ -27,7 +27,7 @@ from hansen_audit import gfc  # noqa: E402
 from hansen_audit import outlines as O  # noqa: E402
 from hansen_audit.budget import capped_download, exclusive_download  # noqa: E402
 from hansen_audit.decisions import DEFAULT_MIN_CELLS, farm_flag  # noqa: E402
-from hansen_audit.io import index_labels  # noqa: E402
+from hansen_audit.io import farm_groups, index_labels  # noqa: E402
 
 ENDPOINT = "https://overpass-api.de/api/interpreter"  # PROTOCOL_E8 deviation: the kumi mirror timed out
 GATE_FIELDS = ("loss_cells", "share_loss_on_gfc_forest", "hansen_flagged", "gated_flagged", "share_flags_not_surviving")
@@ -57,7 +57,18 @@ def fetch(a):
                                              headers={"User-Agent": "hansen-audit-research/1.0"}) as r:
         r.raise_for_status()
         n = capped_download(r, out, cap)
+    reject_partial(out)
     write_manifest(a.outlines_dir, out, keys, a.endpoint, t, n, cap)
+
+
+def reject_partial(path):
+    """Overpass answers 200 with a 'remark' when a query runs out of time or memory, and the elements are then partial.
+    Move such a reply aside (so the next fetch tries again) and stop."""
+    with open(path, encoding="utf-8") as fh:
+        remark = json.load(fh).get("remark")
+    if remark:
+        os.replace(path, path + ".rejected")
+        raise SystemExit(f"Overpass reply is partial ({remark[:200]}); moved to {path}.rejected")
 
 
 def write_manifest(outlines_dir, out, keys, endpoint, t, n, cap):
@@ -68,7 +79,7 @@ def write_manifest(outlines_dir, out, keys, endpoint, t, n, cap):
            "returned": len(els), "missing": sorted(set(keys) - {O.farm_key(e) for e in els}),
            "objects": {O.farm_key(e): {"version": e.get("version"), "timestamp": e.get("timestamp")} for e in els},
            "licence": "(c) OpenStreetMap contributors, ODbL 1.0"}
-    with open(os.path.join(outlines_dir, "manifest.json"), "w") as fh:
+    with open(os.path.join(outlines_dir, "manifest.json"), "w", encoding="utf-8") as fh:
         json.dump(man, fh, indent=1)
     print(json.dumps({k: man[k] for k in ("fetched_utc", "bytes", "requested", "returned")} | {"missing": len(man["missing"])},
                      indent=1))
@@ -145,7 +156,7 @@ def check_e5(rows, paths):
     """Analysis 5: outline flags here against E5/E8 (their grid and box differ, so differences are listed, not dropped)."""
     out = {"compared": 0, "agree": 0, "disagree": []}
     for p in paths:
-        with open(p) as fh:
+        with open(p, encoding="utf-8") as fh:
             per_farm = json.load(fh)["per_farm"]
         for k, v in per_farm.items():
             if k not in rows:
@@ -163,7 +174,7 @@ def check_e5(rows, paths):
 def run(a):
     t0 = time.time()
     z = np.load(a.features, allow_pickle=True)
-    group = {str(k): f"{c}|{p}" for k, c, p in zip(z["keys"], z["country"], z["crop"])}
+    group = farm_groups(z)
     labels = index_labels(Path(a.labels_dir))
     els = {O.farm_key(e): e for e in read_elements(os.path.join(a.outlines_dir, "overpass.json"))}
     rows, excluded, holders = farm_rows(labels, els, a.gfc_dir)
@@ -183,7 +194,7 @@ def run(a):
          "per_farm": rows}
     R["seconds"] = round(time.time() - t0, 1)
     os.makedirs(a.results_dir, exist_ok=True)
-    with open(os.path.join(a.results_dir, "outlines.json"), "w") as fh:
+    with open(os.path.join(a.results_dir, "outlines.json"), "w", encoding="utf-8") as fh:
         json.dump(R, fh, indent=1)
     print(json.dumps({k: R[k] for k in ("n_included", "excluded_by_reason", "analysis_3", "analysis_5_vs_e5_e8")}, indent=1))
     print(json.dumps({k: R["primary"][k] for k in ("analysis_1_flags", "analysis_2_gfc_gate_in_outlines")}, indent=1))
