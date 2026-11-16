@@ -1,0 +1,156 @@
+{
+ "protocol": "PROTOCOL_E10.md",
+ "asset": "UMD/hansen/global_forest_change_2025_v1_13",
+ "n_rebuilt": 996,
+ "missing": [],
+ "class2_identical_outside_nodata": true,
+ "farms_class2_differs": [],
+ "old_class1_subset_of_new_class1": true,
+ "farms_old1_not_new1": [],
+ "shares_old": {
+  "class0": 0.9701,
+  "class1": 0.0071,
+  "class2": 0.0228,
+  "nodata": 0.0
+ },
+ "shares_new": {
+  "class0": 0.4552,
+  "class1": 0.522,
+  "class2": 0.0228,
+  "nodata": 0.0
+ },
+ "shares_new_by_group": {
+  "AR|Cattle": {
+   "class0": 0.9932,
+   "class1": 0.0068,
+   "class2": 0.0,
+   "nodata": 0.0
+  },
+  "AU|Cattle": {
+   "class0": 0.9533,
+   "class1": 0.0467,
+   "class2": 0.0,
+   "nodata": 0.0
+  },
+  "BR|Cattle": {
+   "class0": 0.773,
+   "class1": 0.2189,
+   "class2": 0.0082,
+   "nodata": 0.0
+  },
+  "BR|Cocoa": {
+   "class0": 0.1101,
+   "class1": 0.8812,
+   "class2": 0.0087,
+   "nodata": 0.0
+  },
+  "BR|Coffee": {
+   "class0": 0.2482,
+   "class1": 0.7314,
+   "class2": 0.0205,
+   "nodata": 0.0
+  },
+  "BR|Soy": {
+   "class0": 0.8093,
+   "class1": 0.1844,
+   "class2": 0.0062,
+   "nodata": 0.0
+  },
+  "CI|Cocoa": {
+   "class0": 0.2966,
+   "class1": 0.6666,
+   "class2": 0.0368,
+   "nodata": 0.0
+  },
+  "CM|Cocoa": {
+   "class0": 0.1524,
+   "class1": 0.786,
+   "class2": 0.0616,
+   "nodata": 0.0
+  },
+  "CR|Coffee": {
+   "class0": 0.4269,
+   "class1": 0.5666,
+   "class2": 0.0065,
+   "nodata": 0.0
+  },
+  "ET|Coffee": {
+   "class0": 0.1649,
+   "class1": 0.829,
+   "class2": 0.0061,
+   "nodata": 0.0
+  },
+  "GH|Cocoa": {
+   "class0": 0.0947,
+   "class1": 0.8765,
+   "class2": 0.0288,
+   "nodata": 0.0
+  },
+  "ID|Coffee": {
+   "class0": 0.2563,
+   "class1": 0.7198,
+   "class2": 0.0239,
+   "nodata": 0.0
+  },
+  "ID|Oil Palm": {
+   "class0": 0.4406,
+   "class1": 0.5224,
+   "class2": 0.0369,
+   "nodata": 0.0
+  },
+  "IN|Coffee": {
+   "class0": 0.1252,
+   "class1": 0.8656,
+   "class2": 0.0092,
+   "nodata": 0.0
+  },
+  "IN|Rubber": {
+   "class0": 0.3046,
+   "class1": 0.6823,
+   "class2": 0.0131,
+   "nodata": 0.0
+  },
+  "IT|Cattle": {
+   "class0": 0.777,
+   "class1": 0.2221,
+   "class2": 0.0009,
+   "nodata": 0.0
+  },
+  "KE|Coffee": {
+   "class0": 0.2139,
+   "class1": 0.782,
+   "class2": 0.0041,
+   "nodata": 0.0
+  },
+  "PA|Coffee": {
+   "class0": 0.1877,
+   "class1": 0.8029,
+   "class2": 0.0094,
+   "nodata": 0.0
+  },
+  "TH|Rubber": {
+   "class0": 0.5073,
+   "class1": 0.4485,
+   "class2": 0.0442,
+   "nodata": 0.0
+  },
+  "US|Cattle": {
+   "class0": 0.9979,
+   "class1": 0.0021,
+   "class2": 0.0,
+   "nodata": 0.0
+  },
+  "US|Soy": {
+   "class0": 0.8302,
+   "class1": 0.1689,
+   "class2": 0.0008,
+   "nodata": 0.0
+  },
+  "VN|Coffee": {
+   "class0": 0.4904,
+   "class1": 0.5015,
+   "class2": 0.0081,
+   "nodata": 0.0
+  }
+ }
+}

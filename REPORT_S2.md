@@ -72,6 +72,7 @@ S2C classifier fit once on all 72 grids (1.43M cells), applied to 2020 Sentinel-
   around the farms more than the farms.
   Robust to the flag threshold: 43 of 82 at >= 3 cells, 43 of 71 at >= 12.
 - Loss cells on all farms by predicted 2020 class: FOREST 0.37, PLANT 0.26, OTHER 0.37 (raw).
+- *15 Nov 2026: the stable-forest figures in this warning (0.13 PLANT, 0.55 FOREST) were measured on cells the farm labels called class 1, which held only 2025 loss (docs/results.md section 11, PROTOCOL_E10). They are void until rerun; the loss-cell numbers above stand.*
 - **Warning sign for transport:** these are oil palm farms, yet only 0.13 of their Hansen stable-forest cells are predicted PLANT
   (0.55 FOREST), against 0.53 PLANT in the reference grids. Either the farm boxes include real forest outside the plantation, or the
   classifier under-calls mature palm away from the grids it was trained on. Nothing here can tell which; no reference covers the farms.

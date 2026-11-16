@@ -7,11 +7,13 @@ Hansen "stable forest" cells on palm/crop: 0.48 (0.38-0.59). Reference-FOREST ce
 Caveat: reference years are mostly 2023-24, so palm under a loss cell can be replanting (false flag) or conversion (true violation); not separable.
 
 ## 2. Transported farm-level sensitivity (94 ID oil palm farms, 26 flagged at >= 6 loss cells in the usable footprint) -> results/sensitivity.json
+*15 Nov 2026: the usable footprint is Hansen class 1 or 2, and class 1 was nearly empty (section 11). Rerun pending.*
 Expected share of Hansen-flagged farms that are false flags if per-cell loss precision is p (cells independent, optimistic): p=0.9: 1.8 %, 0.7: 4.2 %, 0.5: 10 %, 0.3: 26 %, 0.2: 51 %.
 Anchored at reference precision 1 - P(palm/crop | loss): all grids p=0.49 -> 10.5 % (farm-bootstrap 2.6-20 %; reference-interval edges 6.9-16 %); <=2021 grids p=0.39 -> 16.6 % (6.4-29 %; edges 10-39 %).
 This is a sensitivity analysis, not a measured false-flag rate: no reference grid contains a user farm, and no post-2020 truth exists. Missed-flag rate is not estimated (not identifiable).
 
 ## 3. Noise-robust training (patch CNN, 5 seeds, 15 epochs; results/experiments.json)
+*15 Nov 2026: void as a test of loss against stable forest. Class 1 held only 2025 loss (section 11), so the task here was "lost 2021-24" against "lost 2025". Rerun pending.*
 - Real labels, 227 farms (136/45/46 split), agreement with Hansen on 46 test farms (1,339 cells): F1(loss) CE 0.888+-0.008, GCE 0.893+-0.005, SCE 0.902+-0.010. This is agreement with the noisy label, not accuracy; it cannot show robustness.
 - Semi-synthetic noise on ID oil palm (21/7/7 farms, 213 test cells; clean = Hansen labels): F1 vs clean, mean of 5 seeds:
   mild noise (stable->loss 5 %, loss->stable 10 %): CE 0.824, GCE 0.847, SCE 0.851, forward(oracle T) 0.852, forward(anchor T-hat) 0.676. Paired farm-bootstrap diff vs CE: GCE +0.021 [0.002, 0.045], forward-oracle +0.025 [0.002, 0.054], anchor-forward -0.186 [-0.529, -0.024].
@@ -25,6 +27,7 @@ This is a sensitivity analysis, not a measured false-flag rate: no reference gri
   and GCE is still no better than CE. The reading is unchanged; the intervals still resample only 7 test farms.
 
 ## 4. Per-farm uncertainty
+*15 Nov 2026: experiment C used the same class 1/2 task; void until rerun (section 11).*
 (Rerun on all farms in section 8: finite but wide intervals.) Experiment C ran but is degenerate: 7 evaluation farms, 3 calibration farms, so the split-conformal half-width is infinite (needs >= 9 calibration farms at 90 %) and every test farm is "uncertain"; ensemble std was 0.0 cells in the test farms (members agree). Implemented and unit-tested (coverage on synthetic data), **not** informative on real data here. Needs the full set of farms (labels exist for 996) with imagery, which this folder does not have.
 
 ## 5. Not run
@@ -36,6 +39,7 @@ Addresses the caveat in section 1. Third registered attempt (S2C) passed the qua
 The <= 2021 grids give 0.61, matching the reference. First two attempts (optical only) failed the gate. Details and caveats in REPORT_S2.md.
 
 ## 7. Farm numbers inside the OpenStreetMap outlines (PROTOCOL_E5; results/e5/farms.json)
+*15 Nov 2026: flag counts stand (class 2 only); the transport check below used class 1, which held 2025-loss cells (section 11). Rerun pending.*
 Run: `e5_outlines.py fetch` (Overpass mirror, 92 of 94 objects returned; 2 ways no longer exist) then `e5_outlines.py run`, same
 cells and S2C predictions as E4, no refit. 83 farms included; 9 outlines are smaller than one 30 m cell (0.03-0.08 ha) and have no cell.
 - The outlines are small: median 1.7 ha (quartiles 0.4-5.3, max 170), 29 under 0.5 ha, 57 under 4 ha, against about 120 ha per E4 box.
@@ -49,6 +53,7 @@ cells and S2C predictions as E4, no refit. 83 farms included; 9 outlines are sma
   the 0.5 ha flag threshold, those farms cannot be flagged at all. Predictions remain transported (E3 would supply a reference).
 
 ## 8. The full set of farms (PROTOCOL_E6; results/e6/experiments.json)
+*15 Nov 2026: void until rerun. The cells, the task and the usable-farm count all rest on class 1, which held only 2025 loss (section 11).*
 The loader skipped 670 undated files per year (median composites of up to 3 scenes, `src/sentinel_client.py`), so every analysis
 above used 415 farms. Read as well (opt-in, `build_features.py --composites`), all 996 labelled farms have both years; 586 have
 usable class 1/2 cells (227 single-scene, 359 composite; 25,844 cells, loss 0.76). Same model, 15 epochs, 5 seeds; agreement
@@ -73,6 +78,7 @@ with Hansen, not accuracy. Run: `run_e6.py results/e6_features.npz results/e6/ex
   results file is the commit before `run_e6.py` itself was committed (it is committed with these results).
 
 ## 9. E4 and E5 on the 106 oil palm farms added by E6 (PROTOCOL_E8; results/e8/)
+*15 Nov 2026: flags and plantation-driven shares stand (class 2 only); the transport check used class 1 (section 11).*
 The same code as E4 and E5 on the 106 ID oil palm farms that only have composites (all 19 windows fetched, 0.74 GB received by
 the machine during the download against a 1 GB budget; outlines from the main Overpass server, deviation in the protocol).
 Transported S2C output, no reference on these farms.
@@ -88,6 +94,7 @@ Transported S2C output, no reference on these farms.
   sets (0.58 against 0.16 plantation-driven), which says the land around the plots varies; the box is not a farm-level unit.
 
 ## 10. Hansen loss against the EU's 2020 forest map (PROTOCOL_E9; results/e9/gfc2020.json)
+*15 Nov 2026: analyses 1 and 2 (loss on GFC forest, flags) and the loss-cell part of analysis 4 stand. The agreement and kappa, the class-1 share and the stable-cell comparison used class 1 and class 0 before the label fix (section 11); rerun pending.*
 JRC GFC2020 version 3 (10 m, EUDR forest definition; "may be used by anyone, anywhere, anytime without permission", attribution:
 Bourgoin et al., JRC), as the forest share of each 30 m label cell, computed on Earth Engine for all 996 farms' label boxes and
 the 40 E4/E8 windows (2,072 grids, 0.10 GB received, none failed). A cell is GFC forest at >= 50 %. Two maps compared; neither is
@@ -111,3 +118,26 @@ truth.
   Version 4 puts less loss on forest (0.19 at 50 %) and loses a similar share of flags (0.40).
 - Limits: GFC2020 is a model (V3 overall accuracy about 0.91 in the JRC assessment; no assessment for V4 yet); it is a map of
   2020 only, so it cannot date a conversion. Gating Hansen with GFC2020 is a candidate rule for the product, not adopted.
+
+## 11. The farm labels had no stable-forest class (PROTOCOL_E10; results/e10/)
+`generate_labels.py` tested Hansen `lossyear == 0` for "no loss", but on Earth Engine `lossyear` is masked where there was no
+loss and never holds 0. So on every farm, forest with no loss was written as class 0, and class 1 held only forest lost in 2025
+(`results/e10/diagnosis.md`). Fixed (`lossyear.unmask(0)`), and all 996 label rasters rebuilt on their own grids from Hansen
+v1.13 with the tested `reference.hansen_label` (`hansen_labels_v2`, outside git; 87 MB of data).
+- Class 2 (loss 2021-2024) is identical on all 996 farms; old class 1 is inside new class 1.
+- Shares of all label cells, old -> new: class 0 0.970 -> 0.455, **class 1 0.007 -> 0.522**, class 2 0.023 -> 0.023.
+- The 72 reference grids are not affected (`reference.py` reads Hansen tiles, where no loss is 0).
+
+What this does to earlier results (nothing rerun yet; each rerun is a dated deviation of its own protocol):
+
+| Result | Uses | Status |
+|---|---|---|
+| Sections 1, 6 (reference grids, S2/S2B/S2C) | Hansen tiles | not affected |
+| Farm flags, loss counts (E2 rule, E4/E5/E8 flags and plantation-driven shares, E9 analyses 1, 2) | class 2 only | not affected |
+| Product change model (`hansen_change_mask`) | class 2 against the rest | not affected |
+| E3 box-loss sample (300) and outline census | class 2 | not affected |
+| **E3 box-stable sample (120 cells)** | class 1 strata | **drawn from 2025-loss cells, not stable forest; must be redrawn before it is labelled** |
+| **Sections 3, 4, 8 (noise experiments A/B, experiment C, E6 transfer)** | task = class 2 against class 1 | **the task was "lost 2021-24" against "lost 2025", not loss against stable forest; rerun** |
+| Section 2 (farm sensitivity, usable footprint) | footprint = class 1 or 2 cells | footprint far too small; rerun |
+| E4/E5/E8 transport checks (PLANT share of stable cells) | class 1 | measured on 2025-loss cells; rerun |
+| E9 analysis 3 (agreement, kappa), class-1 share, stable share in analysis 4 | classes 0 and 1 | rerun |

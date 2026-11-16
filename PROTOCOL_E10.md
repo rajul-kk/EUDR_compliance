@@ -33,3 +33,9 @@ In Earth Engine, Hansen's `lossyear` band is masked where no loss was detected; 
 
 `scripts/hansen_audit/rebuild_labels.py`, the fix in `generate_labels.py`, `results/e10/` (diagnosis.md, labels.json,
 run.log, download_manifest.json), and an inventory section in `docs/results.md`.
+
+## Deviations
+
+- 15 Nov 2026, budget: the first download run stopped at the 0.2 GB guard after 520 farms, having received 44 MB of its own
+  data; the guard counts every byte the machine receives and other traffic made up the rest. The run was resumed with the
+  guard at 0.4 GB. The job's own data over both runs: 87 MB, as expected; the machine received 0.31 GB in the two runs.

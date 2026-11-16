@@ -1,0 +1,15 @@
+C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.10.0). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+996 farms, 996 to fetch
+8/996 done, 0 failed, 0.001 GB
+208/996 done, 0 failed, 0.037 GB
+408/996 done, 0 failed, 0.063 GB
+budget reached (0.204 GB), stopping
+all done
+C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.10.0). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.11, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+996 farms, 476 to fetch
+8/476 done, 0 failed, 0.215 GB
+208/476 done, 0 failed, 0.271 GB
+408/476 done, 0 failed, 0.298 GB
+all done

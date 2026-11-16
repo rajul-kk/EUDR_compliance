@@ -1,0 +1,4996 @@
+{
+ "runs": [
+  {
+   "start": "2026-11-15 18:26:21",
+   "bytes_recv": 204399314,
+   "stopped_by_budget": true
+  },
+  {
+   "start": "2026-11-15 18:30:08",
+   "bytes_recv": 103612118,
+   "stopped_by_budget": false
+  }
+ ],
+ "farms": {
+  "relation_10018408": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10741190": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10741252": {
+   "seconds": 1.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10741874": {
+   "seconds": 1.92,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743682": {
+   "seconds": 1.09,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743729": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743757": {
+   "seconds": 1.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743758": {
+   "seconds": 1.96,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "relation_10743759": {
+   "seconds": 0.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743761": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10743780": {
+   "seconds": 0.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10744014": {
+   "seconds": 0.78,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10744015": {
+   "seconds": 0.96,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10744131": {
+   "seconds": 0.98,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10744132": {
+   "seconds": 1.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10744221": {
+   "seconds": 1.05,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10746463": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10746465": {
+   "seconds": 0.8,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10750336": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10750338": {
+   "seconds": 1.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10750424": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10750425": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10750479": {
+   "seconds": 1.77,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10751145": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10753343": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753344": {
+   "seconds": 0.79,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10753347": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753393": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753395": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753396": {
+   "seconds": 0.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753397": {
+   "seconds": 1.95,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10753461": {
+   "seconds": 1.63,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753462": {
+   "seconds": 1.81,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753464": {
+   "seconds": 1.01,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753465": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753551": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10753552": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758276": {
+   "seconds": 1.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758277": {
+   "seconds": 1.64,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758278": {
+   "seconds": 0.92,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758299": {
+   "seconds": 1.14,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10758300": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758422": {
+   "seconds": 0.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758424": {
+   "seconds": 1.81,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758450": {
+   "seconds": 1.97,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758612": {
+   "seconds": 2.49,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758613": {
+   "seconds": 0.89,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10758614": {
+   "seconds": 1.18,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10758615": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758617": {
+   "seconds": 0.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10758618": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10759086": {
+   "seconds": 1.79,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10759087": {
+   "seconds": 1.95,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10777648": {
+   "seconds": 0.94,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10778280": {
+   "seconds": 1.82,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10778281": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10778282": {
+   "seconds": 1.64,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10778842": {
+   "seconds": 1.16,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "relation_10778844": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10778845": {
+   "seconds": 1.82,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10779958": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10780007": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10781043": {
+   "seconds": 0.88,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10781044": {
+   "seconds": 0.81,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10781045": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10781046": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10781047": {
+   "seconds": 0.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10781112": {
+   "seconds": 0.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10786606": {
+   "seconds": 1.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10790162": {
+   "seconds": 1.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10790318": {
+   "seconds": 1.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10794768": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10794896": {
+   "seconds": 1.65,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10822610": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10847170": {
+   "seconds": 0.68,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10847189": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10847321": {
+   "seconds": 0.9,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10866202": {
+   "seconds": 2.1,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10866660": {
+   "seconds": 1.1,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10875152": {
+   "seconds": 0.99,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10884687": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10887739": {
+   "seconds": 1.02,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10899245": {
+   "seconds": 1.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10899800": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10906060": {
+   "seconds": 1.65,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10922214": {
+   "seconds": 1.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10929430": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10960381": {
+   "seconds": 1.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10961092": {
+   "seconds": 1.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10961093": {
+   "seconds": 0.72,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10961094": {
+   "seconds": 1.72,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10962415": {
+   "seconds": 0.77,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10977433": {
+   "seconds": 0.78,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10977905": {
+   "seconds": 1.0,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10981463": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10982151": {
+   "seconds": 0.94,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10982194": {
+   "seconds": 1.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10982690": {
+   "seconds": 0.73,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10982843": {
+   "seconds": 0.9,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10983038": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10984630": {
+   "seconds": 0.95,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10984749": {
+   "seconds": 1.79,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10993994": {
+   "seconds": 0.86,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_10994008": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10994009": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10994010": {
+   "seconds": 0.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_10994020": {
+   "seconds": 0.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11006565": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11007617": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11058908": {
+   "seconds": 1.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11086175": {
+   "seconds": 0.75,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_11087303": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11087321": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11087521": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11091992": {
+   "seconds": 0.66,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11101069": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11131779": {
+   "seconds": 1.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11137983": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11138879": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11154798": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11154799": {
+   "seconds": 0.97,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11154800": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11154807": {
+   "seconds": 1.79,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11155502": {
+   "seconds": 1.79,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11384018": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11595411": {
+   "seconds": 0.95,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "relation_11597713": {
+   "seconds": 0.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11650258": {
+   "seconds": 0.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11695207": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11695210": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11695680": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11696163": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698119": {
+   "seconds": 1.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698120": {
+   "seconds": 0.66,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698728": {
+   "seconds": 1.7,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698729": {
+   "seconds": 1.73,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698730": {
+   "seconds": 0.94,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "relation_11698731": {
+   "seconds": 1.85,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698732": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698733": {
+   "seconds": 1.66,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698734": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698735": {
+   "seconds": 1.84,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698736": {
+   "seconds": 0.69,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698737": {
+   "seconds": 1.72,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698738": {
+   "seconds": 0.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698739": {
+   "seconds": 0.69,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "relation_11698740": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698741": {
+   "seconds": 0.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698744": {
+   "seconds": 0.71,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698745": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698746": {
+   "seconds": 1.69,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698747": {
+   "seconds": 1.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698748": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11698749": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698754": {
+   "seconds": 1.66,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11698757": {
+   "seconds": 1.82,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "relation_11699373": {
+   "seconds": 1.62,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11699374": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11699376": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11699903": {
+   "seconds": 1.65,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11699904": {
+   "seconds": 0.73,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11699905": {
+   "seconds": 0.84,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724188": {
+   "seconds": 1.73,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724190": {
+   "seconds": 0.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724195": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724200": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11724326": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11724549": {
+   "seconds": 0.67,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724550": {
+   "seconds": 1.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11724551": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11724558": {
+   "seconds": 1.7,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11725562": {
+   "seconds": 0.86,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11727916": {
+   "seconds": 0.87,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11727919": {
+   "seconds": 0.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11727921": {
+   "seconds": 1.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11727928": {
+   "seconds": 0.98,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11727963": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11727964": {
+   "seconds": 0.72,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11728017": {
+   "seconds": 1.69,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11728368": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_11728551": {
+   "seconds": 1.78,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11728567": {
+   "seconds": 1.83,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_11728581": {
+   "seconds": 0.8,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_12142918": {
+   "seconds": 1.78,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "relation_12701728": {
+   "seconds": 1.73,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "relation_12772217": {
+   "seconds": 0.95,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "relation_12914969": {
+   "seconds": 0.88,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "relation_12923842": {
+   "seconds": 0.73,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_13008282": {
+   "seconds": 0.73,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "relation_13329272": {
+   "seconds": 1.8,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "relation_13588880": {
+   "seconds": 1.7,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_13925894": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_13936077": {
+   "seconds": 4.09,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_13936079": {
+   "seconds": 1.77,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "relation_15822115": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_15988323": {
+   "seconds": 1.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_17015807": {
+   "seconds": 1.96,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_17306925": {
+   "seconds": 1.62,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_18074265": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "relation_18817339": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_19278453": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_19624458": {
+   "seconds": 1.95,
+   "bytes_recv": 107856,
+   "failed": false
+  },
+  "relation_19956776": {
+   "seconds": 1.77,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_19956780": {
+   "seconds": 1.78,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_19956792": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_3426855": {
+   "seconds": 1.74,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "relation_3426864": {
+   "seconds": 1.74,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "relation_3426867": {
+   "seconds": 1.72,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "relation_4148520": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_4203659": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_7136236": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "relation_9975332": {
+   "seconds": 0.98,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "relation_9975397": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1013629879": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1016968197": {
+   "seconds": 0.97,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017220834": {
+   "seconds": 1.76,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017220839": {
+   "seconds": 1.73,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017220844": {
+   "seconds": 0.69,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017220857": {
+   "seconds": 0.87,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017220859": {
+   "seconds": 1.64,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017220860": {
+   "seconds": 0.96,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017244488": {
+   "seconds": 1.81,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017368246": {
+   "seconds": 0.7,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017371516": {
+   "seconds": 0.7,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017412100": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1017412104": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1017412105": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1017430761": {
+   "seconds": 0.9,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017430762": {
+   "seconds": 1.75,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1017430763": {
+   "seconds": 0.95,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017430764": {
+   "seconds": 0.69,
+   "bytes_recv": 87192,
+   "failed": false
+  },
+  "way_1017430765": {
+   "seconds": 1.74,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_1020112027": {
+   "seconds": 0.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1020112028": {
+   "seconds": 1.77,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1021287384": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1021287397": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1021287398": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1021287399": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1021287400": {
+   "seconds": 1.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_103977019": {
+   "seconds": 1.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1040457639": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1040457641": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1040476766": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1040791895": {
+   "seconds": 1.19,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1041059277": {
+   "seconds": 0.94,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1041076877": {
+   "seconds": 1.77,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1041394250": {
+   "seconds": 1.7,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1041394251": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1041394252": {
+   "seconds": 0.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1041394297": {
+   "seconds": 1.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1041394298": {
+   "seconds": 0.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1053219035": {
+   "seconds": 0.77,
+   "bytes_recv": 91728,
+   "failed": false
+  },
+  "way_1053219036": {
+   "seconds": 1.68,
+   "bytes_recv": 91728,
+   "failed": false
+  },
+  "way_1053219037": {
+   "seconds": 0.94,
+   "bytes_recv": 91224,
+   "failed": false
+  },
+  "way_1061951511": {
+   "seconds": 0.9,
+   "bytes_recv": 91728,
+   "failed": false
+  },
+  "way_1088483331": {
+   "seconds": 0.92,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1088483332": {
+   "seconds": 1.78,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1088752954": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1088752955": {
+   "seconds": 1.02,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1089408349": {
+   "seconds": 0.95,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1089408350": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1089408351": {
+   "seconds": 0.9,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1091302802": {
+   "seconds": 0.83,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1094222697": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1094222698": {
+   "seconds": 0.7,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1101858944": {
+   "seconds": 0.95,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_1107038086": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1109201695": {
+   "seconds": 1.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1109201697": {
+   "seconds": 0.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1109201698": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1109201700": {
+   "seconds": 0.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1112656307": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1114723693": {
+   "seconds": 0.92,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1114723694": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1118591188": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1121250923": {
+   "seconds": 0.75,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1144924385": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1144924927": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1147233775": {
+   "seconds": 0.96,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1153279847": {
+   "seconds": 1.99,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1153279848": {
+   "seconds": 1.71,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1153279849": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1153279850": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1153279853": {
+   "seconds": 1.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1160174140": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1183968807": {
+   "seconds": 0.93,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1183968808": {
+   "seconds": 1.88,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1183968809": {
+   "seconds": 0.96,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1183968811": {
+   "seconds": 1.95,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1188892310": {
+   "seconds": 1.83,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1188892311": {
+   "seconds": 0.91,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1189742973": {
+   "seconds": 1.72,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1189747428": {
+   "seconds": 0.7,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1198029191": {
+   "seconds": 1.89,
+   "bytes_recv": 102312,
+   "failed": false
+  },
+  "way_1198029196": {
+   "seconds": 0.85,
+   "bytes_recv": 102204,
+   "failed": false
+  },
+  "way_1198029201": {
+   "seconds": 0.85,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1198038404": {
+   "seconds": 0.86,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1198038407": {
+   "seconds": 1.91,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1201643746": {
+   "seconds": 1.97,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1214356805": {
+   "seconds": 0.74,
+   "bytes_recv": 91182,
+   "failed": false
+  },
+  "way_1214356806": {
+   "seconds": 1.66,
+   "bytes_recv": 91728,
+   "failed": false
+  },
+  "way_1214356807": {
+   "seconds": 0.75,
+   "bytes_recv": 91182,
+   "failed": false
+  },
+  "way_1214356808": {
+   "seconds": 1.82,
+   "bytes_recv": 91728,
+   "failed": false
+  },
+  "way_1215013195": {
+   "seconds": 1.02,
+   "bytes_recv": 91224,
+   "failed": false
+  },
+  "way_1232542134": {
+   "seconds": 0.71,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1238318803": {
+   "seconds": 0.97,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1238318804": {
+   "seconds": 0.69,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1238999540": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240170762": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240170763": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240170764": {
+   "seconds": 1.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240170765": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240170766": {
+   "seconds": 1.69,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1240170808": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240675354": {
+   "seconds": 1.63,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240678341": {
+   "seconds": 0.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240941768": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240941770": {
+   "seconds": 0.88,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1240941771": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240949292": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240949293": {
+   "seconds": 0.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240949294": {
+   "seconds": 0.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240950810": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240953015": {
+   "seconds": 0.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1240954778": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243387301": {
+   "seconds": 0.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243389665": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465383": {
+   "seconds": 0.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465384": {
+   "seconds": 0.91,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465385": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465386": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465387": {
+   "seconds": 0.96,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465388": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465389": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465390": {
+   "seconds": 1.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465391": {
+   "seconds": 0.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465392": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465393": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465394": {
+   "seconds": 0.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465395": {
+   "seconds": 0.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465396": {
+   "seconds": 1.64,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243465397": {
+   "seconds": 0.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601161": {
+   "seconds": 0.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601162": {
+   "seconds": 0.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601163": {
+   "seconds": 0.66,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601169": {
+   "seconds": 0.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601170": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1243601171": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251526826": {
+   "seconds": 1.64,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251526827": {
+   "seconds": 0.98,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251526828": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251526829": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251979517": {
+   "seconds": 1.65,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1251979518": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262551292": {
+   "seconds": 0.86,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1262552524": {
+   "seconds": 1.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262656776": {
+   "seconds": 1.62,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262656777": {
+   "seconds": 0.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664093": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664094": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664095": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664096": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664097": {
+   "seconds": 2.93,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1262664098": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664099": {
+   "seconds": 0.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664100": {
+   "seconds": 0.85,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1262664101": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664102": {
+   "seconds": 0.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262664103": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262667644": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262667645": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262667646": {
+   "seconds": 0.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668043": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668044": {
+   "seconds": 0.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668045": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668046": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668047": {
+   "seconds": 1.0,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1262668048": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668049": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668050": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668051": {
+   "seconds": 1.8,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262668052": {
+   "seconds": 0.72,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1262668053": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262859132": {
+   "seconds": 1.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262859133": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262859134": {
+   "seconds": 0.67,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1262860232": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262861485": {
+   "seconds": 0.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1262867023": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1268362503": {
+   "seconds": 1.6,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1268364830": {
+   "seconds": 1.62,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1268364831": {
+   "seconds": 0.81,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1268486069": {
+   "seconds": 0.9,
+   "bytes_recv": 104328,
+   "failed": false
+  },
+  "way_1269020742": {
+   "seconds": 0.73,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_1270841121": {
+   "seconds": 1.02,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1271155150": {
+   "seconds": 0.8,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1271155630": {
+   "seconds": 0.74,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1271197419": {
+   "seconds": 3.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1271208131": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1271758762": {
+   "seconds": 1.73,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1271761233": {
+   "seconds": 0.88,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1271761463": {
+   "seconds": 1.84,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1272009189": {
+   "seconds": 0.89,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1273032204": {
+   "seconds": 0.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1273331581": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1273341761": {
+   "seconds": 0.95,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1273533294": {
+   "seconds": 0.96,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1274603919": {
+   "seconds": 1.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1274603920": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1274603922": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1274603926": {
+   "seconds": 0.95,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1276421253": {
+   "seconds": 0.8,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1276432617": {
+   "seconds": 0.91,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1280734043": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1280952814": {
+   "seconds": 1.8,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1280955338": {
+   "seconds": 0.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1280956050": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1287476345": {
+   "seconds": 1.71,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287476347": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287476348": {
+   "seconds": 1.83,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287476349": {
+   "seconds": 1.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287476350": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287476353": {
+   "seconds": 1.78,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1287694394": {
+   "seconds": 1.81,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694395": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694397": {
+   "seconds": 0.68,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694398": {
+   "seconds": 0.71,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694402": {
+   "seconds": 1.73,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694403": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694404": {
+   "seconds": 1.74,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1287694405": {
+   "seconds": 0.9,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694406": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694407": {
+   "seconds": 0.69,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1287694408": {
+   "seconds": 0.68,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694409": {
+   "seconds": 1.78,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1287694410": {
+   "seconds": 1.66,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287694412": {
+   "seconds": 0.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1287802108": {
+   "seconds": 0.67,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1289210345": {
+   "seconds": 1.75,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1290319439": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1290973807": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1292068885": {
+   "seconds": 0.89,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_1292068889": {
+   "seconds": 0.98,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1292068894": {
+   "seconds": 0.89,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1292068905": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1294737743": {
+   "seconds": 0.88,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1294737744": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1294737745": {
+   "seconds": 3.22,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1294737746": {
+   "seconds": 2.32,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1294737747": {
+   "seconds": 2.37,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1297131819": {
+   "seconds": 0.95,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1297131820": {
+   "seconds": 1.99,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1297131823": {
+   "seconds": 1.81,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1298078027": {
+   "seconds": 1.54,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298078028": {
+   "seconds": 1.83,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298540858": {
+   "seconds": 0.93,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298540859": {
+   "seconds": 0.97,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298635726": {
+   "seconds": 2.0,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298782673": {
+   "seconds": 0.76,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1298782674": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298782676": {
+   "seconds": 2.0,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298808887": {
+   "seconds": 1.99,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298808888": {
+   "seconds": 1.97,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1298808889": {
+   "seconds": 1.97,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1299236862": {
+   "seconds": 3.48,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1300356176": {
+   "seconds": 0.77,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1300356177": {
+   "seconds": 1.95,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1300356179": {
+   "seconds": 1.85,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1300356181": {
+   "seconds": 1.56,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1300356192": {
+   "seconds": 1.09,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1301920940": {
+   "seconds": 1.41,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1301920941": {
+   "seconds": 2.92,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1301920943": {
+   "seconds": 2.49,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1302005666": {
+   "seconds": 1.61,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1302005667": {
+   "seconds": 1.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1302005669": {
+   "seconds": 0.97,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1302005680": {
+   "seconds": 0.97,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1302005681": {
+   "seconds": 2.37,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1302720365": {
+   "seconds": 1.89,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_1302913740": {
+   "seconds": 1.55,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1303737120": {
+   "seconds": 1.93,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1303737122": {
+   "seconds": 7.45,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1303737123": {
+   "seconds": 0.98,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1303737125": {
+   "seconds": 1.24,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1303737127": {
+   "seconds": 5.0,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_1303737128": {
+   "seconds": 1.0,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1303737129": {
+   "seconds": 3.06,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1304949987": {
+   "seconds": 1.9,
+   "bytes_recv": 102204,
+   "failed": false
+  },
+  "way_1306446166": {
+   "seconds": 1.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1306446167": {
+   "seconds": 2.17,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1309124195": {
+   "seconds": 1.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1309124196": {
+   "seconds": 1.71,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1309124197": {
+   "seconds": 1.3,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1309124198": {
+   "seconds": 4.37,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1309124200": {
+   "seconds": 1.93,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1309124201": {
+   "seconds": 1.81,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1311484788": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1314598732": {
+   "seconds": 1.14,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1317844383": {
+   "seconds": 2.43,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1318343307": {
+   "seconds": 1.05,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1322910501": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1322918568": {
+   "seconds": 2.24,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1323001553": {
+   "seconds": 2.03,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1323001554": {
+   "seconds": 1.14,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1327624936": {
+   "seconds": 1.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1327624946": {
+   "seconds": 1.34,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1327624947": {
+   "seconds": 2.11,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1328315032": {
+   "seconds": 1.9,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1330284340": {
+   "seconds": 2.02,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_1337948207": {
+   "seconds": 2.78,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1338698225": {
+   "seconds": 2.2,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1340382669": {
+   "seconds": 2.37,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1340382670": {
+   "seconds": 5.08,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363008902": {
+   "seconds": 3.33,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363047602": {
+   "seconds": 3.28,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1363047603": {
+   "seconds": 1.1,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1363047604": {
+   "seconds": 3.43,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363047605": {
+   "seconds": 2.76,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1363316130": {
+   "seconds": 1.37,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316210": {
+   "seconds": 0.97,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316212": {
+   "seconds": 1.81,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1363316213": {
+   "seconds": 1.39,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316217": {
+   "seconds": 1.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316224": {
+   "seconds": 2.56,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316226": {
+   "seconds": 1.97,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316228": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1363316230": {
+   "seconds": 1.72,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1363316231": {
+   "seconds": 1.83,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1363316235": {
+   "seconds": 3.33,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1367281174": {
+   "seconds": 2.01,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1367720852": {
+   "seconds": 2.11,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1368766768": {
+   "seconds": 0.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1369972520": {
+   "seconds": 2.05,
+   "bytes_recv": 105336,
+   "failed": false
+  },
+  "way_1370056198": {
+   "seconds": 1.91,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1370059552": {
+   "seconds": 1.03,
+   "bytes_recv": 105840,
+   "failed": false
+  },
+  "way_1376353749": {
+   "seconds": 1.95,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1383958183": {
+   "seconds": 0.92,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1393129213": {
+   "seconds": 2.43,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1394983014": {
+   "seconds": 1.91,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_1396715213": {
+   "seconds": 2.07,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1416077311": {
+   "seconds": 2.26,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1417955911": {
+   "seconds": 0.97,
+   "bytes_recv": 89712,
+   "failed": false
+  },
+  "way_1417955913": {
+   "seconds": 0.89,
+   "bytes_recv": 89712,
+   "failed": false
+  },
+  "way_1419927347": {
+   "seconds": 0.95,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1419927349": {
+   "seconds": 1.91,
+   "bytes_recv": 102204,
+   "failed": false
+  },
+  "way_1423911886": {
+   "seconds": 0.72,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1423911889": {
+   "seconds": 0.92,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1426631863": {
+   "seconds": 0.96,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1426631865": {
+   "seconds": 1.04,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_1426631888": {
+   "seconds": 0.96,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1426631889": {
+   "seconds": 0.94,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1426631890": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1426631897": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1428277088": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_1431390958": {
+   "seconds": 0.96,
+   "bytes_recv": 107214,
+   "failed": false
+  },
+  "way_1452277701": {
+   "seconds": 2.12,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_1459244576": {
+   "seconds": 1.68,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277797": {
+   "seconds": 1.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277798": {
+   "seconds": 1.73,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277799": {
+   "seconds": 0.83,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277800": {
+   "seconds": 1.8,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277801": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459277803": {
+   "seconds": 1.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_1459981038": {
+   "seconds": 0.93,
+   "bytes_recv": 104328,
+   "failed": false
+  },
+  "way_1459981064": {
+   "seconds": 1.0,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1459981068": {
+   "seconds": 1.94,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175536": {
+   "seconds": 1.98,
+   "bytes_recv": 104328,
+   "failed": false
+  },
+  "way_1462175537": {
+   "seconds": 2.01,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175538": {
+   "seconds": 1.96,
+   "bytes_recv": 104328,
+   "failed": false
+  },
+  "way_1462175539": {
+   "seconds": 1.94,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175540": {
+   "seconds": 1.01,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175552": {
+   "seconds": 2.17,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175553": {
+   "seconds": 2.02,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175554": {
+   "seconds": 1.93,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175555": {
+   "seconds": 2.04,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462175556": {
+   "seconds": 0.92,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462724598": {
+   "seconds": 1.82,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1462982295": {
+   "seconds": 2.01,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1463784577": {
+   "seconds": 0.91,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1463784581": {
+   "seconds": 1.8,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1463784582": {
+   "seconds": 2.0,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1467974580": {
+   "seconds": 0.86,
+   "bytes_recv": 102816,
+   "failed": false
+  },
+  "way_1471848079": {
+   "seconds": 1.89,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_1471848080": {
+   "seconds": 1.97,
+   "bytes_recv": 104832,
+   "failed": false
+  },
+  "way_169780165": {
+   "seconds": 1.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_169780166": {
+   "seconds": 1.75,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_169780168": {
+   "seconds": 1.78,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_169780169": {
+   "seconds": 0.73,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_169780170": {
+   "seconds": 1.85,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_170991771": {
+   "seconds": 0.71,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_170991772": {
+   "seconds": 0.89,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_171490227": {
+   "seconds": 1.7,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_177184320": {
+   "seconds": 1.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362002": {
+   "seconds": 1.81,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362010": {
+   "seconds": 1.73,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362013": {
+   "seconds": 1.67,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362014": {
+   "seconds": 1.77,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362018": {
+   "seconds": 1.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362019": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362023": {
+   "seconds": 3.0,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362025": {
+   "seconds": 1.86,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_199362029": {
+   "seconds": 1.9,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_203240182": {
+   "seconds": 0.94,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_208850054": {
+   "seconds": 0.77,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_214483924": {
+   "seconds": 1.06,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_215837567": {
+   "seconds": 1.96,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_215837568": {
+   "seconds": 2.0,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_222415626": {
+   "seconds": 0.91,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_222846396": {
+   "seconds": 0.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_230100622": {
+   "seconds": 0.88,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_230101646": {
+   "seconds": 2.24,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_230502911": {
+   "seconds": 0.88,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_230587757": {
+   "seconds": 2.03,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_230768701": {
+   "seconds": 2.24,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_231793580": {
+   "seconds": 0.93,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_233425954": {
+   "seconds": 0.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_233491798": {
+   "seconds": 1.86,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_234074145": {
+   "seconds": 1.15,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_234077587": {
+   "seconds": 1.66,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_234077588": {
+   "seconds": 1.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_234298192": {
+   "seconds": 1.3,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_234353808": {
+   "seconds": 1.34,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_234425354": {
+   "seconds": 1.92,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_234428445": {
+   "seconds": 1.78,
+   "bytes_recv": 92184,
+   "failed": false
+  },
+  "way_234430186": {
+   "seconds": 1.87,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_234470116": {
+   "seconds": 1.73,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_234471421": {
+   "seconds": 1.92,
+   "bytes_recv": 91683,
+   "failed": false
+  },
+  "way_234564909": {
+   "seconds": 1.7,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_234572094": {
+   "seconds": 1.84,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_234715351": {
+   "seconds": 1.78,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_235323639": {
+   "seconds": 1.84,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_235479633": {
+   "seconds": 1.93,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_235547206": {
+   "seconds": 0.94,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_235736561": {
+   "seconds": 1.65,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_235739348": {
+   "seconds": 0.72,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_247201403": {
+   "seconds": 1.77,
+   "bytes_recv": 89712,
+   "failed": false
+  },
+  "way_247827161": {
+   "seconds": 1.81,
+   "bytes_recv": 89712,
+   "failed": false
+  },
+  "way_249158077": {
+   "seconds": 0.88,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_254043293": {
+   "seconds": 1.87,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_254427801": {
+   "seconds": 0.77,
+   "bytes_recv": 91683,
+   "failed": false
+  },
+  "way_255284767": {
+   "seconds": 1.81,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_255531586": {
+   "seconds": 1.73,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_255536680": {
+   "seconds": 0.83,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_255727559": {
+   "seconds": 0.87,
+   "bytes_recv": 92736,
+   "failed": false
+  },
+  "way_257619875": {
+   "seconds": 0.7,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_263641712": {
+   "seconds": 1.69,
+   "bytes_recv": 92232,
+   "failed": false
+  },
+  "way_275452213": {
+   "seconds": 1.74,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_287837481": {
+   "seconds": 0.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_288427606": {
+   "seconds": 1.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_313276788": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_313280033": {
+   "seconds": 1.77,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_313280449": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_314093286": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_318391587": {
+   "seconds": 0.92,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_318391589": {
+   "seconds": 1.76,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_318391590": {
+   "seconds": 1.71,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_327530278": {
+   "seconds": 1.81,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530279": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530280": {
+   "seconds": 0.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530281": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530282": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530283": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530284": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530285": {
+   "seconds": 1.02,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530286": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530288": {
+   "seconds": 1.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_327530289": {
+   "seconds": 0.91,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_340122565": {
+   "seconds": 1.89,
+   "bytes_recv": 103824,
+   "failed": false
+  },
+  "way_351531691": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_358720687": {
+   "seconds": 1.83,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_361370799": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_402325671": {
+   "seconds": 0.88,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_402351647": {
+   "seconds": 0.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_402949157": {
+   "seconds": 1.79,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403043732": {
+   "seconds": 0.93,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403043741": {
+   "seconds": 0.93,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403043745": {
+   "seconds": 0.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403062366": {
+   "seconds": 1.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_403062368": {
+   "seconds": 0.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_403077336": {
+   "seconds": 1.04,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403244144": {
+   "seconds": 1.75,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403244151": {
+   "seconds": 0.72,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403244162": {
+   "seconds": 1.77,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403244165": {
+   "seconds": 0.87,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403244169": {
+   "seconds": 1.79,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403246343": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403246344": {
+   "seconds": 0.89,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403246345": {
+   "seconds": 1.71,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403246346": {
+   "seconds": 0.7,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403262834": {
+   "seconds": 0.74,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403262835": {
+   "seconds": 0.94,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_403262836": {
+   "seconds": 0.88,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_403262837": {
+   "seconds": 0.71,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403262838": {
+   "seconds": 1.77,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_403262839": {
+   "seconds": 1.65,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403684200": {
+   "seconds": 1.61,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403684201": {
+   "seconds": 0.75,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403684202": {
+   "seconds": 0.79,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_403684203": {
+   "seconds": 0.95,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_403684204": {
+   "seconds": 1.86,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_404242713": {
+   "seconds": 0.94,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_423572986": {
+   "seconds": 0.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_423572987": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_423574918": {
+   "seconds": 1.71,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_423574919": {
+   "seconds": 0.92,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_423574920": {
+   "seconds": 1.67,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_466257521": {
+   "seconds": 0.85,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257522": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257527": {
+   "seconds": 0.77,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257530": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257534": {
+   "seconds": 0.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257537": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257541": {
+   "seconds": 1.91,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257550": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257551": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257553": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257555": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466257556": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_466393283": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_466419040": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_468542820": {
+   "seconds": 1.89,
+   "bytes_recv": 113400,
+   "failed": false
+  },
+  "way_468542822": {
+   "seconds": 1.98,
+   "bytes_recv": 113400,
+   "failed": false
+  },
+  "way_491839034": {
+   "seconds": 1.64,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_491888097": {
+   "seconds": 1.82,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_491889237": {
+   "seconds": 0.68,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_491889238": {
+   "seconds": 0.69,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_491894034": {
+   "seconds": 1.65,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_491896967": {
+   "seconds": 1.7,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492065096": {
+   "seconds": 1.78,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_492065100": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492065101": {
+   "seconds": 2.55,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_492065122": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_492065192": {
+   "seconds": 1.76,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492067624": {
+   "seconds": 1.91,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492107044": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492217968": {
+   "seconds": 1.87,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492217978": {
+   "seconds": 1.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492218013": {
+   "seconds": 0.85,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492283519": {
+   "seconds": 0.9,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_492520302": {
+   "seconds": 1.82,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_497158737": {
+   "seconds": 1.74,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158739": {
+   "seconds": 0.9,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158741": {
+   "seconds": 0.71,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158744": {
+   "seconds": 1.74,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158745": {
+   "seconds": 1.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158746": {
+   "seconds": 1.79,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158747": {
+   "seconds": 0.71,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158748": {
+   "seconds": 1.7,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158749": {
+   "seconds": 0.85,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158751": {
+   "seconds": 1.78,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158753": {
+   "seconds": 0.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158756": {
+   "seconds": 1.76,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158758": {
+   "seconds": 0.88,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158760": {
+   "seconds": 1.77,
+   "bytes_recv": 86172,
+   "failed": false
+  },
+  "way_497158762": {
+   "seconds": 1.77,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158765": {
+   "seconds": 0.84,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158768": {
+   "seconds": 0.96,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158770": {
+   "seconds": 0.93,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158774": {
+   "seconds": 0.81,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158777": {
+   "seconds": 0.79,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158780": {
+   "seconds": 1.66,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158782": {
+   "seconds": 0.71,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158783": {
+   "seconds": 2.26,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158784": {
+   "seconds": 0.71,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158786": {
+   "seconds": 0.82,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158789": {
+   "seconds": 0.88,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158791": {
+   "seconds": 1.8,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158792": {
+   "seconds": 0.68,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158793": {
+   "seconds": 1.8,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158794": {
+   "seconds": 0.95,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158795": {
+   "seconds": 1.8,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158796": {
+   "seconds": 1.75,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158797": {
+   "seconds": 1.78,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158798": {
+   "seconds": 0.93,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158799": {
+   "seconds": 0.94,
+   "bytes_recv": 85671,
+   "failed": false
+  },
+  "way_497158800": {
+   "seconds": 0.77,
+   "bytes_recv": 85671,
+   "failed": false
+  },
+  "way_497158801": {
+   "seconds": 1.72,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158802": {
+   "seconds": 1.76,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158803": {
+   "seconds": 1.71,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158804": {
+   "seconds": 1.78,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158805": {
+   "seconds": 0.91,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158806": {
+   "seconds": 1.12,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158807": {
+   "seconds": 0.92,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158808": {
+   "seconds": 1.8,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158809": {
+   "seconds": 1.76,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158810": {
+   "seconds": 0.72,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158811": {
+   "seconds": 2.01,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158813": {
+   "seconds": 1.73,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158815": {
+   "seconds": 0.86,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158817": {
+   "seconds": 1.69,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158818": {
+   "seconds": 1.83,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158819": {
+   "seconds": 1.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158820": {
+   "seconds": 1.76,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158821": {
+   "seconds": 1.68,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158822": {
+   "seconds": 1.82,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158824": {
+   "seconds": 0.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158825": {
+   "seconds": 1.68,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158826": {
+   "seconds": 0.81,
+   "bytes_recv": 86172,
+   "failed": false
+  },
+  "way_497158827": {
+   "seconds": 1.1,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158828": {
+   "seconds": 1.83,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158829": {
+   "seconds": 1.81,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_497158830": {
+   "seconds": 1.62,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158831": {
+   "seconds": 1.75,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_497158832": {
+   "seconds": 1.74,
+   "bytes_recv": 85671,
+   "failed": false
+  },
+  "way_527185874": {
+   "seconds": 1.78,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_527185875": {
+   "seconds": 1.9,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_530431673": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_530431674": {
+   "seconds": 0.87,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_534168630": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_535401063": {
+   "seconds": 1.75,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_549536190": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_553474249": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_553474253": {
+   "seconds": 1.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_560515551": {
+   "seconds": 1.89,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_571090410": {
+   "seconds": 1.83,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_628743458": {
+   "seconds": 0.75,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_639834488": {
+   "seconds": 0.72,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_665560887": {
+   "seconds": 1.76,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_670115181": {
+   "seconds": 1.76,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_670712708": {
+   "seconds": 1.87,
+   "bytes_recv": 85671,
+   "failed": false
+  },
+  "way_670712717": {
+   "seconds": 0.88,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_682321551": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_685964500": {
+   "seconds": 1.84,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_686207905": {
+   "seconds": 0.94,
+   "bytes_recv": 83664,
+   "failed": false
+  },
+  "way_726194950": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_726194951": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_726194952": {
+   "seconds": 0.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_738116154": {
+   "seconds": 1.88,
+   "bytes_recv": 112725,
+   "failed": false
+  },
+  "way_738116173": {
+   "seconds": 0.92,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_743308224": {
+   "seconds": 2.03,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_743308237": {
+   "seconds": 0.99,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_744762908": {
+   "seconds": 1.76,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_749064294": {
+   "seconds": 2.21,
+   "bytes_recv": 135576,
+   "failed": false
+  },
+  "way_749064298": {
+   "seconds": 2.01,
+   "bytes_recv": 135270,
+   "failed": false
+  },
+  "way_749120833": {
+   "seconds": 1.0,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_749120834": {
+   "seconds": 2.0,
+   "bytes_recv": 135270,
+   "failed": false
+  },
+  "way_749120864": {
+   "seconds": 2.07,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_750643135": {
+   "seconds": 1.93,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_751672666": {
+   "seconds": 0.95,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_751674022": {
+   "seconds": 0.96,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_751775306": {
+   "seconds": 0.99,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_754072005": {
+   "seconds": 1.75,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_754295537": {
+   "seconds": 1.04,
+   "bytes_recv": 136080,
+   "failed": false
+  },
+  "way_759595188": {
+   "seconds": 1.99,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_771811113": {
+   "seconds": 0.87,
+   "bytes_recv": 85170,
+   "failed": false
+  },
+  "way_779246667": {
+   "seconds": 0.94,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_783824912": {
+   "seconds": 1.67,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_784121981": {
+   "seconds": 1.83,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_784210198": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_784235186": {
+   "seconds": 1.86,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_786236618": {
+   "seconds": 1.78,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_796357627": {
+   "seconds": 1.79,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_797614316": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_797879819": {
+   "seconds": 0.95,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_798813588": {
+   "seconds": 0.85,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_798831338": {
+   "seconds": 1.77,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_799760040": {
+   "seconds": 0.87,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_799760042": {
+   "seconds": 1.78,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_799760044": {
+   "seconds": 0.92,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_800890216": {
+   "seconds": 1.68,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_801293098": {
+   "seconds": 0.91,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_801293099": {
+   "seconds": 0.89,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_801293105": {
+   "seconds": 1.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_801713044": {
+   "seconds": 0.86,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_801732687": {
+   "seconds": 0.89,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_801740786": {
+   "seconds": 0.92,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_802355527": {
+   "seconds": 1.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_802795377": {
+   "seconds": 1.22,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_802902323": {
+   "seconds": 1.79,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_802973422": {
+   "seconds": 1.79,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_803234940": {
+   "seconds": 1.76,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_803383459": {
+   "seconds": 1.77,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_804287954": {
+   "seconds": 1.81,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_804287955": {
+   "seconds": 0.94,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_804287956": {
+   "seconds": 1.67,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_813896563": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_813896564": {
+   "seconds": 0.87,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_813896565": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_840781093": {
+   "seconds": 1.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_840781113": {
+   "seconds": 0.83,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_845549411": {
+   "seconds": 1.84,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_854983948": {
+   "seconds": 0.92,
+   "bytes_recv": 113400,
+   "failed": false
+  },
+  "way_856312853": {
+   "seconds": 1.7,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_859517917": {
+   "seconds": 1.69,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859517918": {
+   "seconds": 0.93,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859537638": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859537639": {
+   "seconds": 1.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859537640": {
+   "seconds": 0.93,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_859537643": {
+   "seconds": 1.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859566707": {
+   "seconds": 0.74,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859566708": {
+   "seconds": 0.89,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_859566709": {
+   "seconds": 1.7,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_859575207": {
+   "seconds": 1.68,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_864177386": {
+   "seconds": 1.78,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196290": {
+   "seconds": 1.63,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196291": {
+   "seconds": 1.77,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196293": {
+   "seconds": 0.72,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196294": {
+   "seconds": 0.67,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196295": {
+   "seconds": 0.85,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196296": {
+   "seconds": 0.96,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196302": {
+   "seconds": 1.63,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196304": {
+   "seconds": 0.65,
+   "bytes_recv": 85671,
+   "failed": false
+  },
+  "way_864196305": {
+   "seconds": 1.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196320": {
+   "seconds": 0.96,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864196321": {
+   "seconds": 0.67,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864634364": {
+   "seconds": 1.75,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864634365": {
+   "seconds": 1.75,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696131": {
+   "seconds": 0.84,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696132": {
+   "seconds": 0.96,
+   "bytes_recv": 86688,
+   "failed": false
+  },
+  "way_864696133": {
+   "seconds": 1.81,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696134": {
+   "seconds": 0.79,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696135": {
+   "seconds": 0.91,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696136": {
+   "seconds": 0.72,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864696137": {
+   "seconds": 0.94,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864701873": {
+   "seconds": 1.67,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_864996072": {
+   "seconds": 0.88,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_864996085": {
+   "seconds": 1.64,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_865047533": {
+   "seconds": 0.75,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_865047567": {
+   "seconds": 1.76,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_865060786": {
+   "seconds": 1.78,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_867304808": {
+   "seconds": 0.88,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868705758": {
+   "seconds": 1.69,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868710192": {
+   "seconds": 0.92,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868711322": {
+   "seconds": 0.74,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868711324": {
+   "seconds": 0.73,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868720229": {
+   "seconds": 0.7,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868818401": {
+   "seconds": 0.73,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_868837825": {
+   "seconds": 0.85,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_868837828": {
+   "seconds": 1.77,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_876461238": {
+   "seconds": 0.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_876461816": {
+   "seconds": 1.89,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_889083721": {
+   "seconds": 0.91,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_892348455": {
+   "seconds": 1.78,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_892348456": {
+   "seconds": 0.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_892348457": {
+   "seconds": 0.79,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_895767312": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_908068214": {
+   "seconds": 0.77,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_908068215": {
+   "seconds": 0.82,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068216": {
+   "seconds": 0.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068217": {
+   "seconds": 2.01,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068218": {
+   "seconds": 0.98,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_908068219": {
+   "seconds": 1.69,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_908068220": {
+   "seconds": 0.81,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068223": {
+   "seconds": 1.65,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_908068224": {
+   "seconds": 1.67,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068225": {
+   "seconds": 1.86,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_908068228": {
+   "seconds": 0.89,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_908405160": {
+   "seconds": 0.89,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_910930590": {
+   "seconds": 0.88,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_910930591": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_918103317": {
+   "seconds": 0.9,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_918841100": {
+   "seconds": 0.94,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_919019156": {
+   "seconds": 1.94,
+   "bytes_recv": 112725,
+   "failed": false
+  },
+  "way_920234021": {
+   "seconds": 2.04,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_921922825": {
+   "seconds": 0.69,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_925448968": {
+   "seconds": 1.63,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_925448969": {
+   "seconds": 1.71,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_941854292": {
+   "seconds": 0.82,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_942058323": {
+   "seconds": 0.91,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_942089420": {
+   "seconds": 1.64,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_942342149": {
+   "seconds": 0.97,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_943016764": {
+   "seconds": 1.88,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_955262569": {
+   "seconds": 1.84,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_955691350": {
+   "seconds": 1.69,
+   "bytes_recv": 84669,
+   "failed": false
+  },
+  "way_955691351": {
+   "seconds": 0.96,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_955691356": {
+   "seconds": 1.65,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_955691358": {
+   "seconds": 0.88,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_965655197": {
+   "seconds": 1.66,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_965659437": {
+   "seconds": 1.79,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_968250979": {
+   "seconds": 0.8,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_968251253": {
+   "seconds": 0.78,
+   "bytes_recv": 85680,
+   "failed": false
+  },
+  "way_970313187": {
+   "seconds": 1.73,
+   "bytes_recv": 84168,
+   "failed": false
+  },
+  "way_970313188": {
+   "seconds": 1.1,
+   "bytes_recv": 83667,
+   "failed": false
+  },
+  "way_975424753": {
+   "seconds": 0.97,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_975424754": {
+   "seconds": 0.97,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_976037875": {
+   "seconds": 0.94,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_976066297": {
+   "seconds": 0.75,
+   "bytes_recv": 84672,
+   "failed": false
+  },
+  "way_979722036": {
+   "seconds": 0.88,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_979722037": {
+   "seconds": 0.93,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_980768417": {
+   "seconds": 1.03,
+   "bytes_recv": 113400,
+   "failed": false
+  },
+  "way_980798833": {
+   "seconds": 1.87,
+   "bytes_recv": 113400,
+   "failed": false
+  },
+  "way_980798851": {
+   "seconds": 1.95,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_980798853": {
+   "seconds": 1.86,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_980798854": {
+   "seconds": 0.91,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_98170643": {
+   "seconds": 0.7,
+   "bytes_recv": 86184,
+   "failed": false
+  },
+  "way_981902255": {
+   "seconds": 2.01,
+   "bytes_recv": 112896,
+   "failed": false
+  },
+  "way_987789903": {
+   "seconds": 0.91,
+   "bytes_recv": 106344,
+   "failed": false
+  },
+  "way_987789904": {
+   "seconds": 0.99,
+   "bytes_recv": 105840,
+   "failed": false
+  },
+  "way_987789907": {
+   "seconds": 2.06,
+   "bytes_recv": 106344,
+   "failed": false
+  },
+  "way_987789908": {
+   "seconds": 0.98,
+   "bytes_recv": 105840,
+   "failed": false
+  },
+  "way_987789909": {
+   "seconds": 1.83,
+   "bytes_recv": 105840,
+   "failed": false
+  },
+  "way_987789910": {
+   "seconds": 1.95,
+   "bytes_recv": 106344,
+   "failed": false
+  },
+  "way_987789911": {
+   "seconds": 0.86,
+   "bytes_recv": 105711,
+   "failed": false
+  },
+  "way_993368444": {
+   "seconds": 0.84,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_993481822": {
+   "seconds": 0.85,
+   "bytes_recv": 85176,
+   "failed": false
+  },
+  "way_997531572": {
+   "seconds": 0.69,
+   "bytes_recv": 85680,
+   "failed": false
+  }
+ }
+}
