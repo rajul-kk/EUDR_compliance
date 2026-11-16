@@ -11,9 +11,9 @@ Labels written before LABEL_NODATA existed carry a nodata tag of 0, the same val
 without masking, and treat 0 there as "non-forest or no data".
 
 EUDR baseline date: 31 December 2020.
-Hansen asset: UMD/hansen/global_forest_change_2023_v1_11
+Hansen asset: UMD/hansen/global_forest_change_2025_v1_13
   - treecover2000: % tree canopy cover in year 2000
-  - lossyear:      year of first loss (1=2001 … 23=2023); 0 = no loss detected
+  - lossyear:      year of first loss (1=2001 … 25=2025); masked where no loss was detected (unmasked to 0 here)
 """
 
 import logging
@@ -112,7 +112,9 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
         hansen = ee.Image(HANSEN_ASSET)
 
         treecover = hansen.select("treecover2000")
-        lossyear = hansen.select("lossyear")
+        # lossyear is masked where no loss was detected (it never holds 0); unmask so "no loss" reads as 0.
+        # Without this, lossyear.eq(0) never matched and stable forest was written as class 0 (PROTOCOL_E10).
+        lossyear = hansen.select("lossyear").unmask(0)
         has_data = hansen.select("datamask").gt(0)
 
         # Was this pixel forested in 2000?
