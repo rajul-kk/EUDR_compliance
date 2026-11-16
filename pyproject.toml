@@ -59,10 +59,32 @@ line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+preview = true                 # for PLW1514 only: explicit-preview-rules keeps every other preview rule off
+explicit-preview-rules = true
+select = [
+    "E", "F", "W", "I",
+    "B",        # likely bugs (unused loop variables, raise without from, ...)
+    "ARG",      # unused arguments left after a refactor
+    "RUF059",   # unused unpacked variables
+    "SIM115",   # files opened without a context manager
+    "PLW1514",  # text files opened without an explicit encoding (Windows defaults to cp1252)
+    "C90",      # functions too complex to read in one go
+]
 ignore = [
     "E501",   # line too long — handled by formatter
     "E402",   # module-level import not at top — intentional: logger declared before path-dependent imports
     "W291",   # trailing whitespace in code
     "W293",   # trailing whitespace in blank lines (common in docstrings)
+    "B905",   # zip(strict=...): the lengths are equal by construction here
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+# the legacy pipeline predates these rules; the Hansen audit (hansen_audit/, scripts/hansen_audit/, tests_hansen_audit/) follows all of them
+"src/**" = ["B", "ARG", "RUF059", "C90"]
+"main_audit.py" = ["B", "ARG", "RUF059", "C90"]
+"GEE_dynamic/**" = ["B", "ARG", "RUF059", "C90", "PLW1514", "SIM115"]
+"NDVI_pred/**" = ["B", "ARG", "RUF059", "C90", "PLW1514", "SIM115"]
+"tests/**" = ["B", "ARG", "RUF059", "C90", "PLW1514", "SIM115"]
