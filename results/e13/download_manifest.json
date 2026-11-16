@@ -1,0 +1,30 @@
+{
+ "record": "https://zenodo.org/api/records/13379129",
+ "version": "v1.2",
+ "licence": {
+  "id": "cc-by-4.0"
+ },
+ "cap_bytes": 304000000,
+ "declared_bytes": 147306694,
+ "files": {
+  "GlobalOilPalm_OP-YoP.zip": {
+   "bytes": 146494272,
+   "md5": "7c7404d8ffd8d290c36c191c118b5ad1",
+   "md5_ok": true,
+   "fetched_utc": "2026-11-15T14:46:29Z"
+  },
+  "Grid_OilPalm2016-2021.zip": {
+   "bytes": 81956,
+   "md5": "dddf5b71aebbee4c158922ee06534522",
+   "md5_ok": true,
+   "fetched_utc": "2026-11-15T14:48:43Z"
+  },
+  "Validation_points_GlobalOP2016-2021.zip": {
+   "bytes": 730466,
+   "md5": "15c8a34e11a98d2a8146cfacf52bd321",
+   "md5_ok": true,
+   "fetched_utc": "2026-11-15T14:48:45Z"
+  }
+ },
+ "bytes_received": 147306694
+}

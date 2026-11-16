@@ -160,3 +160,8 @@ cells and cannot be flagged at all. Labels `hansen_labels_v2` (loss only); GFC20
 - Reading: on these farms the box, not the plot, carries almost all Hansen flags. What remains inside plots is concentrated in
   Cameroon and Ghana cocoa, where about half also survives the GFC2020 gate. Both maps are models; E3 labels remain the
   reference, and nothing here changes a product outcome.
+
+## 13. Hansen loss against oil palm planting year (PROTOCOL_E13): stopped at the encoding check
+The Descals et al. (2024) planting-year layer (Zenodo 13379129 v1.2, CC BY 4.0; 147 MB, MD5s match) holds 0, the years
+1990-2021, and two values neither the record nor the paper defines: 1989 (5.6 % of palm pixels) and 2022 (0.06 %). As
+registered, no analysis was run (`results/e13/encoding.json`); the reading of those two values waits on the owner.
