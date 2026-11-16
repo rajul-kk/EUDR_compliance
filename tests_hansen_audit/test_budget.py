@@ -91,3 +91,33 @@ def test_run_guarded_reserves_a_whole_batch_before_starting_it(tmp_path):
     calls = []
     run_guarded(b, list("abcdefgh"), lambda it: calls.append(it) or {"bytes_recv": 1}, workers=8, log=lambda m: None)
     assert calls == []   # 8 x 0.2 GB would pass the 1 GB budget, so the batch never starts
+
+
+class _Resp:
+    def __init__(self, blocks, length=None):
+        self.blocks = blocks
+        self.headers = {} if length is None else {"Content-Length": str(length)}
+
+    def iter_content(self, chunk):
+        yield from self.blocks
+
+
+def test_capped_download_writes_within_cap(tmp_path):
+    from hansen_audit.budget import capped_download
+
+    p = str(tmp_path / "f.bin")
+    assert capped_download(_Resp([b"ab", b"cd"], 4), p, 4) == 4
+    assert open(p, "rb").read() == b"abcd"
+
+
+def test_capped_download_refuses_declared_size_and_stops_past_cap(tmp_path):
+    import pytest
+
+    from hansen_audit.budget import OverBudget, capped_download
+
+    p = str(tmp_path / "f.bin")
+    with pytest.raises(OverBudget):
+        capped_download(_Resp([b"abcde"], 5), p, 4)
+    with pytest.raises(OverBudget):
+        capped_download(_Resp([b"ab", b"cde"]), p, 4)
+    assert not (tmp_path / "f.bin").exists() and not (tmp_path / "f.bin.part").exists()

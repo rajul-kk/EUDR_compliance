@@ -154,3 +154,29 @@ def run_guarded(budget: "DownloadBudget", items: Sequence, fetch: Callable[[obje
             if (i // workers) % 25 == 0:
                 log(f"{min(i + workers, len(items))}/{len(items)} done, {n_fail} failed, {budget.used() / 1e9:.3f} GB")
     return n_fail
+
+
+class OverBudget(RuntimeError):
+    pass
+
+
+def capped_download(response, path: str, cap_bytes: int, chunk: int = 1 << 20) -> int:
+    """Stream an HTTP response (requests, stream=True) to `path`, counting the job's own bytes; refuse when the declared
+    Content-Length already passes `cap_bytes`, and stop (deleting the partial file) once the bytes received pass it.
+    Writes through `<path>.part` and returns the number of bytes written."""
+    declared = response.headers.get("Content-Length")
+    if declared is not None and int(declared) > cap_bytes:
+        raise OverBudget(f"declared size {int(declared)} bytes passes the cap of {cap_bytes}")
+    tmp, n = path + ".part", 0
+    try:
+        with open(tmp, "wb") as fh:
+            for block in response.iter_content(chunk):
+                n += len(block)
+                if n > cap_bytes:
+                    raise OverBudget(f"received more than the cap of {cap_bytes} bytes")
+                fh.write(block)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+    return n

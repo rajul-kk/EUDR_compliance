@@ -141,3 +141,22 @@ What this does to earlier results (nothing rerun yet; each rerun is a dated devi
 | Section 2 (farm sensitivity, usable footprint) | footprint = class 1 or 2 cells | footprint far too small; rerun |
 | E4/E5/E8 transport checks (PLANT share of stable cells) | class 1 | measured on 2025-loss cells; rerun |
 | E9 analysis 3 (agreement, kappa), class-1 share, stable share in analysis 4 | classes 0 and 1 | rerun |
+
+## 12. Every farm inside its OpenStreetMap outline (PROTOCOL_E12; results/e12/outlines.json)
+One Overpass request for all 996 farm ids (3.8 MB, 994 returned; overpass-api.de gave 502, so the E5 mirror was used, a
+recorded deviation). 969 farms have at least one label cell inside their outline (25 outlines hold none, 2 not returned).
+Outlines are small: median 4.9 ha (quartiles 1.0, 28.5), against about 2,500 ha per label box; 136 outlines have fewer than 6
+cells and cannot be flagged at all. Labels `hansen_labels_v2` (loss only); GFC2020 V3 at 50 % from E9.
+- **Flags: 873 of the 969 farms are flagged in their box; 138 inside their outline. 0.84 [0.82, 0.87] of box flags are not
+  flagged inside the outline**, and no farm is flagged inside its outline but not in its box.
+- E9 gate inside outlines: 0.24 [0.18, 0.29] of the 10,645 loss cells inside outlines are GFC2020 forest; of the 138 farms
+  flagged inside outlines, 55 still are on GFC-forest loss alone (0.60 [0.52, 0.68] do not survive).
+- By group (box flagged -> outline flagged -> outline and GFC-gated): ID Oil Palm 185 -> 10 -> 0; VN Coffee 67 -> 3 -> 0;
+  IN Rubber 77 -> 1 -> 0; CI Cocoa 34 -> 3 -> 0; BR Cattle 69 -> 5 -> 2; GH Cocoa 88 -> 20 -> 12; CM Cocoa 96 -> 71 -> 36.
+  Cameroon's outlines are larger (median 45 ha against 1.1 ha for ID Oil Palm), so more of them can reach 6 cells.
+- Check against E5/E8 (analysis 5): of 177 Indonesian oil palm farms in both, 176 agree on the outline flag; the other has 7
+  loss cells on the E4 window grid and 4 on its label grid (the label rasters are on a 0.00027 degree grid, the windows on
+  Hansen's 0.00025). Secondary (coverage >= 0.5): identical, every outline is at least 0.55 inside its label raster.
+- Reading: on these farms the box, not the plot, carries almost all Hansen flags. What remains inside plots is concentrated in
+  Cameroon and Ghana cocoa, where about half also survives the GFC2020 gate. Both maps are models; E3 labels remain the
+  reference, and nothing here changes a product outcome.

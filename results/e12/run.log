@@ -1,0 +1,64 @@
+{
+ "n_included": 969,
+ "excluded_by_reason": {
+  "no label cell inside the outline": 25,
+  "not returned by Overpass": 2
+ },
+ "analysis_3": {
+  "outline_ha_quartiles": [
+   0.96,
+   4.87,
+   28.49
+  ],
+  "coverage_quartiles": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "outlines_under_min_cells": 136,
+  "min_cells": 6,
+  "outline_cells": 506449,
+  "outline_cells_in_two_or_more": 196
+ },
+ "analysis_5_vs_e5_e8": {
+  "compared": 177,
+  "agree": 176,
+  "disagree": [
+   {
+    "farm": "way_1243389665",
+    "e5_e8_loss_cells": 7,
+    "e12_loss_cells": 4,
+    "e5_e8_coverage": 1.0,
+    "e12_coverage": 1.0
+   }
+  ]
+ }
+}
+{
+ "analysis_1_flags": {
+  "n_farms": 969,
+  "box_flagged": 873,
+  "outline_flagged": 138,
+  "flagged_outline_not_box": 0,
+  "share_box_flags_not_flagged_in_outline": {
+   "est": 0.8419243986254296,
+   "lo": 0.8170286344018348,
+   "hi": 0.8660650904326921
+  }
+ },
+ "analysis_2_gfc_gate_in_outlines": {
+  "loss_cells": 10645,
+  "share_loss_on_gfc_forest": {
+   "est": 0.23992484734617192,
+   "lo": 0.17954476268853276,
+   "hi": 0.29164583621311085
+  },
+  "hansen_flagged": 138,
+  "gated_flagged": 55,
+  "share_flags_not_surviving": {
+   "est": 0.6014492753623188,
+   "lo": 0.5230718954248367,
+   "hi": 0.6838709677419355
+  }
+ }
+}

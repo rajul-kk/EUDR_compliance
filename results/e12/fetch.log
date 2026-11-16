@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 196, in <module>
+    main()
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 192, in main
+    fetch(a) if a.cmd == "fetch" else run(a)
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 55, in fetch
+    r.raise_for_status()
+  File "C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 502 Server Error: Bad Gateway for url: https://overpass-api.de/api/interpreter
+Traceback (most recent call last):
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 196, in <module>
+    main()
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 192, in main
+    fetch(a) if a.cmd == "fetch" else run(a)
+  File "D:\Work\Segmentation-logistics\EUDR-compliance-hansen-audit\scripts\hansen_audit\e12_outlines.py", line 58, in fetch
+    els = json.load(fh).get("elements", [])
+  File "C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "C:\Users\rajul\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 241892: character maps to <undefined>
+D:/Work/eudr-hansen-audit-refdata/e12_outlines\overpass.json exists; not fetching again
+{
+ "fetched_utc": "2026-11-15T14:43:52Z",
+ "bytes": 3845783,
+ "requested": 996,
+ "returned": 994,
+ "missing": 2
+}

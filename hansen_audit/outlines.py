@@ -60,8 +60,12 @@ def coverage(poly, farm_box) -> float:
 
 def outline_cells(origin, shape, poly) -> np.ndarray:
     """Bool (H, W): window cells whose centres fall inside the outline (holes excluded)."""
+    return outline_cells_on((HANSEN_RES, 0.0, origin[0], 0.0, -HANSEN_RES, origin[1]), shape, poly)
+
+
+def outline_cells_on(transform, shape, poly) -> np.ndarray:
+    """Bool (H, W): cells of a north-up raster (affine a, b, c, d, e, f) whose centres fall inside the outline."""
+    a, _, c, _, e, f = tuple(transform)[:6]
     H, W = shape
-    lon = origin[0] + (np.arange(W) + 0.5) * HANSEN_RES
-    lat = origin[1] - (np.arange(H) + 0.5) * HANSEN_RES
-    X, Y = np.meshgrid(lon, lat)
+    X, Y = np.meshgrid(c + (np.arange(W) + 0.5) * a, f + (np.arange(H) + 0.5) * e)
     return contains_xy(poly, X, Y)
