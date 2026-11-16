@@ -13,7 +13,6 @@ import argparse
 import logging
 import os
 import random
-import re
 import sys
 
 import numpy as np
@@ -28,13 +27,12 @@ if __package__ in (None, ""):   # run by path (python src/x.py): make the repo r
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.deeplab_model import get_deeplab_model
-from src.preprocessing.change_dataset import load_image, load_mask
+from src.preprocessing.change_dataset import hansen_label_pairs, load_image, load_mask
 from src.train_utils import compute_miou, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUM_CLASSES = 3  # Hansen: 0=non-forest, 1=forest-2020, 2=post-EUDR-loss
 
-_FARM_RE = re.compile(r"(.+?)_(2020|2024)(?:_|\.tiff?)")
 
 
 class HansenDataset(Dataset):
@@ -47,17 +45,7 @@ class HansenDataset(Dataset):
 
     def __init__(self, t1_dir: str, mask_dir: str, training: bool = False) -> None:
         self._training = training
-        self.samples: list = []
-
-        for f in sorted(os.listdir(t1_dir)):
-            if not f.endswith((".tif", ".tiff")):
-                continue
-            m = _FARM_RE.match(f)
-            if not m:
-                continue
-            label_path = os.path.join(mask_dir, f"{m.group(1)}_hansen_label.tif")
-            if os.path.exists(label_path):
-                self.samples.append((os.path.join(t1_dir, f), label_path))
+        self.samples = hansen_label_pairs(t1_dir, mask_dir)
 
         logger.info("HansenDataset: %d samples (training=%s)", len(self.samples), training)
 

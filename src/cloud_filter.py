@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
+CLOUD_SCL_CLASSES = frozenset({0, 1, 3, 8, 9, 10})   # SCL no data, saturated, cloud shadow, medium/high cloud, cirrus
+
 try:
     from s2cloudless import S2PixelCloudDetector as _S2Detector
 except ImportError:
@@ -68,8 +70,4 @@ class CloudFilter:
         Returns:
             Binary mask of shape (H, W) where 1 = cloud/shadow.
         """
-        cloud_classes = {0, 1, 3, 8, 9, 10}
-        mask = np.zeros_like(scl_band, dtype=np.uint8)
-        for cls in cloud_classes:
-            mask[scl_band == cls] = 1
-        return mask
+        return np.isin(scl_band, list(CLOUD_SCL_CLASSES)).astype(np.uint8)

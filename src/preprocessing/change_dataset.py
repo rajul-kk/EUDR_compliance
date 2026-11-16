@@ -15,6 +15,8 @@ import rasterio
 import torch
 from torch.utils.data import Dataset
 
+from src.cloud_filter import CLOUD_SCL_CLASSES
+
 # Suppress GDAL/libtiff TIFF metadata warnings that are harmless for multi-band GEE exports
 warnings.filterwarnings("ignore", message=".*TIFFReadDirectory.*")
 warnings.filterwarnings("ignore", message=".*SamplesPerPixel.*")
@@ -26,7 +28,6 @@ from src.train_utils import seed_everything, split_dataset  # noqa: F401 — re-
 
 logger = logging.getLogger(__name__)
 
-CLOUD_SCL_CLASSES = {0, 1, 3, 8, 9, 10}
 FOREST_CLASS = 1
 IGNORE_INDEX = 255
 
@@ -38,6 +39,19 @@ HANSEN_NODATA = 255        # generate_labels.LABEL_NODATA: Hansen has no data he
 
 _OPTICAL_BANDS = [0, 1, 2, 3]  # R, G, B, NIR — clip these; SCL is categorical, NDVI/NDWI are derived
 
+
+
+FARM_YEAR_RE = re.compile(r"(.+?)_(2020|2024)(?:_|\.tiff?)")   # {farm_key}_{year}_{date}.tiff or {farm_key}_{year}.tiff
+
+
+def hansen_label_pairs(image_dir: str, label_dir: str) -> list:
+    """(image, label) paths for every image in image_dir whose farm has {farm_key}_hansen_label.tif in label_dir."""
+    out = []
+    for f in sorted(os.listdir(image_dir)):
+        m = FARM_YEAR_RE.match(f) if f.endswith((".tif", ".tiff")) else None
+        if m and os.path.exists(label := os.path.join(label_dir, f"{m.group(1)}_hansen_label.tif")):
+            out.append((os.path.join(image_dir, f), label))
+    return out
 
 def _percentile_clip(img: np.ndarray, low: float = 2.0, high: float = 98.0) -> np.ndarray:
     """Clip each optical band to its own [low, high] percentile.
@@ -172,7 +186,7 @@ class ChangeDetectionDataset(Dataset):
             # Match both filename formats:
             #   old: {farm_key}_{year}_{date}.tiff
             #   new: {farm_key}_{year}.tiff
-            m = re.match(r"(.+?)_(2020|2024)(?:_|\.tiff?)", f)
+            m = FARM_YEAR_RE.match(f)
             if not m:
                 continue
             farm_key = m.group(1)

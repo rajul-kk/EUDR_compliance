@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import random
+import sys
 import threading
 import time
 
@@ -16,6 +17,10 @@ import requests
 from dask import delayed
 from dotenv import load_dotenv
 from pystac_client import Client
+
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.cloud_filter import CLOUD_SCL_CLASSES
 
 load_dotenv()
 
@@ -37,7 +42,6 @@ STATE_LOCK = threading.Lock()
 TOKEN_LOCK = threading.Lock()  # one refresh at a time across dask threads
 
 # SCL classes treated as cloud / shadow
-_CLOUD_SCL = {0, 1, 3, 8, 9, 10}
 
 DEFAULT_PROFILE = {
     "default": {
@@ -326,7 +330,7 @@ def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=
             best_profile = profile
 
         scl = arr[4].astype(np.int16)
-        cloud_mask = np.isin(scl, list(_CLOUD_SCL))
+        cloud_mask = np.isin(scl, list(CLOUD_SCL_CLASSES))
 
         spectral = arr[:4].copy()
         spectral[:, cloud_mask] = np.nan
@@ -346,7 +350,7 @@ def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=
 
     # SCL: mark pixels that were cloudy in clearest scene but have data elsewhere
     had_any_clear = ~np.all(np.isnan(stacked), axis=(0, 1))  # (H, W)
-    was_cloud = np.isin(scl_clearest.astype(np.int16), list(_CLOUD_SCL))
+    was_cloud = np.isin(scl_clearest.astype(np.int16), list(CLOUD_SCL_CLASSES))
     scl_clearest[had_any_clear & was_cloud] = 4.0  # reclassify as clear vegetation
 
     composite = np.concatenate(

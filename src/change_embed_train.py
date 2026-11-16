@@ -19,10 +19,8 @@ if __package__ in (None, ""):   # run by path (python src/x.py): make the repo r
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.change_embed_model import get_change_embed_model
-from src.train_utils import seed_everything, split_dataset
-
-IGNORE_INDEX = 255
-FOREST_CLASS = 1
+from src.preprocessing.change_dataset import FOREST_CLASS, IGNORE_INDEX
+from src.train_utils import change_f1, seed_everything, split_dataset
 
 
 def check_year_dirs(dir_t1: str, dir_t2: str) -> None:
@@ -96,17 +94,6 @@ class ChangeEmbedDataset(Dataset):
         return torch.from_numpy(diff), torch.from_numpy(change)
 
 
-def _change_f1(logits: torch.Tensor, targets: torch.Tensor) -> float:
-    preds = torch.argmax(logits, dim=1)
-    valid = targets != IGNORE_INDEX
-    tp = ((preds == 1) & (targets == 1) & valid).sum().float()
-    fp = ((preds == 1) & (targets == 0) & valid).sum().float()
-    fn = ((preds == 0) & (targets == 1) & valid).sum().float()
-    p = tp / (tp + fp + 1e-8)
-    r = tp / (tp + fn + 1e-8)
-    return (2 * p * r / (p + r + 1e-8)).item()
-
-
 def train(args: argparse.Namespace) -> None:
     seed_everything(args.seed)
     DEVICE = torch.device(args.device)
@@ -152,7 +139,7 @@ def train(args: argparse.Namespace) -> None:
                 diff, change = diff.to(DEVICE), change.to(DEVICE)
                 logits = model(diff)["out"]
                 val_loss += criterion(logits, change).item()
-                val_f1 += _change_f1(logits, change)
+                val_f1 += change_f1(logits, change)
 
         avg_train_loss = train_loss / max(1, len(train_loader))
         avg_val_loss = val_loss / max(1, len(val_loader))

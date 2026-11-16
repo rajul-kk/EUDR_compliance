@@ -1,6 +1,7 @@
 """Shared training utilities used by tessera_train and tessera_embed_train."""
 
 import logging
+import os
 import random
 import re
 from typing import Optional, Tuple
@@ -150,3 +151,38 @@ def load_embedding(path: str, scales_path: Optional[str] = None) -> np.ndarray:
         raise ValueError(f"Cannot infer embedding channel axis for shape {arr.shape} ({path})")
 
     return arr.astype(np.float32)
+
+
+def change_f1(logits: torch.Tensor, targets: torch.Tensor) -> float:
+    preds = torch.argmax(logits, dim=1)
+    valid = targets != 255
+    tp = ((preds == 1) & (targets == 1) & valid).sum().float()
+    fp = ((preds == 1) & (targets == 0) & valid).sum().float()
+    fn = ((preds == 0) & (targets == 1) & valid).sum().float()
+    p = tp / (tp + fp + 1e-8)
+    r = tp / (tp + fn + 1e-8)
+    return (2 * p * r / (p + r + 1e-8)).item()
+
+
+def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
+    candidates = [
+        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tif"),
+        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tiff"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
+    candidates = [
+        os.path.join(mask_dir, f"{stem}_mask.tif"),
+        os.path.join(mask_dir, f"{stem}_mask.tiff"),
+        os.path.join(mask_dir, f"{stem}.tif"),
+        os.path.join(mask_dir, f"{stem}.tiff"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None

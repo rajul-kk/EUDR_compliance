@@ -77,6 +77,8 @@ from src.tessera_embed_model import TesseraEmbeddingSegHead
 from src.train_utils import (
     compute_miou,
     extract_farm_key,
+    find_mask,
+    find_tile_mask,
     load_embedding,
     seed_everything,
     split_dataset,
@@ -88,30 +90,6 @@ def extract_year(name: str) -> Optional[str]:
     if not match:
         return None
     return match.group(1)
-
-
-def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
-    candidates = [
-        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tif"),
-        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tiff"),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-    return None
-
-
-def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
-    candidates = [
-        os.path.join(mask_dir, f"{stem}_mask.tif"),
-        os.path.join(mask_dir, f"{stem}_mask.tiff"),
-        os.path.join(mask_dir, f"{stem}.tif"),
-        os.path.join(mask_dir, f"{stem}.tiff"),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-    return None
 
 
 class TesseraEmbeddingDataset(Dataset):

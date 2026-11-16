@@ -18,12 +18,11 @@ if __package__ in (None, ""):   # run by path (python src/x.py): make the repo r
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.hybrid_model import get_hybrid_model
-from src.preprocessing.change_dataset import load_image, load_mask
+from src.preprocessing.change_dataset import hansen_label_pairs, load_image, load_mask
 from src.train_utils import compute_miou, load_embedding, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-_FARM_RE = re.compile(r"(.+?)_(2020|2024)(?:_|\.tiff?)")
 _KEY_RE = re.compile(r"((relation|way)_\d+)")
 
 
@@ -43,17 +42,7 @@ class HybridDataset(Dataset):
         self._training = training
         self.embeddings_dir = embeddings_dir
         self._embed_files: list = os.listdir(embeddings_dir) if os.path.isdir(embeddings_dir) else []
-        self.samples: list = []
-
-        for f in sorted(os.listdir(t1_dir)):
-            if not f.endswith((".tif", ".tiff")):
-                continue
-            m = _FARM_RE.match(f)
-            if not m:
-                continue
-            label_path = os.path.join(mask_dir, f"{m.group(1)}_hansen_label.tif")
-            if os.path.exists(label_path):
-                self.samples.append((os.path.join(t1_dir, f), label_path))
+        self.samples = hansen_label_pairs(t1_dir, mask_dir)
 
         logger.info("HybridDataset: %d samples (Hansen labels)", len(self.samples))
 

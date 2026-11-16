@@ -3,7 +3,7 @@ import csv
 import glob
 import json
 import os
-import re
+import sys
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -11,34 +11,18 @@ import numpy as np
 import pandas as pd
 import rasterio
 
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.train_utils import extract_farm_key, find_mask, find_tile_mask
+
+
+def farm_key_or_empty(name: str) -> str:
+    return extract_farm_key(name) or ""
+
 
 def load_mask(path: str) -> np.ndarray:
     with rasterio.open(path) as src:
         return src.read(1)
-
-
-def find_mask(mask_dir: str, farm_key: str, year: str) -> Optional[str]:
-    candidates = [
-        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tif"),
-        os.path.join(mask_dir, f"{farm_key}_{year}_hybrid.tiff"),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-    return None
-
-
-def find_tile_mask(mask_dir: str, stem: str) -> Optional[str]:
-    candidates = [
-        os.path.join(mask_dir, f"{stem}_mask.tif"),
-        os.path.join(mask_dir, f"{stem}_mask.tiff"),
-        os.path.join(mask_dir, f"{stem}.tif"),
-        os.path.join(mask_dir, f"{stem}.tiff"),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-    return None
 
 
 def compute_segmentation_metrics(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int = 4, ignore_index: int = 255) -> Dict[str, float]:
@@ -91,16 +75,9 @@ def precision_recall_f1(tp: float, fp: float, fn: float) -> Tuple[float, float, 
     return precision, recall, f1
 
 
-def extract_farm_key_from_prediction_name(filename: str) -> str:
-    match = re.match(r"^(relation|way)_\d+", filename)
-    if not match:
-        return ""
-    return match.group(0)
-
-
 def extract_prediction_key(filename: str) -> str:
     base = filename.replace("_predicted.tif", "").replace("_predicted.tiff", "")
-    farm_key = extract_farm_key_from_prediction_name(base)
+    farm_key = farm_key_or_empty(base)
     if farm_key:
         return farm_key
     if base.startswith("grid_"):
@@ -225,7 +202,7 @@ def run_baseline_metrics(
         if allowed_keys is not None and pred_key not in allowed_keys:
             continue
 
-        farm_key = extract_farm_key_from_prediction_name(pred_key)
+        farm_key = farm_key_or_empty(pred_key)
         is_grid = pred_key.startswith("grid_")
 
         if is_grid:
@@ -452,7 +429,7 @@ def run_change_detection_benchmark(
 
     for pred_path in pred_files:
         filename = os.path.basename(pred_path)
-        farm_key = extract_farm_key_from_prediction_name(filename)
+        farm_key = farm_key_or_empty(filename)
         if not farm_key:
             continue
 

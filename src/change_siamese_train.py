@@ -18,10 +18,9 @@ if __package__ in (None, ""):   # run by path (python src/x.py): make the repo r
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.change_siamese_model import get_siamese_model
-from src.preprocessing.change_dataset import ChangeDetectionDataset
-from src.train_utils import keep_frozen_batchnorm_eval, seed_everything, split_dataset
+from src.preprocessing.change_dataset import IGNORE_INDEX, ChangeDetectionDataset
+from src.train_utils import change_f1, keep_frozen_batchnorm_eval, seed_everything, split_dataset
 
-IGNORE_INDEX = 255
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -52,17 +51,6 @@ class FocalLoss(nn.Module):
                               torch.full_like(pt, 1 - self.alpha))
         loss = alpha_t * (1 - pt) ** self.gamma * ce
         return (loss * valid).sum() / valid.sum().clamp(min=1)
-
-
-def _change_f1(logits: torch.Tensor, targets: torch.Tensor) -> float:
-    preds = torch.argmax(logits, dim=1)
-    valid = targets != IGNORE_INDEX
-    tp = ((preds == 1) & (targets == 1) & valid).sum().float()
-    fp = ((preds == 1) & (targets == 0) & valid).sum().float()
-    fn = ((preds == 0) & (targets == 1) & valid).sum().float()
-    p = tp / (tp + fp + 1e-8)
-    r = tp / (tp + fn + 1e-8)
-    return (2 * p * r / (p + r + 1e-8)).item()
 
 
 def _suppress_gdal_worker(worker_id: int) -> None:
@@ -174,7 +162,7 @@ def train(args: argparse.Namespace) -> None:
                     logits = model(t1, t2)["out"]
                     loss = criterion(logits, change)
                 val_loss += loss.item()
-                f1 = _change_f1(logits, change)
+                f1 = change_f1(logits, change)
                 val_f1 += f1
                 val_bar.set_postfix(loss=f"{loss.item():.4f}", f1=f"{f1:.4f}")
 

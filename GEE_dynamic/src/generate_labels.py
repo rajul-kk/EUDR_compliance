@@ -33,10 +33,10 @@ if __package__ in (None, ""):   # run by path (python GEE_dynamic/src/x.py): mak
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from GEE_dynamic.auth import initialize_gee
+from GEE_dynamic.config import HANSEN_ASSET_ID
 
 logger = logging.getLogger(__name__)
 
-HANSEN_ASSET = "UMD/hansen/global_forest_change_2025_v1_13"
 TREECOVER_THRESHOLD = 10    # % canopy cover in 2000 to count as forest
 BUFFER_METERS = 2500        # 5km × 5km tile around centroid
 OUTPUT_SCALE = 30           # Hansen native resolution (metres)
@@ -107,7 +107,7 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
 
     try:
         region = ee.Geometry.Point([lon, lat]).buffer(BUFFER_METERS).bounds()
-        hansen = ee.Image(HANSEN_ASSET)
+        hansen = ee.Image(HANSEN_ASSET_ID)
 
         treecover = hansen.select("treecover2000")
         # lossyear is masked where no loss was detected (it never holds 0); unmask so "no loss" reads as 0.
