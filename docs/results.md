@@ -157,6 +157,8 @@ cells and cannot be flagged at all. Labels `hansen_labels_v2` (loss only); GFC20
 - Check against E5/E8 (analysis 5): of 177 Indonesian oil palm farms in both, 176 agree on the outline flag; the other has 7
   loss cells on the E4 window grid and 4 on its label grid (the label rasters are on a 0.00027 degree grid, the windows on
   Hansen's 0.00025). Secondary (coverage >= 0.5): identical, every outline is at least 0.55 inside its label raster.
+  The E5/E8 counts include only cells with a valid S2C prediction, while E12 counts every loss cell, so the check leans
+  towards E12 flagging more farms; it did not happen here (the one disagreement goes the other way).
 - Reading: on these farms the box, not the plot, carries almost all Hansen flags. What remains inside plots is concentrated in
   Cameroon and Ghana cocoa, where about half also survives the GFC2020 gate. Both maps are models; E3 labels remain the
   reference, and nothing here changes a product outcome.
