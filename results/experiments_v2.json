@@ -1,0 +1,256 @@
+{
+ "protocol": "PROTOCOL.md",
+ "epochs": 15,
+ "seeds": 5,
+ "n_patches": 101221,
+ "loss_share_all": 0.05615435532152419,
+ "expA_real_labels": {
+  "ce": {
+   "f1_loss_vs_hansen_mean": 0.42320974868891803,
+   "f1_sd": 0.04131683253391203,
+   "bal_acc_mean": 0.6494738912510852,
+   "bal_acc_sd": 0.022568656942129204
+  },
+  "gce": {
+   "f1_loss_vs_hansen_mean": 0.0,
+   "f1_sd": 0.0,
+   "bal_acc_mean": 0.49996612083568603,
+   "bal_acc_sd": 4.149333274053532e-05
+  },
+  "sce": {
+   "f1_loss_vs_hansen_mean": 0.4113278033987683,
+   "f1_sd": 0.04159591728062134,
+   "bal_acc_mean": 0.6375291046807693,
+   "bal_acc_sd": 0.020409093873363492
+  },
+  "anchor_T_hat_from_CE_ensemble": [
+   [
+    0.999379698031486,
+    0.0006203019685139844
+   ],
+   [
+    0.6436872674133559,
+    0.3563127325866441
+   ]
+  ]
+ },
+ "split_A": {
+  "train_farms": 183,
+  "val_farms": 61,
+  "test_farms": 62,
+  "n_test_cells": 18521
+ },
+ "expB_semisynthetic_ID_oilpalm": {
+  "n_farms": {
+   "train": 28,
+   "val": 9,
+   "test": 10
+  },
+  "n_test_cells": 2592,
+  "settings": {
+   "mild": {
+    "T_star": [
+     [
+      0.95,
+      0.05
+     ],
+     [
+      0.1,
+      0.9
+     ]
+    ],
+    "T_hat_anchor": [
+     [
+      0.96351278905026,
+      0.03648721094973994
+     ],
+     [
+      0.5246224247031681,
+      0.4753775752968319
+     ]
+    ],
+    "T_hat_max_abs_err": 0.42462242470316813,
+    "observed_noise_rate_train": 0.049105951427808915,
+    "methods": {
+     "ce": {
+      "f1_vs_clean_mean": 0.6478102995670695,
+      "f1_sd": 0.01882034302669812,
+      "bal_acc_mean": 0.7645298952969675,
+      "bal_acc_sd": 0.014069506774331329
+     },
+     "gce": {
+      "f1_vs_clean_mean": 0.5148514714662719,
+      "f1_sd": 0.2574530265971607,
+      "bal_acc_mean": 0.7019834010615909,
+      "bal_acc_sd": 0.10104487549799436
+     },
+     "sce": {
+      "f1_vs_clean_mean": 0.6316397618474773,
+      "f1_sd": 0.027254270495577035,
+      "bal_acc_mean": 0.7581489668683071,
+      "bal_acc_sd": 0.014214691110667659
+     },
+     "forward_oracleT": {
+      "f1_vs_clean_mean": 0.6342051376195363,
+      "f1_sd": 0.04812165423576946,
+      "bal_acc_mean": 0.7664312282420215,
+      "bal_acc_sd": 0.009661944826068693
+     },
+     "forward_anchorT": {
+      "f1_vs_clean_mean": 0.6186895241018311,
+      "f1_sd": 0.02091815745957939,
+      "bal_acc_mean": 0.791337313195759,
+      "bal_acc_sd": 0.0013880062501744825
+     }
+    },
+    "paired_f1_diff_vs_ce_bootstrap_mean_lo_hi": {
+     "gce": [
+      -0.08578287531143694,
+      -0.10055137237242848,
+      0.0
+     ],
+     "sce": [
+      -0.016157239460357412,
+      -0.04357845105112757,
+      0.0007030282496766851
+     ],
+     "forward_oracleT": [
+      -0.01741375064792945,
+      -0.10389670108931054,
+      0.031941446337795436
+     ],
+     "forward_anchorT": [
+      -0.02910940433333562,
+      -0.06567276303114009,
+      0.015166457155284356
+     ]
+    }
+   },
+   "severe": {
+    "T_star": [
+     [
+      0.85,
+      0.15
+     ],
+     [
+      0.3,
+      0.7
+     ]
+    ],
+    "T_hat_anchor": [
+     [
+      0.9172196407241878,
+      0.08278035927581216
+     ],
+     [
+      0.5188113296386203,
+      0.4811886703613797
+     ]
+    ],
+    "T_hat_max_abs_err": 0.21881132963862032,
+    "observed_noise_rate_train": 0.14665065385641846,
+    "methods": {
+     "ce": {
+      "f1_vs_clean_mean": 0.5720844004747567,
+      "f1_sd": 0.04947683931205364,
+      "bal_acc_mean": 0.7137900909367679,
+      "bal_acc_sd": 0.027305480770294356
+     },
+     "gce": {
+      "f1_vs_clean_mean": 0.4262774390796088,
+      "f1_sd": 0.21441328983395805,
+      "bal_acc_mean": 0.6601072180232173,
+      "bal_acc_sd": 0.08140758228025431
+     },
+     "sce": {
+      "f1_vs_clean_mean": 0.10442278860569716,
+      "f1_sd": 0.13239908836174563,
+      "bal_acc_mean": 0.5302815465868929,
+      "bal_acc_sd": 0.03876633671293314
+     },
+     "forward_oracleT": {
+      "f1_vs_clean_mean": 0.5819492194645706,
+      "f1_sd": 0.025991598070415223,
+      "bal_acc_mean": 0.7503387295326088,
+      "bal_acc_sd": 0.007492387062572911
+     },
+     "forward_anchorT": {
+      "f1_vs_clean_mean": 0.6045827769325651,
+      "f1_sd": 0.03950885716979844,
+      "bal_acc_mean": 0.7918662554436311,
+      "bal_acc_sd": 0.005251470796725729
+     }
+    },
+    "paired_f1_diff_vs_ce_bootstrap_mean_lo_hi": {
+     "gce": [
+      -0.11250611103299547,
+      -0.19660049829557893,
+      0.0
+     ],
+     "sce": [
+      -0.4379399559373225,
+      -0.5818581651249839,
+      0.0
+     ],
+     "forward_oracleT": [
+      0.003420496836977077,
+      -0.13356165421775393,
+      0.06863755250852022
+     ],
+     "forward_anchorT": [
+      0.02262128779976646,
+      -0.051050650331566624,
+      0.07596826852347523
+     ]
+    }
+   }
+  }
+ },
+ "expC_farm_decisions_ID_oilpalm": {
+  "n_farms_eval": 10,
+  "n_cal": 5,
+  "n_test": 5,
+  "conformal_halfwidth_cells": Infinity,
+  "hansen_flag_rate_test": 0.8,
+  "model_flag_rate_test": 0.4,
+  "agreement": 0.6,
+  "uncertain_share": 1.0,
+  "decision_counts_0_1_2": [
+   0,
+   0,
+   5
+  ],
+  "mean_ensemble_std_cells": 7.002773352670346,
+  "note": "Coverage is w.r.t. the noisy Hansen count, not truth. Small n."
+ },
+ "expD_transported_false_flag_sensitivity": {
+  "id_palm_farms": 47,
+  "hansen_flagged_farms": 26,
+  "min_cells": 6,
+  "note": "Assumes reference-cell precision transfers to these farms and cells are independent (optimistic).",
+  "strict_P_FOREST_given_loss__point": {
+   "precision": 0.14962959616948235,
+   "expected_false_flag_share_of_flagged_farms": 0.707165268559302
+  },
+  "strict_P_FOREST_given_loss__pessimistic_ci_edge": {
+   "precision": 0.09778605659827462,
+   "expected_false_flag_share_of_flagged_farms": 0.8892896852971102
+  },
+  "strict_P_FOREST_given_loss__optimistic_ci_edge": {
+   "precision": 0.20946386792022398,
+   "expected_false_flag_share_of_flagged_farms": 0.48046291569583655
+  },
+  "lenient_1_minus_P_PLANT_given_loss__point": {
+   "precision": 0.49074555063691394,
+   "expected_false_flag_share_of_flagged_farms": 0.10534858802917668
+  },
+  "lenient_1_minus_P_PLANT_given_loss__pessimistic_ci_edge": {
+   "precision": 0.3981682055588335,
+   "expected_false_flag_share_of_flagged_farms": 0.16040029130071531
+  },
+  "lenient_1_minus_P_PLANT_given_loss__optimistic_ci_edge": {
+   "precision": 0.5828210190463895,
+   "expected_false_flag_share_of_flagged_farms": 0.06877345871325803
+  }
+ }
+}

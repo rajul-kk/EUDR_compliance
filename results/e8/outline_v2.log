@@ -1,0 +1,138 @@
+{
+ "n_included": 102,
+ "excluded": {
+  "way_1243387301": "no cell inside the box",
+  "way_1262668051": "no cell inside the box",
+  "way_1262668052": "no cell inside the box",
+  "way_1327624947": "no cell inside the box"
+ },
+ "primary": {
+  "outline": {
+   "n_farms": 102,
+   "n_flagged": 7,
+   "n_plantation_driven": 7,
+   "share_plantation_driven": {
+    "est": 1.0,
+    "lo": 1.0,
+    "hi": 1.0
+   },
+   "flagged_farms_loss_cells_by_2020_class": {
+    "FOREST": 7,
+    "PLANT": 47,
+    "OTHER": 274
+   }
+  },
+  "box_same_farms": {
+   "n_farms": 102,
+   "n_flagged": 55,
+   "n_plantation_driven": 8,
+   "share_plantation_driven": {
+    "est": 0.14545454545454545,
+    "lo": 0.05454545454545454,
+    "hi": 0.23636363636363636
+   },
+   "flagged_farms_loss_cells_by_2020_class": {
+    "FOREST": 3254,
+    "PLANT": 390,
+    "OTHER": 1491
+   }
+  }
+ },
+ "flag_changes": {
+  "flagged_box_not_outline": [
+   "way_1040457639",
+   "way_1112656307",
+   "way_1153279849",
+   "way_1153279850",
+   "way_1153279853",
+   "way_1240170762",
+   "way_1240170763",
+   "way_1240170764",
+   "way_1240170765",
+   "way_1240170766",
+   "way_1240170808",
+   "way_1240675354",
+   "way_1240941768",
+   "way_1240941770",
+   "way_1240941771",
+   "way_1240949292",
+   "way_1240949293",
+   "way_1240949294",
+   "way_1240950810",
+   "way_1240953015",
+   "way_1240954778",
+   "way_1243465396",
+   "way_1243465397",
+   "way_1243601161",
+   "way_1243601162",
+   "way_1243601163",
+   "way_1243601169",
+   "way_1243601170",
+   "way_1243601171",
+   "way_1251526826",
+   "way_1251526827",
+   "way_1251526828",
+   "way_1251526829",
+   "way_1262667644",
+   "way_1262667646",
+   "way_1274603920",
+   "way_1274603922",
+   "way_1274603926",
+   "way_1280734043",
+   "way_1280955338",
+   "way_1280956050",
+   "way_1317844383",
+   "way_1322910501",
+   "way_1322918568",
+   "way_1323001553",
+   "way_1323001554",
+   "way_1363047602",
+   "way_876461238"
+  ],
+  "flagged_outline_not_box": [],
+  "plantation_driven_box_not_outline": [],
+  "plantation_driven_outline_not_box": [
+   "way_1153279847",
+   "way_1238999540",
+   "way_1243389665",
+   "way_1262667645"
+  ]
+ },
+ "overlap": {
+  "cells_in_outlines": 11432,
+  "cells_in_more_than_one": 0
+ },
+ "transport_check": {
+  "outline": {
+   "cells": 6125,
+   "share_PLANT": 0.6716734693877551
+  },
+  "box_same_farms": {
+   "cells": 104498,
+   "share_PLANT": 0.43261115045264026
+  },
+  "reading": "PLANT share >= 0.40: boxes included forest outside the plantation; <= 0.20: classifier under-calls palm on the farms; between: inconclusive (pre-registered)"
+ }
+}
+{
+ "n": 99,
+ "outline": {
+  "n_farms": 99,
+  "n_flagged": 5,
+  "n_plantation_driven": 5,
+  "share_plantation_driven": {
+   "est": 1.0,
+   "lo": 1.0,
+   "hi": 1.0
+  },
+  "flagged_farms_loss_cells_by_2020_class": {
+   "FOREST": 7,
+   "PLANT": 34,
+   "OTHER": 75
+  }
+ },
+ "transport_check": {
+  "cells": 3620,
+  "share_PLANT": 0.5267955801104972
+ }
+}

@@ -1,0 +1,22 @@
+$ python -I scripts/hansen_audit/build_features.py D:/Work/eudr-satellite-upload results/e6_features_v2.npz --composites --labels-dir D:/Work/eudr-satellite-upload/hansen_labels_v2 (2026-11-15 23:11, git 7bff3bd + working tree)
+0 996
+50 996
+100 996
+150 996
+200 996
+250 996
+300 996
+350 996
+400 996
+450 996
+500 996
+550 996
+600 996
+650 996
+700 996
+750 996
+800 996
+850 996
+900 996
+950 996
+saved 996

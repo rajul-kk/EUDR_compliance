@@ -1,0 +1,11 @@
+$ python -I scripts/hansen_audit/build_features.py D:/Work/eudr-satellite-upload results/features_v2.npz --labels-dir D:/Work/eudr-satellite-upload/hansen_labels_v2 (2026-11-15 23:10, git 7bff3bd + working tree)
+0 415
+50 415
+100 415
+150 415
+200 415
+250 415
+300 415
+350 415
+400 415
+saved 415

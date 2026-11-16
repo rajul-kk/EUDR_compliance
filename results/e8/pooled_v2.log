@@ -1,0 +1,48 @@
+{
+ "box": {
+  "n": 200,
+  "summary": {
+   "n_farms": 200,
+   "n_flagged": 135,
+   "n_plantation_driven": 55,
+   "share_plantation_driven": {
+    "est": 0.4074074074074074,
+    "lo": 0.32592592592592595,
+    "hi": 0.4888888888888889
+   },
+   "flagged_farms_loss_cells_by_2020_class": {
+    "FOREST": 4581,
+    "PLANT": 1317,
+    "OTHER": 2817
+   }
+  },
+  "transport_check": {
+   "cells": 167182,
+   "share_PLANT": 0.3769185677883983
+  }
+ },
+ "outline": {
+  "n": 185,
+  "summary": {
+   "n_farms": 185,
+   "n_flagged": 11,
+   "n_plantation_driven": 11,
+   "share_plantation_driven": {
+    "est": 1.0,
+    "lo": 1.0,
+    "hi": 1.0
+   },
+   "flagged_farms_loss_cells_by_2020_class": {
+    "FOREST": 8,
+    "PLANT": 86,
+    "OTHER": 307
+   }
+  },
+  "transport_check": {
+   "cells": 10968,
+   "share_PLANT": 0.5930889861415025
+  }
+ },
+ "transport_reading_e8_outline": "boxes included forest outside the plantation",
+ "transport_reading_pooled_outline": "boxes included forest outside the plantation"
+} 0
