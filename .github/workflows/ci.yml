@@ -48,34 +48,20 @@ jobs:
               "reportlab.lib.pagesizes", "reportlab.lib.styles",
               "reportlab.lib.units", "reportlab.platypus",
               "skimage", "skimage.morphology",
+              "tqdm.auto",
+              "tqdm",
+              "torch.nn.functional",
           ]:
               sys.modules.setdefault(mod, MagicMock())
 
           sys.path.insert(0, ".")
-          sys.path.insert(0, "src")
 
-          # Core package exports
-          import src
-          from src import SentinelClient, CloudFilter, VegetationIndex
-          from src import ChangeDetector, ChangeResult, RiskLevel
-
-          # New modules added this session
-          import src.train_utils
-          import src.logging_config
-          import src.benchmark
-          import src.tessera_embed_infer
-          import src.tessera_embed_train
-          import src.tessera_train
-          import src.pipeline_runner
-          import src.inference
-          import src.detect_deforestation
-          import src.audit_trail
-          import src.dds_exporter
-          import src.find_farms
-          import src.enrich_farm_countries
-          import src.tessera_embedding_generation
-          import src.geotessera_mask_tiler
-
+          import importlib, os, pathlib
+          mods = [".".join(p.with_suffix("").parts) for d in ("src", "GEE_dynamic", "NDVI_pred")
+                  for p in sorted(pathlib.Path(d).rglob("*.py")) if p.name != "__init__.py"]
+          os.environ.setdefault("GEE_PROJECT_ID", "ci-import-check")   # auth reads it at import; nothing connects
+          for m in mods:
+              importlib.import_module(m)
           print("All src modules import OK")
           EOF
 

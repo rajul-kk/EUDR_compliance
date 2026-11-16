@@ -9,9 +9,9 @@ import pytest
 
 SCRIPT = textwrap.dedent('''
     import sys
-    sys.path.insert(0, "src")
+    sys.path.insert(0, ".")
     import torch, torch.nn as nn
-    from train_utils import keep_frozen_batchnorm_eval, mc_dropout_predict
+    from src.train_utils import keep_frozen_batchnorm_eval, mc_dropout_predict
 
     class Net(nn.Module):
         def __init__(self):

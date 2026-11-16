@@ -58,6 +58,7 @@ import json
 import logging
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -70,7 +71,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
-from train_utils import (
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.train_utils import (
     compute_miou,
     extract_farm_key,
     load_embedding,

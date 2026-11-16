@@ -1,10 +1,8 @@
 """Tests for ChangeDetectionDataset pairing logic and Hansen resize."""
 import os
 import re
-import tempfile
 
 import numpy as np
-import pytest
 
 
 def _make_tif(path: str, data: np.ndarray) -> None:
@@ -115,7 +113,7 @@ def test_farm_key_regex():
 
 def test_hansen_change_mask_ignores_no_data_and_cloud():
     """255 (no Hansen data) and cloudy cells are ignored; only class 2 counts as change."""
-    from preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
+    from src.preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
 
     raw = np.array([[0, 1], [2, 255]], dtype=np.uint8)
     clear = np.full((2, 2), 4, dtype=np.uint8)          # SCL 4 = vegetation
@@ -129,7 +127,7 @@ def test_hansen_change_mask_ignores_no_data_and_cloud():
 
 
 def test_hansen_change_mask_resizes_coarse_labels_nearest():
-    from preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
+    from src.preprocessing.change_dataset import IGNORE_INDEX, hansen_change_mask
 
     raw = np.array([[2, 255], [0, 1]], dtype=np.uint8)
     clear = np.full((4, 4), 4, dtype=np.uint8)
@@ -146,7 +144,7 @@ def test_label_nodata_constants_agree():
     import ast
     from pathlib import Path
 
-    from preprocessing.change_dataset import (
+    from src.preprocessing.change_dataset import (
         HANSEN_FOREST_2020,
         HANSEN_NODATA,
         HANSEN_POST_EUDR_LOSS,

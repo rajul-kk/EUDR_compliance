@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dds_exporter import CommodityInfo, DDSExporter, OperatorInfo
-from detect_deforestation import compute_deforestation_metrics, generate_summary_stats
+from src.dds_exporter import CommodityInfo, DDSExporter, OperatorInfo
+from src.detect_deforestation import compute_deforestation_metrics, generate_summary_stats
 
 UTM = SimpleNamespace(is_geographic=False)
 WGS84 = SimpleNamespace(is_geographic=True)
@@ -94,7 +94,7 @@ def test_without_pixel_size_the_area_rule_does_not_guess():
 
 
 def test_pixel_area():
-    from change_detector import pixel_area_m2
+    from src.change_detector import pixel_area_m2
 
     assert pixel_area_m2(_transform(10.0, -10.0), UTM, 100) == 100.0
     assert pixel_area_m2(None, UTM, 100) is None
@@ -104,7 +104,7 @@ def test_pixel_area():
 
 
 def test_unknown_rule_is_refused(monkeypatch):
-    from change_detector import decision_rule
+    from src.change_detector import decision_rule
 
     monkeypatch.setenv("EUDR_DECISION_RULE", "percent")
     with pytest.raises(ValueError):
@@ -112,8 +112,8 @@ def test_unknown_rule_is_refused(monkeypatch):
 
 
 def test_every_path_decides_the_same_loss_the_same_way(monkeypatch):
-    import detect_deforestation as dd
-    from change_detector import ChangeDetector
+    import src.detect_deforestation as dd
+    from src.change_detector import ChangeDetector
 
     base, now, change = _masks()
     t = _transform(10.0, -10.0)  # 100 m2 pixels: 10 lost = 0.1 ha
@@ -130,8 +130,8 @@ def test_every_path_decides_the_same_loss_the_same_way(monkeypatch):
 
 
 def test_legacy_rule_is_kept_behind_its_name(monkeypatch):
-    import detect_deforestation as dd
-    from change_detector import ChangeDetector, classify_forest_loss
+    import src.detect_deforestation as dd
+    from src.change_detector import ChangeDetector, classify_forest_loss
 
     monkeypatch.setenv("EUDR_DECISION_RULE", "legacy_percent")
     base, now, change = _masks()
@@ -145,7 +145,7 @@ def test_legacy_rule_is_kept_behind_its_name(monkeypatch):
 
 
 def test_no_baseline_forest_is_the_same_on_the_change_path(monkeypatch):
-    import detect_deforestation as dd
+    import src.detect_deforestation as dd
 
     _patch(monkeypatch, dd, {"c": np.ones((4, 4), np.uint8), "b": np.zeros((4, 4), np.uint8)},
            _transform(10.0, -10.0), UTM)
@@ -176,7 +176,7 @@ def test_dds_never_carries_an_undefined_conclusion(tmp_path):
 
 
 def test_farms_that_cannot_be_assessed_stay_in_the_report(tmp_path, monkeypatch):
-    import detect_deforestation as dd
+    import src.detect_deforestation as dd
 
     pred, base = tmp_path / "pred", tmp_path / "base"
     pred.mkdir()

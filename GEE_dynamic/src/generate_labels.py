@@ -29,12 +29,10 @@ import requests
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
+if __package__ in (None, ""):   # run by path (python GEE_dynamic/src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-try:
-    from auth import initialize_gee
-except ImportError:
-    from GEE_dynamic.auth import initialize_gee
+from GEE_dynamic.auth import initialize_gee
 
 logger = logging.getLogger(__name__)
 

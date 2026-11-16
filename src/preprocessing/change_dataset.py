@@ -7,7 +7,6 @@ were forest in t1 and are no longer forest in t2 (EUDR relevant forest loss).
 import logging
 import os
 import re
-import sys
 import warnings
 from typing import List, Optional, Tuple
 
@@ -21,12 +20,9 @@ warnings.filterwarnings("ignore", message=".*TIFFReadDirectory.*")
 warnings.filterwarnings("ignore", message=".*SamplesPerPixel.*")
 warnings.filterwarnings("ignore", message=".*ExtraSamples.*")
 
-_src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
 
-from preprocessing.histogram_match import match_histogram
-from train_utils import seed_everything, split_dataset  # noqa: F401 — re-exported for callers
+from src.preprocessing.histogram_match import match_histogram
+from src.train_utils import seed_everything, split_dataset  # noqa: F401 — re-exported for callers
 
 logger = logging.getLogger(__name__)
 

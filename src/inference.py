@@ -13,18 +13,9 @@ import numpy as np
 import rasterio
 from torchvision.models.segmentation import deeplabv3_resnet50
 
-# Ensure src/ is on sys.path so sibling modules (tessera_backbone) resolve
 # correctly when this script is run from the project root.
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
-
-# Add GEE_dynamic for dataset_loader access
-current_dir = _src_dir
-parent_dir = os.path.dirname(current_dir)
-gee_dir = os.path.join(parent_dir, 'GEE_dynamic')
-if gee_dir not in sys.path:
-    sys.path.append(gee_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -75,7 +66,7 @@ def load_tessera_model(model_path):
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found: {model_path}")
 
-    from tessera_backbone import TesseraSegmentationModel
+    from src.tessera_backbone import TesseraSegmentationModel
 
     model = TesseraSegmentationModel.load_from_checkpoint(model_path, map_location=DEVICE)
     model.to(DEVICE)
@@ -135,7 +126,7 @@ def predict_single_image(model, image_path, output_path=None, expected_in_channe
                      alongside the prediction (suffix _uncertainty.tif).
         mc_passes:   Number of stochastic passes for MC Dropout (default 20).
     """
-    from train_utils import mc_dropout_predict
+    from src.train_utils import mc_dropout_predict
 
     image_tensor, profile = load_image(image_path, expected_in_channels=expected_in_channels)
     image_tensor = image_tensor.to(DEVICE)

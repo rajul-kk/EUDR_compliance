@@ -11,24 +11,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tessera_backbone import TesseraSegmentationModel
-from train_utils import compute_miou, keep_frozen_batchnorm_eval, seed_everything, split_dataset
-
-_gee_dir = os.path.join(os.path.dirname(_src_dir), "GEE_dynamic")
-if _gee_dir not in sys.path:
-    sys.path.append(_gee_dir)
-
-try:
-    from preprocessing.dataset_loader import FarmSegmentationDataset
-except ImportError:
-    if _gee_dir not in sys.path:
-        sys.path.insert(0, _gee_dir)
-    from preprocessing.dataset_loader import FarmSegmentationDataset
-
+from src.preprocessing.dataset_loader import FarmSegmentationDataset
+from src.tessera_backbone import TesseraSegmentationModel
+from src.train_utils import compute_miou, keep_frozen_batchnorm_eval, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

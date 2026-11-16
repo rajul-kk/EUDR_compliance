@@ -38,4 +38,3 @@ for mod in _STUBS:
         sys.modules.setdefault(mod, stub)
 
 sys.path.insert(0, ".")
-sys.path.insert(0, "src")

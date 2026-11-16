@@ -14,11 +14,10 @@ import torch
 import torch.nn as nn
 from affine import Affine
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from train_utils import extract_farm_key, load_embedding
+from src.train_utils import extract_farm_key, load_embedding
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

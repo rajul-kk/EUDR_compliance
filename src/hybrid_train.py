@@ -14,13 +14,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from hybrid_model import get_hybrid_model
-from preprocessing.change_dataset import load_image, load_mask
-from train_utils import compute_miou, load_embedding, seed_everything, split_dataset
+from src.hybrid_model import get_hybrid_model
+from src.preprocessing.change_dataset import load_image, load_mask
+from src.train_utils import compute_miou, load_embedding, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

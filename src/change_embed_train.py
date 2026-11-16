@@ -15,12 +15,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from change_embed_model import get_change_embed_model
-from train_utils import seed_everything, split_dataset
+from src.change_embed_model import get_change_embed_model
+from src.train_utils import seed_everything, split_dataset
 
 IGNORE_INDEX = 255
 FOREST_CLASS = 1
@@ -44,7 +43,7 @@ class ChangeEmbedDataset(Dataset):
         self.pairs: list = []
         check_year_dirs(embeddings_dir_t1, embeddings_dir_t2)
 
-        from train_utils import extract_farm_key, load_embedding
+        from src.train_utils import extract_farm_key, load_embedding
 
         self._load_embedding = load_embedding
         self._extract_key = extract_farm_key

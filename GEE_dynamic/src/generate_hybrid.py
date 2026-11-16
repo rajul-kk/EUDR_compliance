@@ -1,26 +1,22 @@
+import os
+import sys
+
 import ee
 import pandas as pd
-import os
 import requests
-import sys
 
 # Add parent directory to path to import authenticators and config if running directly
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
-
-try:
-    from auth import initialize_gee
-    from config import DYNAMIC_WORLD_ASSET_ID, CANOPY_HEIGHT_ASSET_ID
-    from src.fusion_engine import compute_hybrid_classification
-except ImportError:
-    # Fallback if running from parent dir or installed as package
-    from GEE_dynamic.auth import initialize_gee
-    from GEE_dynamic.config import DYNAMIC_WORLD_ASSET_ID, CANOPY_HEIGHT_ASSET_ID
-    from GEE_dynamic.src.fusion_engine import compute_hybrid_classification
+if __package__ in (None, ""):   # run by path (python GEE_dynamic/src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import zipfile
-import shutil
+
+from GEE_dynamic.auth import initialize_gee
+from GEE_dynamic.config import CANOPY_HEIGHT_ASSET_ID, DYNAMIC_WORLD_ASSET_ID
+from GEE_dynamic.src.fusion_engine import compute_hybrid_classification
+
 
 def download_file(url, output_path):
     """Downloads a file from a URL. If it's a zip, extracts the TIFF."""
@@ -214,7 +210,7 @@ def main():
     raw_dir_2020 = r'd:\Work\EUDR-compliance\data\raw_satellite\2020_baseline'
     raw_dir_2024 = r'd:\Work\EUDR-compliance\data\raw_satellite\2024_current'
     
-    print(f"DEBUG: Checking for images in:")
+    print("DEBUG: Checking for images in:")
     print(f"  2020: {raw_dir_2020}")
     print(f"  2024: {raw_dir_2024}")
     

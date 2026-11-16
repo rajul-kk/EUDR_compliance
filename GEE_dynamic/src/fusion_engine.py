@@ -1,39 +1,16 @@
 import ee
-try:
-    from GEE_dynamic.config import (
-        HEIGHT_THRESHOLD,
-        DW_TREES_LABEL,
-        DW_CROPS_LABEL,
-        DW_SHRUB_LABEL,
-        CLASS_FOREST,
-        CLASS_CROPS,
-        CLASS_SHRUB,
-        CLASS_OTHER
-    )
-except ImportError:
-    try:
-        from config import (
-            HEIGHT_THRESHOLD,
-            DW_TREES_LABEL,
-            DW_CROPS_LABEL,
-            DW_SHRUB_LABEL,
-            CLASS_FOREST,
-            CLASS_CROPS,
-            CLASS_SHRUB,
-            CLASS_OTHER
-        )
-    except ImportError:
-         # Fallback for relative import
-        from ..config import (
-            HEIGHT_THRESHOLD,
-            DW_TREES_LABEL,
-            DW_CROPS_LABEL,
-            DW_SHRUB_LABEL,
-            CLASS_FOREST,
-            CLASS_CROPS,
-            CLASS_SHRUB,
-            CLASS_OTHER
-        )
+
+from GEE_dynamic.config import (
+    CLASS_CROPS,
+    CLASS_FOREST,
+    CLASS_OTHER,
+    CLASS_SHRUB,
+    DW_CROPS_LABEL,
+    DW_SHRUB_LABEL,
+    DW_TREES_LABEL,
+    HEIGHT_THRESHOLD,
+)
+
 
 def compute_hybrid_classification(dw_image, height_image):
     """

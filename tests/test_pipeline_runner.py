@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-import pipeline_runner as pr
+import src.pipeline_runner as pr
 
 
 def _fail(*a, **kw):
@@ -52,7 +52,7 @@ def test_embed_change_trains_on_the_two_given_years(tmp_path):
 
 
 def test_change_dataset_refuses_identical_year_folders(tmp_path):
-    from change_embed_train import check_year_dirs
+    from src.change_embed_train import check_year_dirs
 
     with pytest.raises(ValueError, match="same folder"):
         check_year_dirs(str(tmp_path), str(tmp_path / "." ))

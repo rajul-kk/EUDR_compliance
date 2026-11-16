@@ -8,10 +8,13 @@ import glob
 import json
 import os
 import re
+import sys
 
 import pandas as pd
 import rasterio.features
 
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.change_detector import FLAG_LEVELS, KNOWN_LEVELS, classify, decision_rule, pixel_area_m2
 from src.postprocessing.refiner import refine_mask
 

@@ -9,11 +9,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
-# Ensure project root is on sys.path for src.* imports
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-_project_root_early = os.path.dirname(_src_dir)
-if _project_root_early not in sys.path:
-    sys.path.insert(0, _project_root_early)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Define paths
 current_dir = os.path.dirname(os.path.abspath(__file__))

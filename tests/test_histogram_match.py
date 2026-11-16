@@ -1,7 +1,7 @@
 """Tests for match_histogram in src/preprocessing/histogram_match.py."""
-import numpy as np
-import pytest
 from unittest.mock import patch
+
+import numpy as np
 
 
 def test_output_shape_preserved():

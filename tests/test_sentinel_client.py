@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import sentinel_client as sc
+import src.sentinel_client as sc
 
 
 @pytest.fixture(autouse=True)

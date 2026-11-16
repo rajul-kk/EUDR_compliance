@@ -14,13 +14,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from change_siamese_model import get_siamese_model
-from preprocessing.change_dataset import ChangeDetectionDataset
-from train_utils import keep_frozen_batchnorm_eval, seed_everything, split_dataset
+from src.change_siamese_model import get_siamese_model
+from src.preprocessing.change_dataset import ChangeDetectionDataset
+from src.train_utils import keep_frozen_batchnorm_eval, seed_everything, split_dataset
 
 IGNORE_INDEX = 255
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

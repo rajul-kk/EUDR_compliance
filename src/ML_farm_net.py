@@ -26,12 +26,11 @@ from torchvision.models.segmentation import deeplabv3_resnet50
 
 logger = logging.getLogger(__name__)
 
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
+if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from preprocessing.change_dataset import load_image, load_mask
-from train_utils import compute_miou, seed_everything, split_dataset
+from src.preprocessing.change_dataset import load_image, load_mask
+from src.train_utils import compute_miou, seed_everything, split_dataset
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUM_CLASSES = 3  # Hansen: 0=non-forest, 1=forest-2020, 2=post-EUDR-loss

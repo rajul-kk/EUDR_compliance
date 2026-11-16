@@ -1,7 +1,7 @@
 """Hash-chained audit log: what verify() can and cannot detect."""
 import pytest
 
-from audit_trail import AuditEntry, AuditLog
+from src.audit_trail import AuditEntry, AuditLog
 
 
 def _entry(i):
