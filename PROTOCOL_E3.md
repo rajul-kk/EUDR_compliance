@@ -113,3 +113,28 @@ inside the outlines there are only 89 valid loss cells over 83 farms, and only 4
 - The farm boxes are 0.01 degree tiles around OpenStreetMap points, not plot outlines (E5); a box can include land
   outside the plantation, and estimates are for the boxes.
 - One reading of the imagery per cell (two where the second pass covers it); the reference is a labeller, not truth.
+
+## Deviations
+
+- 15 Nov 2026, box-stable sample redrawn (owner's go-ahead, 15 Nov: "do E3"). PROTOCOL_E10 found that the label rasters
+  the 14 Nov draw read had no stable-forest class: their class 1 held only forest lost in 2025, and stable forest read as
+  class 0, which those files declared as no data. The box-stable sheets (strata 3, 4, 5) were therefore drawn from 2025-loss
+  cells, not stable forest. They were never labelled (both sheets checked empty) and are void; the folder is renamed
+  `e3_draw/box_stable_VOID_E10` and kept.
+  - Labels: `eudr-satellite-upload/hansen_labels_v2` (PROTOCOL_E10), read with `e3_sample.py --labels-dir`. Class 1 there is
+    `hansen_audit.reference.hansen_label`: tree cover >= 10 % in 2000 and no loss 2001-2024 (loss in 2025 stays class 1, as
+    the protocol's "stable" meant up to the Hansen 2021-24 window). Non-forest is now class 0 with 255 as no data, so strata
+    0-2 are populated; they stay outside the sample, as before.
+  - Population counts go to `results/e3/population_v2.json`; `population.json` (13 Nov) is kept as the record of the
+    original draw.
+  - Check before drawing: N_h for the loss strata 6, 7, 8 must equal 1,182, 465 and 637 (class 2 is unchanged by E10). If
+    so, the box-loss sheets and the outline census stand unchanged; if not, nothing is drawn and the owner is told.
+  - The draw keeps every owner decision: 120 cells, 40 per stratum 3, 4, 5, seed 20261115, second pass 0.25. Output:
+    `e3_draw/box_stable_v2/`, with `design.json` copied to `results/e3/box_stable_v2/`.
+
+        python -I scripts/hansen_audit/e3_sample.py draw <data_root> <refdata>/e4 results/e4/farm_preds.npz PROTOCOL_E3.md <refdata>/e3_draw/box_stable_v2 --n-total 120 --n-min 40 --seed 20261115 --domain 3 4 5 --second-frac 0.25 --labels-dir <data_root>/hansen_labels_v2
+  - Estimates 1-3 read `results/e3/population_v2.json` for N_h (the loss strata are the same in both files; the stable
+    strata exist only in v2).
+  - Check done 15 Nov before the draw: loss strata 1,182 / 465 / 637, as required. Redrawing the box-loss sample and the
+    census on the v2 labels gave byte-identical sheets and keys. New stable strata: 3 FOREST 10,372, 4 PLANT 10,375,
+    5 OTHER 15,644 (old: 408, 104, 263).

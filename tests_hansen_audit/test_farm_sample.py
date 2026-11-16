@@ -152,3 +152,17 @@ def test_census_estimate_without_labels_in_a_class():
     out = S.census_estimate([1, 1], ["UNSURE", "UNSURE"], ["a", "a"])
     assert out["overall"] is None and out["by_predicted_class"]["PLANT"]["shares"] is None
     assert out["farms_with_min_forest_cells"] == []
+
+
+def test_e3_labels_dir_defaults_to_the_frozen_draw_and_takes_an_override():
+    import argparse
+    import importlib.util
+    import os
+    from pathlib import Path
+
+    p = os.path.join(os.path.dirname(__file__), "..", "scripts", "hansen_audit", "e3_sample.py")
+    spec = importlib.util.spec_from_file_location("e3_sample", p)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert m.labels_dir(argparse.Namespace(data_root="root", labels_dir=None)) == Path("root") / "hansen_labels"
+    assert m.labels_dir(argparse.Namespace(data_root="root", labels_dir="v2")) == Path("v2")

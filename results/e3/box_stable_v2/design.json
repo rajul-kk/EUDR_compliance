@@ -1,0 +1,17 @@
+{
+ "labels_dir": "hansen_labels_v2",
+ "N_h": {
+  "3": 10372,
+  "4": 10375,
+  "5": 15644
+ },
+ "n_h": {
+  "3": 40,
+  "4": 40,
+  "5": 40
+ },
+ "seed": 20261115,
+ "second_frac": 0.25,
+ "n_second_pass": 30,
+ "protocol": "PROTOCOL_E3.md"
+}

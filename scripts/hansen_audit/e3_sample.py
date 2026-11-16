@@ -1,9 +1,9 @@
 """E3: reference sample on the farms. Population counts, the draw, and estimates from returned labels.
 
 usage:
-  python -I e3_sample.py population <data_root> <e4_out_dir> <farm_preds.npz> <out_json>
-  python -I e3_sample.py draw <data_root> <e4_out_dir> <farm_preds.npz> <protocol_md> <out_dir> --n-total N --n-min M --seed S [--domain 6 7 8] [--second-frac F]
-  python -I e3_sample.py census <data_root> <e4_out_dir> <farm_preds.npz> <outlines_dir> <protocol_md> <out_dir> --seed S [--second-frac F]
+  python -I e3_sample.py population <data_root> <e4_out_dir> <farm_preds.npz> <out_json> [--labels-dir D]
+  python -I e3_sample.py draw <data_root> <e4_out_dir> <farm_preds.npz> <protocol_md> <out_dir> --n-total N --n-min M --seed S [--domain 6 7 8] [--second-frac F] [--labels-dir D]
+  python -I e3_sample.py census <data_root> <e4_out_dir> <farm_preds.npz> <outlines_dir> <protocol_md> <out_dir> --seed S [--second-frac F] [--labels-dir D]
   python -I e3_sample.py estimate <population_json> <key_csv> <labels_csv> [--farms farms.json] [--key2 <key_csv> --labels2 <labels_csv>]
   python -I e3_sample.py census-estimate <e4_out_dir> <outlines_dir> <key_csv> <labels_csv> [--key2 <key_csv> --labels2 <labels_csv>]
 population: every cell centre in any of the 94 farm boxes, counted once (cells shared by overlapping boxes or windows are
@@ -38,12 +38,17 @@ from hansen_audit.s2 import HANSEN_RES  # noqa: E402
 LOSS_DOMAIN = (6, 7, 8)
 
 
-def population(data_root, e4_out_dir, preds_npz):
+def labels_dir(a):
+    """The label rasters: --labels-dir if given, else <data_root>/hansen_labels (the files the frozen E3 draw used)."""
+    return Path(a.labels_dir) if a.labels_dir else Path(a.data_root) / "hansen_labels"
+
+
+def population(labels_root, e4_out_dir, preds_npz):
     from e4_farms import label_on_window
 
     W = json.load(open(os.path.join(e4_out_dir, "windows.json")))
     boxes = dict(zip(W["farms"], np.array(W["boxes"])))
-    labels = index_labels(Path(data_root) / "hansen_labels")
+    labels = index_labels(Path(labels_root))
     preds = np.load(preds_npz)
     cells = {}
     for w in W["windows"]:
@@ -69,12 +74,12 @@ def population(data_root, e4_out_dir, preds_npz):
 
 
 def cmd_population(a):
-    cells = population(a.data_root, a.e4_out_dir, a.preds)
+    cells = population(labels_dir(a), a.e4_out_dir, a.preds)
     st = np.array([v["stratum"] for v in cells.values()])
     N_h = {int(h): int((st == h).sum()) for h in range(9)}
     loss = sum(N_h[h] for h in LOSS_DOMAIN)
     out = {"n_cells": len(cells), "n_invalid": int((st < 0).sum()), "n_shared_by_boxes": sum(len(v["farms"]) > 1 for v in cells.values()),
-           "N_h": N_h, "strata": "3 * hansen (0 non-forest, 1 stable, 2 loss) + S2C 2020 prediction (0 FOREST, 1 PLANT, 2 OTHER)",
+           "labels_dir": labels_dir(a).name, "N_h": N_h, "strata": "3 * hansen (0 non-forest, 1 stable, 2 loss) + S2C 2020 prediction (0 FOREST, 1 PLANT, 2 OTHER)",
            "loss_cells": loss,
            "n_for_halfwidth_p05": {str(d): S.n_for_halfwidth(0.5, d) for d in (0.05, 0.07, 0.1)}}
     json.dump(out, open(a.out_json, "w"), indent=1)
@@ -85,7 +90,7 @@ def cmd_draw(a):
     text = open(a.protocol).read()
     if "Status: frozen" not in text.splitlines():
         sys.exit(f"{a.protocol} is not frozen (needs a line 'Status: frozen'); nothing drawn")
-    cells = population(a.data_root, a.e4_out_dir, a.preds)
+    cells = population(labels_dir(a), a.e4_out_dir, a.preds)
     keys = list(cells)
     st = np.array([cells[g]["stratum"] for g in keys])
     dom = [int(d) for d in a.domain]
@@ -97,7 +102,7 @@ def cmd_draw(a):
     rows = [{"cell": f"{keys[i][0]}_{keys[i][1]}", "stratum": cells[keys[i]]["stratum"], "hansen": cells[keys[i]]["hansen"], "pred": cells[keys[i]]["pred"],
              "window": cells[keys[i]]["window"], "farms": ";".join(sorted(cells[keys[i]]["farms"]))} for i in idx]
     n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
-    json.dump({"N_h": N_h, "n_h": n_h, "seed": a.seed, "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
+    json.dump({"labels_dir": labels_dir(a).name, "N_h": N_h, "n_h": n_h, "seed": a.seed, "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
               open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
     print(json.dumps({"N_h": N_h, "n_h": n_h, "n_second_pass": n_b}, indent=1))
 
@@ -139,7 +144,7 @@ def cmd_census(a):
     text = open(a.protocol).read()
     if "Status: frozen" not in text.splitlines():
         sys.exit(f"{a.protocol} is not frozen (needs a line 'Status: frozen'); nothing written")
-    cells = population(a.data_root, a.e4_out_dir, a.preds)
+    cells = population(labels_dir(a), a.e4_out_dir, a.preds)
     inside = outline_set(a.e4_out_dir, a.outlines_dir)
     keys = sorted(g for g in cells if g in inside and cells[g]["stratum"] in LOSS_DOMAIN)
     lon = np.array([cells[g]["lon"] for g in keys])
@@ -148,7 +153,7 @@ def cmd_census(a):
              "window": cells[g]["window"], "farms": ";".join(sorted(cells[g]["farms"]))} for g in keys]
     n_b = write_pair(a.out_dir, lon, lat, rows, a.seed, a.second_frac)
     N_h = {h: sum(r["stratum"] == h for r in rows) for h in LOSS_DOMAIN}
-    json.dump({"census": "loss cells inside the OSM outlines", "N_h": N_h, "n": len(rows), "seed": a.seed,
+    json.dump({"census": "loss cells inside the OSM outlines", "labels_dir": labels_dir(a).name, "N_h": N_h, "n": len(rows), "seed": a.seed,
                "second_frac": a.second_frac, "n_second_pass": n_b, "protocol": a.protocol},
               open(os.path.join(a.out_dir, "design.json"), "w"), indent=1)
     print(json.dumps({"N_h": N_h, "n": len(rows), "n_second_pass": n_b}, indent=1))
@@ -233,6 +238,9 @@ def main():
         ce.add_argument(n)
     ce.add_argument("--key2")
     ce.add_argument("--labels2")
+    for q in (p, d, c):
+        q.add_argument("--labels-dir", help="label rasters to read (default <data_root>/hansen_labels; PROTOCOL_E3 deviation "
+                                            "15 Nov: hansen_labels_v2)")
     a = ap.parse_args()
     {"population": cmd_population, "draw": cmd_draw, "census": cmd_census, "estimate": cmd_estimate,
      "census-estimate": cmd_census_estimate}[a.cmd](a)

@@ -136,7 +136,7 @@ What this does to earlier results (nothing rerun yet; each rerun is a dated devi
 | Farm flags, loss counts (E2 rule, E4/E5/E8 flags and plantation-driven shares, E9 analyses 1, 2) | class 2 only | not affected |
 | Product change model (`hansen_change_mask`) | class 2 against the rest | not affected |
 | E3 box-loss sample (300) and outline census | class 2 | not affected |
-| **E3 box-stable sample (120 cells)** | class 1 strata | **drawn from 2025-loss cells, not stable forest; must be redrawn before it is labelled** |
+| **E3 box-stable sample (120 cells)** | class 1 strata | **drawn from 2025-loss cells, not stable forest; redrawn 15 Nov from `hansen_labels_v2` (PROTOCOL_E3 deviation; `e3_draw/box_stable_v2`, old sheets void). Box-loss sheets and census redrawn on v2 came out byte-identical, so they stand** |
 | **Sections 3, 4, 8 (noise experiments A/B, experiment C, E6 transfer)** | task = class 2 against class 1 | **the task was "lost 2021-24" against "lost 2025", not loss against stable forest; rerun** |
 | Section 2 (farm sensitivity, usable footprint) | footprint = class 1 or 2 cells | footprint far too small; rerun |
 | E4/E5/E8 transport checks (PLANT share of stable cells) | class 1 | measured on 2025-loss cells; rerun |
