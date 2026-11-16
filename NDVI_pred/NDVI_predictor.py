@@ -13,7 +13,6 @@ def calculate_ndvi(red, nir):
     numerator = nir - red
     denominator = nir + red
     
-    # Avoid division by zero
     ndvi = np.divide(numerator, denominator, out=np.zeros_like(numerator), where=denominator!=0)
     return ndvi
 
@@ -22,7 +21,6 @@ def generate_debug_mask(ndvi, output_path):
     Save a colormap of the NDVI values for visual inspection.
     """
     plt.figure(figsize=(6, 6))
-    # cmap 'RdYlGn' goes from Red (low NDVI) to Green (high NDVI)
     plt.imshow(ndvi, cmap='RdYlGn', vmin=-1, vmax=1)
     plt.colorbar(label='NDVI')
     plt.title("NDVI Categorization Mask")
@@ -46,7 +44,6 @@ def process_images_paired(input_dir, output_base_dir):
     
     print(f"🚀 Starting Paired Auto-Labeling from: {input_dir}")
     
-    # helper to find files
     all_files = []
     for root, dirs, files in os.walk(input_dir):
         for file in files:
@@ -55,7 +52,6 @@ def process_images_paired(input_dir, output_base_dir):
 
     print(f"   📂 Found {len(all_files)} TIFF files total.")
 
-    # Group by Farm ID
     # Filename format expected: {farm_id}_{year}_{date}.tiff
     # e.g. way_12345_2020_2020-06-01.tiff
     
@@ -65,10 +61,7 @@ def process_images_paired(input_dir, output_base_dir):
         basename = os.path.basename(file_path)
         parts = basename.split('_')
         
-        # Heuristic: find where the year is to split farm_id
-        # Usually farm_id is everything before the year suffix
         
-        # Search for 2020 or 2024 in parts
         year_idx = -1
         year = None
         
@@ -88,20 +81,13 @@ def process_images_paired(input_dir, output_base_dir):
 
     print(f"   🚜 Identified {len(farm_data)} unique farms.")
     
-    # Process each farm
     for farm_id, years in farm_data.items():
         
-        # Create Farm Folder
         farm_dir = os.path.join(output_base_dir, farm_id)
         
-        # Check if already done (optimization)
-        # If folder exists and has contents, we can skip? 
-        # User requested duplicate check, let's look inside.
         if os.path.exists(farm_dir):
             existing = os.listdir(farm_dir)
-            if len(existing) >= 2: # heuristic: at least 2 files (image + mask?)
-                 # Actually verify if we have coverage for the years present in input
-                 # But simplistic check: if folder exists, duplicate check per file below
+            if len(existing) >= 2:
                  pass
         
         os.makedirs(farm_dir, exist_ok=True)
@@ -124,7 +110,6 @@ def process_images_paired(input_dir, output_base_dir):
                     ndvi = calculate_ndvi(red, nir)
                     avg_ndvi = np.mean(ndvi)
                     
-                    # Categorize
                     label = "needs_review"
                     if avg_ndvi >= 0.6:
                         label = "forest"
@@ -133,31 +118,19 @@ def process_images_paired(input_dir, output_base_dir):
                     
                     stats[label] += 1
                     
-                    # New Filename: {year}_{label}.tiff
-                    # If we have multiple dates for same year/farm, we might conflict.
-                    # Appending date from original filename to be safe if needed.
-                    # Original: way_123_2020_2020-06-01.tiff
-                    # Let's keep it simple as requested: {year}_{label}.tiff 
-                    # BUT checks for collisions if multiple images per year.
                     
                     date_part = base_name.replace(f"{farm_id}_{year}_", "").replace(".tiff", "")
                     
-                    # Target Name: {year}_{label}.tiff
-                    # To allow multiple images per year, maybe: {year}_{date}_{label}.tiff
                     target_name = f"{year}_{label}.tiff"
                     
                     dest_file = os.path.join(farm_dir, target_name)
                     mask_file = os.path.join(farm_dir, f"{year}_{label}_mask.png")
                     
-                    # DUPLICATE CHECK
                     if os.path.exists(dest_file):
-                        # print(f"   ⏭️ {farm_id}: {year} already labeled as {label}")
                         continue
 
-                    # Copy
                     shutil.copy2(file_path, dest_file)
                     
-                    # Mask
                     generate_debug_mask(ndvi, mask_file)
                     
                     print(f"[{label.upper()}] {farm_id} ({year}): Avg NDVI {avg_ndvi:.2f}")
@@ -189,14 +162,10 @@ def clean_old_labels(label_dir):
 if __name__ == "__main__":
     input_folder = "data/raw_satellite"
     
-    # New Output Folder
     output_folder_paired = "data/labeled_paired"
     
-    # Old Output Folder to Delete
     output_folder_old = "data/labeled"
     
-    # 1. Run New Process
     process_images_paired(input_folder, output_folder_paired)
     
-    # 2. Cleanup Old
     clean_old_labels(output_folder_old)

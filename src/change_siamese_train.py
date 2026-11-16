@@ -102,7 +102,6 @@ def train(args: argparse.Namespace) -> None:
         logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)
 
-    # Collect encoder params for warmup freeze (unwrap DataParallel if needed)
     _base = model.module if isinstance(model, torch.nn.DataParallel) else model
     _encoder_params = (
         list(_base.stem.parameters()) + list(_base.layer1.parameters()) +

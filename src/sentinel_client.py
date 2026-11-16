@@ -26,22 +26,18 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# CONFIGURATION
 USERNAME = os.getenv("CDSE_EMAIL")
 PASSWORD = os.getenv("CDSE_PASSWORD")
 
-# API ENDPOINTS
 AUTH_URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
 CATALOG_URL = "https://stac.dataspace.copernicus.eu/v1"
 PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 
-# GLOBAL TOKEN CACHE
 ACCESS_TOKEN = None
 TOKEN_EXPIRY = 0
 STATE_LOCK = threading.Lock()
 TOKEN_LOCK = threading.Lock()  # one refresh at a time across dask threads
 
-# SCL classes treated as cloud / shadow
 
 DEFAULT_PROFILE = {
     "default": {
@@ -77,9 +73,6 @@ function evaluatePixel(sample) {
 """
 
 
-# ---------------------------------------------------------------------------
-# Utilities
-# ---------------------------------------------------------------------------
 
 def request_with_retry(method, url, max_retries=4, retryable_statuses=None, timeout=60, **kwargs):
     """HTTP wrapper with bounded exponential-backoff retries."""
@@ -166,9 +159,6 @@ def update_manifest(manifest_path, farm_id, year, status, message=""):
         df.to_csv(manifest_path, index=False)
 
 
-# ---------------------------------------------------------------------------
-# Authentication
-# ---------------------------------------------------------------------------
 
 def get_auth_token(rejected=None):
     """Cached access token, refreshed near expiry.
@@ -211,9 +201,6 @@ def _get_auth_token_locked(rejected):
                 raise
 
 
-# ---------------------------------------------------------------------------
-# STAC scene search
-# ---------------------------------------------------------------------------
 
 def search_scenes(bbox, start_date, end_date, max_cloud=50):
     """Return all STAC items in the window at or below max_cloud, sorted ascending by cloud cover."""
@@ -231,9 +218,6 @@ def search_scenes(bbox, start_date, end_date, max_cloud=50):
     return items
 
 
-# ---------------------------------------------------------------------------
-# Single-scene download (in-memory array)
-# ---------------------------------------------------------------------------
 
 def _download_scene_bytes(bbox, date):
     """Call the Sentinel Hub Process API for one date. Returns raw bytes or None."""
@@ -279,9 +263,6 @@ def _bytes_to_array(data):
         return None, None
 
 
-# ---------------------------------------------------------------------------
-# Cloud-free median compositing
-# ---------------------------------------------------------------------------
 
 def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=8):
     """
@@ -312,7 +293,7 @@ def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=
     scenes = scenes[:max_scenes]
     logger.info("Compositing %d scene(s) [%s – %s]", len(scenes), start_date, end_date)
 
-    spectral_stack = []   # list of (4, H, W) arrays with NaN for clouds
+    spectral_stack = []
     scl_clearest = None   # SCL from least-cloudy scene (first in sorted list)
     best_profile = None
 
@@ -343,19 +324,18 @@ def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=
         logger.error("All scene downloads failed for window %s – %s", start_date, end_date)
         return None, None
 
-    # Spectral composite
-    stacked = np.stack(spectral_stack, axis=0)          # (N, 4, H, W)
-    composite_spectral = np.nanmedian(stacked, axis=0)  # (4, H, W)
+    stacked = np.stack(spectral_stack, axis=0)
+    composite_spectral = np.nanmedian(stacked, axis=0)
     composite_spectral = np.nan_to_num(composite_spectral, nan=0.0)
 
     # SCL: mark pixels that were cloudy in clearest scene but have data elsewhere
-    had_any_clear = ~np.all(np.isnan(stacked), axis=(0, 1))  # (H, W)
+    had_any_clear = ~np.all(np.isnan(stacked), axis=(0, 1))
     was_cloud = np.isin(scl_clearest.astype(np.int16), list(CLOUD_SCL_CLASSES))
     scl_clearest[had_any_clear & was_cloud] = 4.0  # reclassify as clear vegetation
 
     composite = np.concatenate(
         [composite_spectral, scl_clearest[np.newaxis]], axis=0
-    )  # (5, H, W)
+    )
 
     valid_pct = float(np.mean(composite_spectral[0] != 0) * 100)
     logger.info("Composite complete — %.1f%% valid pixels (non-zero in band 0)", valid_pct)
@@ -363,9 +343,6 @@ def build_median_composite(bbox, start_date, end_date, max_cloud=30, max_scenes=
     return composite, best_profile
 
 
-# ---------------------------------------------------------------------------
-# Farm image download (uses compositing)
-# ---------------------------------------------------------------------------
 
 def download_farm_image(row, year, farm_id, start_date, end_date, profile_cfg):
     """
@@ -426,9 +403,6 @@ def download_farm_image(row, year, farm_id, start_date, end_date, profile_cfg):
     return filename
 
 
-# ---------------------------------------------------------------------------
-# Per-farm orchestration
-# ---------------------------------------------------------------------------
 
 def process_single_farm(row, skip_count, index, profile, manifest_path):
     try:
@@ -485,9 +459,6 @@ def process_single_farm(row, skip_count, index, profile, manifest_path):
         return False
 
 
-# ---------------------------------------------------------------------------
-# Batch entry point
-# ---------------------------------------------------------------------------
 
 def download_all_farms(
     csv_path: str,

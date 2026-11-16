@@ -115,18 +115,15 @@ def generate_label(lat: float, lon: float, farm_id: str, output_dir: str) -> boo
         lossyear = hansen.select("lossyear").unmask(0)
         has_data = hansen.select("datamask").gt(0)
 
-        # Was this pixel forested in 2000?
         was_forest = treecover.gte(TREECOVER_THRESHOLD)
 
         # Post-EUDR loss: lossyear 21-24 (2021-2024)
         post_eudr_loss = lossyear.gte(21).And(lossyear.lte(24))
 
-        # Forest in 2020: was forested in 2000 AND not lost by end of 2020
         # lossyear 0 = no loss; lossyear >= 21 = loss after 2020
         no_pre2021_loss = lossyear.eq(0).Or(lossyear.gte(21))
         forest_2020 = was_forest.And(no_pre2021_loss)
 
-        # Build label: start at 0, set forest_2020=1, then overwrite with post_eudr_loss=2
         label = (
             ee.Image.constant(0).uint8()
             .where(forest_2020, 1)
@@ -187,7 +184,6 @@ def main(csv_path: str = DEFAULT_CSV, output_dir: str = DEFAULT_OUT):
         os.path.join(PROJECT_ROOT, "data", "raw_satellite", "2024_current"),
     ]
 
-    # Only process farms that have at least one satellite image downloaded
     farms = [
         row for _, row in df.iterrows()
         if _has_satellite_image(str(row["farm_id"]), sat_dirs)

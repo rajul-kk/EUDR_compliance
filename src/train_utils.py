@@ -105,7 +105,6 @@ def mc_dropout_predict(
             m.training = was_training
 
     mean_probs = torch.stack(probs_list, dim=0).mean(dim=0)  # (B, C, H, W)
-    # Shannon entropy: -sum(p * log(p + eps))
     uncertainty = -(mean_probs * (mean_probs + 1e-8).log()).sum(dim=1)  # (B, H, W)
     return mean_probs, uncertainty
 

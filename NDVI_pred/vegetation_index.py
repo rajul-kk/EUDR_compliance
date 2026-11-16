@@ -47,9 +47,7 @@ class VegetationIndex:
         
         with rasterio.open(filepath) as src:
             # We requested 4 bands: B04 (Red), B03 (Green), B02 (Blue), B08 (NIR)
-            # Rasterio uses 1-based indexing for bands
             
-            # Read bands (FLOAT32 as requested in evalscript)
             # Note: evalscript order was [B04, B03, B02, B08]
             red = src.read(1)
             green = src.read(2)
@@ -91,13 +89,11 @@ class VegetationIndex:
         Returns:
             NDVI array with values from -1 to 1
         """
-        # Avoid division by zero
         denominator = nir_band.astype(float) + red_band.astype(float)
         denominator[denominator == 0] = np.nan
         
         ndvi = (nir_band.astype(float) - red_band.astype(float)) / denominator
         
-        # Clip to valid range
         ndvi = np.clip(ndvi, -1, 1)
         
         return ndvi
@@ -221,32 +217,24 @@ class VegetationIndex:
 
 
 if __name__ == "__main__":
-    # Example usage with REAL data
     vi = VegetationIndex()
     
-    # Path to the image we validated earlier
-    # Note: Use the path to the current best image
-    # We'll try to find the latest .tiff in the training_chips directory
     data_dir = "data/training_chips"
     
     image_path = None
     if os.path.exists(data_dir):
         files = [f for f in os.listdir(data_dir) if f.endswith(".tiff")]
         if files:
-            # Pick the most recent one (or just the first one)
             image_path = os.path.join(data_dir, files[0])
             print(f"🎯 Selected input image: {image_path}")
     
     if image_path and os.path.exists(image_path):
         try:
-            # 1. Load Data
             data = vi.load_satellite_image(image_path)
             
-            # 2. Calculate NDVI
             print("🧮 Calculating NDVI...")
             ndvi = vi.calculate_ndvi(data["red"], data["nir"])
             
-            # 3. Analyze Results
             min_val = np.nanmin(ndvi)
             max_val = np.nanmax(ndvi)
             mean_val = np.nanmean(ndvi)
@@ -257,10 +245,8 @@ if __name__ == "__main__":
             print(f"   Mean NDVI:  {mean_val:.3f}")
             print(f"   Forest Cover: {forest_pct:.1f}%")
             
-            # 4. Save NDVI Result
             output_path = image_path.replace(".tiff", "_NDVI.tiff")
             
-            # Update profile for single band NDVI output
             profile = data["profile"]
             profile.update(
                 count=1,
@@ -279,7 +265,6 @@ if __name__ == "__main__":
             traceback.print_exc()
     else:
         print("⚠️ No .tiff files found in data/training_chips. Calculating with synthetic data instead...")
-        # Fallback to synthetic data
         np.random.seed(42)
         red = np.random.uniform(0.05, 0.15, (100, 100))
         nir = np.random.uniform(0.3, 0.6, (100, 100))

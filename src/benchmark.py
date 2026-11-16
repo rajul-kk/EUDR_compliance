@@ -512,7 +512,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-type", choices=ALL_MODEL_TYPES, default="deeplab",
                         help="Model architecture being evaluated")
 
-    # compare mode
     parser.add_argument("--baseline-2020-dir", default=None)
     parser.add_argument("--masks-2024-dir", default=None)
     parser.add_argument("--deeplab-pred-dir", default=None)
@@ -520,7 +519,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--deeplab-elapsed-seconds", type=float, default=None)
     parser.add_argument("--tessera-elapsed-seconds", type=float, default=None)
 
-    # baseline mode (two-stage models)
     parser.add_argument("--prediction-dir", default=None)
     parser.add_argument("--mask-dir", default=None)
     parser.add_argument("--farms-csv", default=None)
@@ -530,7 +528,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--split-manifest-path", default=None)
     parser.add_argument("--split-name", default="val")
 
-    # change mode (direct change map models: siamese, embed-change)
     parser.add_argument("--change-pred-dir", default=None, help="Directory with binary change map predictions")
     parser.add_argument("--mask-t1-dir", default=None, help="2020 hybrid mask directory")
     parser.add_argument("--mask-t2-dir", default=None, help="2024 hybrid mask directory")
@@ -582,7 +579,6 @@ def main() -> None:
         )
         return
 
-    # baseline mode — all two-stage models (deeplab, tessera, tessera-embed, hybrid)
     missing = [n for n, v in [
         ("--prediction-dir", args.prediction_dir),
         ("--mask-dir", args.mask_dir),

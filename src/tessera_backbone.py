@@ -65,12 +65,11 @@ class TesseraSegmentationModel(nn.Module):
 
         backbone = resnet50(weights=ResNet50_Weights.DEFAULT)
 
-        # Replace 3-channel first conv with in_channels-channel version.
         # Kaiming init preserves gradient flow; RGB channels copy pretrained weights.
         new_conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         nn.init.kaiming_normal_(new_conv1.weight, mode="fan_out", nonlinearity="relu")
         with torch.no_grad():
-            new_conv1.weight[:, :3] = backbone.conv1.weight  # copy pretrained RGB weights
+            new_conv1.weight[:, :3] = backbone.conv1.weight
         backbone.conv1 = new_conv1
 
         self.stem = nn.Sequential(backbone.conv1, backbone.bn1, backbone.relu, backbone.maxpool)

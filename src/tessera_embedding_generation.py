@@ -43,7 +43,6 @@ def bbox_from_farms_csv(csv_path: str, padding: float = 0.5) -> Tuple[float, flo
     min_lon = float(df["lon"].min()) - padding
     max_lon = float(df["lon"].max()) + padding
 
-    # Clamp to valid geographic range
     min_lat = max(min_lat, -90.0)
     max_lat = min(max_lat, 90.0)
     min_lon = max(min_lon, -180.0)

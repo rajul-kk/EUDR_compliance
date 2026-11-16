@@ -14,16 +14,10 @@ Usage examples:
 Run `python main_audit.py --help` for all options.
 """
 
-import os
 import sys
 
-# Ensure project root is first on sys.path so all src.* imports resolve.
-_root = os.path.dirname(os.path.abspath(__file__))
-if _root not in sys.path:
-    sys.path.insert(0, _root)
-
-from src.logging_config import setup_pipeline_logging  # noqa: E402
-from src.pipeline_runner import main  # noqa: E402
+from src.logging_config import setup_pipeline_logging
+from src.pipeline_runner import main
 
 if __name__ == "__main__":
     setup_pipeline_logging()

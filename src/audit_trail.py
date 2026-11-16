@@ -20,9 +20,6 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 def _sha256(path: str) -> str:
     """Return 'sha256:<hex>' for a file, or 'sha256:missing' if not found."""
@@ -45,9 +42,6 @@ def _chain_hash(previous_hash: Optional[str], entry_json: str) -> str:
     return f"sha256:{hashlib.sha256(payload.encode()).hexdigest()}"
 
 
-# ---------------------------------------------------------------------------
-# Data model
-# ---------------------------------------------------------------------------
 
 @dataclass
 class AuditEntry:
@@ -177,9 +171,6 @@ class AuditLog:
         return results
 
 
-# ---------------------------------------------------------------------------
-# Factory
-# ---------------------------------------------------------------------------
 
 def build_audit_entry(
     model_type: str,

@@ -38,7 +38,6 @@ def setup_pipeline_logging(
 
     logging.basicConfig(level=level, format=fmt, datefmt=datefmt, handlers=handlers, force=True)
 
-    # Quieten noisy third-party loggers
     for noisy in ("urllib3", "requests", "fiona", "rasterio", "pyproj"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 

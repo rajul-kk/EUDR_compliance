@@ -33,13 +33,11 @@ def export_deforestation_vector(mask_2020, mask_2024, transform, crs, output_pat
     """
     Export changed forest pixels as a vectorized GeoJSON.
     """
-    # Detect loss: was forest (1) in 2020, not forest (not 1) in 2024
     loss_mask = ((mask_2020 == forest_class) & (mask_2024 != forest_class)).astype(np.uint8)
 
     if np.sum(loss_mask) == 0:
         return None
 
-    # Vectorize
     shapes = rasterio.features.shapes(loss_mask, mask=loss_mask, transform=transform)
 
     features = []
@@ -100,7 +98,6 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
         mask_2020, transform, crs = load_mask(baseline_mask_path)
         mask_2024, _, _ = load_mask(predicted_mask_path)
 
-        # --- Post-processing ---
         mask_2024 = refine_mask(mask_2024)
 
         if mask_2020.shape != mask_2024.shape:
@@ -110,7 +107,6 @@ def analyze_farm_pair(baseline_mask_path, predicted_mask_path, farm_id, output_v
                                                 pixel_m2=pixel_area_m2(transform, crs, mask_2020.shape[0]))
         metrics['farm_id'] = farm_id
 
-        # --- Vector Export ---
         if output_vector_dir:
             vector_path = os.path.join(output_vector_dir, f"{farm_id}_deforestation.geojson")
             export_deforestation_vector(mask_2020, mask_2024, transform, crs, vector_path)

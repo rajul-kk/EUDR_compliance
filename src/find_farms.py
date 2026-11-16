@@ -10,9 +10,6 @@ logger = logging.getLogger(__name__)
 # Use a reliable Overpass mirror — overpass-api.de times out frequently
 ox.settings.overpass_url = "https://overpass.kumi.systems/api/interpreter"
 
-# CONFIGURATION
-# Extensive list of regions to ensure we fill the dataset
-# CONFIGURATION
 # Optimized regions (Town/Municipality level) to avoid timeouts
 # and ensuring better OSM data availability
 TARGETS = {
@@ -67,7 +64,6 @@ TARGETS = {
         {"region": "Hat Yai District, Songkhla, Thailand", "tags": {"landuse": "farmland"}},
         {"region": "Kottayam, India", "tags": {"landuse": "farmland"}},
         {"region": "Bong County, Liberia", "tags": {"landuse": "plantation"}},
-        # New Regions
         {"region": "Xishuangbanna, China", "tags": {"landuse": "plantation"}},
         {"region": "North Sumatra, Indonesia", "tags": {"landuse": "plantation"}},
         {"region": "Phuket, Thailand", "tags": {"landuse": "farmland"}},

@@ -52,9 +52,6 @@ except ImportError:
     _REPORTLAB = False
 
 
-# ---------------------------------------------------------------------------
-# Input metadata
-# ---------------------------------------------------------------------------
 
 @dataclass
 class OperatorInfo:
@@ -76,9 +73,6 @@ class CommodityInfo:
     production_end: str     # ISO date, e.g. "2024-12-31"
 
 
-# ---------------------------------------------------------------------------
-# DDS record (one per farm)
-# ---------------------------------------------------------------------------
 
 @dataclass
 class DDSRecord:
@@ -101,9 +95,6 @@ class DDSRecord:
     notes: str = ""
 
 
-# ---------------------------------------------------------------------------
-# Exporter
-# ---------------------------------------------------------------------------
 
 class DDSExporter:
     def __init__(
@@ -120,9 +111,6 @@ class DDSExporter:
         self.baseline_year = baseline_year
         self.assessment_year = assessment_year
 
-    # ------------------------------------------------------------------
-    # Build records from pipeline output
-    # ------------------------------------------------------------------
 
     def from_report(
         self,
@@ -148,7 +136,6 @@ class DDSExporter:
         for _, row in report_df.iterrows():
             farm_id = str(row.get("farm_id", ""))
 
-            # Look up farm metadata
             lat, lon, country, area_ha = 0.0, 0.0, self.operator.country_iso2, 0.0
             if not farms.empty:
                 meta = farms[farms["farm_id"].str.endswith(farm_id)]
@@ -229,9 +216,7 @@ class DDSExporter:
 
         return records
 
-    # ------------------------------------------------------------------
     # JSON export  (EU IS API format)
-    # ------------------------------------------------------------------
 
     def to_json(self, records: List[DDSRecord], output_path: str) -> str:
         """Export DDS records to EU IS-compatible JSON."""
@@ -292,9 +277,7 @@ class DDSExporter:
         logger.info("DDS JSON written to %s (%d records)", output_path, len(records))
         return output_path
 
-    # ------------------------------------------------------------------
     # XML export  (TRACES NT envelope)
-    # ------------------------------------------------------------------
 
     def to_xml(self, records: List[DDSRecord], output_path: str) -> str:
         """Export DDS records to TRACES NT-compatible XML."""
@@ -351,9 +334,6 @@ class DDSExporter:
         logger.info("DDS XML written to %s (%d records)", output_path, len(records))
         return output_path
 
-    # ------------------------------------------------------------------
-    # PDF export  (human-readable summary)
-    # ------------------------------------------------------------------
 
     def to_pdf(self, records: List[DDSRecord], output_path: str) -> str:
         """Export a human-readable DDS summary PDF. Requires reportlab."""
@@ -384,7 +364,6 @@ class DDSExporter:
         story.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", normal_style))
         story.append(Spacer(1, 0.6 * cm))
 
-        # Operator block
         if records:
             op = records[0].operator
             story.append(Paragraph("Operator", heading_style))
@@ -398,7 +377,6 @@ class DDSExporter:
                 story.append(Paragraph(line, normal_style))
             story.append(Spacer(1, 0.5 * cm))
 
-        # Summary counts
         counts: dict = {}
         for r in records:
             counts[r.risk_level] = counts.get(r.risk_level, 0) + 1
@@ -425,7 +403,6 @@ class DDSExporter:
         story.append(summary_table)
         story.append(Spacer(1, 0.6 * cm))
 
-        # Per-farm table
         story.append(Paragraph("Farm-Level Results", heading_style))
         table_data = [["Farm ID", "Country", "Deforestation %", "Risk Level", "DDS Reference"]]
 
@@ -469,7 +446,6 @@ class DDSExporter:
         story.append(farm_table)
         story.append(Spacer(1, 0.8 * cm))
 
-        # Evidence block
         if records:
             story.append(Paragraph("Evidence & Audit", heading_style))
             story.append(Paragraph(f"Model version: {records[0].model_version}", normal_style))

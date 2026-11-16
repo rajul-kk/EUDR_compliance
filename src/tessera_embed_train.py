@@ -205,7 +205,6 @@ def run_preflight_checks(pairs: List[Tuple[str, Optional[str], str]], expected_i
         if scales_path is not None and not os.path.exists(scales_path):
             orphan_scales += 1
 
-    # Validate channels and shape alignment on one deterministic sample.
     emb_path, scales_path, mask_path = pairs[0]
     embedding = load_embedding(emb_path, scales_path=scales_path)
     with rasterio.open(mask_path) as src:

@@ -84,7 +84,6 @@ def load_image(path: str) -> Tuple[np.ndarray, np.ndarray]:
     return img, scl
 
 
-_load_image = load_image  # private alias kept for internal use
 
 
 def load_mask(path: str) -> np.ndarray:
@@ -92,7 +91,6 @@ def load_mask(path: str) -> np.ndarray:
         return src.read(1).astype(np.int64)
 
 
-_load_mask = load_mask  # private alias kept for internal use
 
 
 def hansen_change_mask(raw: np.ndarray, scl_t1: np.ndarray, scl_t2: np.ndarray) -> np.ndarray:
@@ -183,9 +181,6 @@ class ChangeDetectionDataset(Dataset):
         skipped_zero = 0
 
         for f in sorted(t1_files):
-            # Match both filename formats:
-            #   old: {farm_key}_{year}_{date}.tiff
-            #   new: {farm_key}_{year}.tiff
             m = FARM_YEAR_RE.match(f)
             if not m:
                 continue
@@ -230,8 +225,8 @@ class ChangeDetectionDataset(Dataset):
     def __getitem__(self, idx: int):
         t1_path, t2_path, label_path, label_t2_path = self.pairs[idx]
 
-        img_t1, scl_t1 = _load_image(t1_path)
-        img_t2, scl_t2 = _load_image(t2_path)
+        img_t1, scl_t1 = load_image(t1_path)
+        img_t2, scl_t2 = load_image(t2_path)
 
         if self.histogram_match:
             img_t2 = match_histogram(img_t2, img_t1)
@@ -244,12 +239,12 @@ class ChangeDetectionDataset(Dataset):
         if self.label_backend == "hansen":
             # Hansen label encodes both years in one file.
             # Resize label to match satellite tile if needed (Hansen is 30m, Sentinel is 10m).
-            change = hansen_change_mask(_load_mask(label_path), scl_t1, scl_t2)
+            change = hansen_change_mask(load_mask(label_path), scl_t1, scl_t2)
 
         else:
             # Hybrid legacy: derive change from two per-year masks
-            mask_t1 = _cloud_ignore(_load_mask(label_path)[:h, :w], scl_t1)
-            mask_t2 = _cloud_ignore(_load_mask(label_t2_path)[:h, :w], scl_t2)
+            mask_t1 = _cloud_ignore(load_mask(label_path)[:h, :w], scl_t1)
+            mask_t2 = _cloud_ignore(load_mask(label_t2_path)[:h, :w], scl_t2)
             change = np.zeros((h, w), dtype=np.int64)
             change[(mask_t1 == FOREST_CLASS) & (mask_t2 != FOREST_CLASS) & (mask_t2 != IGNORE_INDEX)] = 1
             change[(mask_t1 == IGNORE_INDEX) | (mask_t2 == IGNORE_INDEX)] = IGNORE_INDEX

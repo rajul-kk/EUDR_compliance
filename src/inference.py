@@ -11,7 +11,6 @@ import sys
 import numpy as np
 import rasterio
 
-# correctly when this script is run from the project root.
 if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.deeplab_model import get_deeplab_model
@@ -73,11 +72,9 @@ def load_image(image_path, expected_in_channels=6):
         image = src.read()  # (C, H, W)
         profile = src.profile
 
-        # Validate band count
         if image.shape[0] < 5:
             raise ValueError(f"Expected at least 5 bands, got {image.shape[0]} in {os.path.basename(image_path)}")
 
-        # Convert to float32
         image = image.astype(np.float32)
 
         # Append derived indices to match training channel layout [R,G,B,NIR,SCL,NDVI,NDWI]
@@ -95,7 +92,6 @@ def load_image(image_path, expected_in_channels=6):
                 f"got {image.shape[0]} in {os.path.basename(image_path)}"
             )
 
-        # Add batch dimension and convert to tensor
         image_tensor = torch.from_numpy(image).unsqueeze(0)  # (1, C, H, W)
 
     return image_tensor, profile
@@ -167,7 +163,6 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
         logger.info("Using DataParallel across %d GPUs for inference", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)
 
-    # Find all matching files
     image_files = glob.glob(os.path.join(input_dir, file_pattern))
 
     if not image_files:
@@ -179,11 +174,9 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
     results = {}
     for i, image_path in enumerate(image_files, 1):
         try:
-            # Generate output filename
             base_name = os.path.splitext(os.path.basename(image_path))[0]
             output_path = os.path.join(output_dir, f"{base_name}_predicted.tif")
 
-            # Run inference
             logger.info("[%d/%d] Processing %s", i, len(image_files), base_name)
             predict_single_image(model, image_path, output_path, expected_in_channels=7,
                                  uncertainty=uncertainty, mc_passes=mc_passes)

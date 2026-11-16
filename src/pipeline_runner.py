@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Define paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 find_farms_script = os.path.join(current_dir, 'find_farms.py')
