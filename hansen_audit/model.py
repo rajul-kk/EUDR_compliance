@@ -19,7 +19,7 @@ def make_patches(X: np.ndarray, Y: np.ndarray, V: np.ndarray, min_valid: float =
     Xp = np.nan_to_num(np.pad(X, ((0, 0), (0, 0), (1, 1), (1, 1)), constant_values=np.nan), nan=0.0)
     ps, ys, fs = [], [], []
     for f in range(Fn):
-        ii, jj = np.where((Y[f] >= 1) & (V[f] >= min_valid) & ~np.isnan(X[f]).any(0))
+        ii, jj = np.where((Y[f] >= 1) & (Y[f] <= 2) & (V[f] >= min_valid) & ~np.isnan(X[f]).any(0))
         if len(ii) == 0:
             continue
         for i, j in zip(ii, jj):

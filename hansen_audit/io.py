@@ -41,6 +41,12 @@ def index_images(folder: Path, composites: bool = False) -> dict[str, list[tuple
     return {k: sorted(v) for k, v in out.items()}
 
 
+def labels_root(data_root, labels_dir=None) -> Path:
+    """The label rasters to read: `labels_dir` if given (the PROTOCOL_E10 rebuild, hansen_labels_v2), else
+    <data_root>/hansen_labels, the files every result before 15 Nov 2026 used."""
+    return Path(labels_dir) if labels_dir else Path(data_root) / "hansen_labels"
+
+
 def index_labels(folder: Path) -> dict[str, Path]:
     out = {}
     for p in sorted(Path(folder).iterdir()):

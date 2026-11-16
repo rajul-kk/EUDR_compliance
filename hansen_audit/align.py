@@ -25,7 +25,10 @@ def label_on_image_grid(label_path, image_path, out_shape=None):
         arr = lb.read(1, window=win, boundless=True, fill_value=255,
                       out_shape=shape, resampling=rasterio.enums.Resampling.nearest)
         native = lb.read(1, window=win.round_offsets().round_lengths(), boundless=True, fill_value=255)
-    cov = float((arr != 255).mean())
+        lbb = lb.bounds
+    ix = max(0.0, min(b.right, lbb.right) - max(b.left, lbb.left))
+    iy = max(0.0, min(b.top, lbb.top) - max(b.bottom, lbb.bottom))
+    cov = float(ix * iy / ((b.right - b.left) * (b.top - b.bottom)))
     return arr.astype(np.uint8), cov, native
 
 

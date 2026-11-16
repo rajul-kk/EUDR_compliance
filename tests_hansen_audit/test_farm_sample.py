@@ -166,3 +166,14 @@ def test_e3_labels_dir_defaults_to_the_frozen_draw_and_takes_an_override():
     spec.loader.exec_module(m)
     assert m.labels_dir(argparse.Namespace(data_root="root", labels_dir=None)) == Path("root") / "hansen_labels"
     assert m.labels_dir(argparse.Namespace(data_root="root", labels_dir="v2")) == Path("v2")
+
+
+def test_make_patches_ignores_label_255():
+    import numpy as np
+
+    from hansen_audit.model import make_patches
+
+    X = np.zeros((1, 2, 3, 3), np.float32)
+    Y = np.array([[[1, 2, 255], [0, 1, 255], [2, 2, 0]]], np.uint8)
+    _, y, _ = make_patches(X, Y, np.ones((1, 3, 3), np.float32))
+    assert sorted(y.tolist()) == [0, 0, 1, 1, 1]
