@@ -29,6 +29,9 @@ def class_group(class_id: int) -> int:
     return G_OTHER
 
 
+LABEL_NODATA = 255   # farm labels: Hansen no data, and cells outside a label raster when it is resampled
+
+
 def hansen_label(treecover: np.ndarray, lossyear: np.ndarray) -> np.ndarray:
     """Identical logic to generate_labels.py. 0 non-forest/pre-2021 loss, 1 forest no loss, 2 loss 2021-24."""
     was_forest = treecover >= TREECOVER_THRESHOLD

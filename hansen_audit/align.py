@@ -31,13 +31,3 @@ def label_on_image_grid(label_path, image_path, out_shape=None):
     iy = max(0.0, min(b.top, lbb.top) - max(b.bottom, lbb.bottom))
     cov = float(ix * iy / ((b.right - b.left) * (b.top - b.bottom)))
     return arr.astype(np.uint8), cov, native
-
-
-def pixel_center_offset_m(csv_lat, csv_lon, image_path):
-    """Distance in metres (small-angle) of the CSV farm point from the image centre."""
-    with rasterio.open(image_path) as im:
-        b = im.bounds
-    clon, clat = (b.left + b.right) / 2, (b.bottom + b.top) / 2
-    dy = (csv_lat - clat) * 111_320.0
-    dx = (csv_lon - clon) * 111_320.0 * np.cos(np.radians(csv_lat))
-    return float(np.hypot(dx, dy))

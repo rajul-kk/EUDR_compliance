@@ -71,7 +71,7 @@ def main(ref_npz, grid_index, s2_dir, out_dir, feature_set="s2", s1_dir=None):
     folds = L.assign_folds(gids, [rows[g]["island"] for g in gids])
     rng = np.random.default_rng(0)
 
-    per = {}  # per-grid counts
+    per = {}
     pred_maps = {}
     for k in range(L.N_FOLDS):
         train = [g for g in gids if folds[g] != k]

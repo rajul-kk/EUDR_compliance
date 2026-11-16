@@ -48,7 +48,6 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
     inv["baseline_months"] = dict(Counter(d[:7] for v in b.values() for d, _ in v))
     inv["current_months"] = dict(Counter(d[:7] for v in c.values() for d, _ in v))
 
-    # raster metadata: all distinct signatures
     sig_img, sig_lab = Counter(), Counter()
     for fid in complete:
         m = _meta(b[fid][0][1])
@@ -58,7 +57,6 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
     inv["image_signatures"] = [dict(sig=str(k), n=v) for k, v in sig_img.items()]
     inv["label_signatures"] = [dict(sig=str(k), n=v) for k, v in sig_lab.items()]
 
-    # label values + class balance over all complete labels; footprint ratio
     tot = Counter()
     per_farm = {}
     for fid in complete:
@@ -75,7 +73,6 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
     inv["farms_with_any_forest_px"] = sum(1 for d in per_farm.values() if d.get(1, 0) + d.get(2, 0) > 0)
     inv["farms_no_forest_at_all"] = sum(1 for d in per_farm.values() if d.get(1, 0) + d.get(2, 0) == 0)
 
-    # band statistics on a deterministic sample
     rng = np.random.default_rng(seed)
     pick = list(rng.choice(complete, size=min(band_sample, len(complete)), replace=False))
     stats = {i: [] for i in range(5)}
@@ -98,7 +95,6 @@ def inventory(root: Path, band_sample: int = 40, seed: int = 0) -> dict:
     inv["image_nan_fraction_max"] = max(nan_frac)
     inv["band5_value_counts_sample"] = dict(scl)
 
-    # geographic extent (centroid from csv) vs label centre
     inv["farm_lat_range"] = [float(farms.lat.min()), float(farms.lat.max())]
     inv["farm_lon_range"] = [float(farms.lon.min()), float(farms.lon.max())]
     inv["_complete"] = complete

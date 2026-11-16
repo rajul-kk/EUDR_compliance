@@ -16,6 +16,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 IMG_RE = re.compile(r"^(?P<fid>(?:relation|way)_\d+)_(?P<year>20\d\d)_(?P<date>\d{4}-\d{2}-\d{2})\.tiff?$")
@@ -66,6 +67,15 @@ def write_json(obj, path, **kw):
     """Write `obj` as JSON in UTF-8, closing the file; keyword arguments go to json.dump."""
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(obj, fh, **kw)
+
+
+ID_OIL_PALM = "ID|Oil Palm"
+
+
+def farms_in_group(features, group=ID_OIL_PALM):
+    """Indices (into features.npz's farm arrays) of the farms in a "country|crop" group."""
+    country, crop = group.split("|")
+    return np.flatnonzero((features["country"] == country) & (features["crop"] == crop))
 
 
 def farm_groups(features) -> dict[str, str]:

@@ -22,10 +22,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 from hansen_audit.budget import exclusive_download  # noqa: E402
 from hansen_audit.ee_grid import CRS, compute_pixels  # noqa: E402
 from hansen_audit.io import farm_groups, index_labels  # noqa: E402
-from hansen_audit.reference import hansen_label  # noqa: E402
+from hansen_audit.reference import LABEL_NODATA, hansen_label  # noqa: E402
 
 ASSET = "UMD/hansen/global_forest_change_2025_v1_13"
-NODATA = 255
+NODATA = LABEL_NODATA
 WORKERS = 8
 
 
