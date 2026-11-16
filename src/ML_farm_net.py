@@ -21,14 +21,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
-from torchvision.models import ResNet50_Weights, resnet50
-from torchvision.models.segmentation import deeplabv3_resnet50
 
 logger = logging.getLogger(__name__)
 
 if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from src.deeplab_model import get_deeplab_model
 from src.preprocessing.change_dataset import load_image, load_mask
 from src.train_utils import compute_miou, seed_everything, split_dataset
 
@@ -96,17 +95,6 @@ class HansenDataset(Dataset):
         return torch.from_numpy(img), torch.from_numpy(label)
 
 
-def get_deeplab_model(num_classes: int = NUM_CLASSES, in_channels: int = 7) -> nn.Module:
-    model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-    pretrained = resnet50(weights=ResNet50_Weights.DEFAULT)
-    new_conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-    nn.init.kaiming_normal_(new_conv1.weight, mode="fan_out", nonlinearity="relu")
-    with torch.no_grad():
-        new_conv1.weight[:, :3] = pretrained.conv1.weight
-    model.backbone.conv1 = new_conv1
-    return model
-
-
 def train_model(raw_dir, mask_dir, output_model_path, epochs=15, batch_size=8,
                 learning_rate=1e-4, val_ratio=0.15, patience=5, seed=42):
     seed_everything(seed)
@@ -129,7 +117,7 @@ def train_model(raw_dir, mask_dir, output_model_path, epochs=15, batch_size=8,
                               num_workers=_workers, pin_memory=_cuda,
                               persistent_workers=_workers > 0)
 
-    model = get_deeplab_model().to(DEVICE)
+    model = get_deeplab_model(NUM_CLASSES).to(DEVICE)
     if torch.cuda.device_count() > 1:
         logger.info("Using DataParallel across %d GPUs", torch.cuda.device_count())
         model = torch.nn.DataParallel(model)

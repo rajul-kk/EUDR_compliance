@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ from affine import Affine
 if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from src.tessera_embed_model import TesseraEmbeddingSegHead
 from src.train_utils import extract_farm_key, load_embedding
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,21 +55,6 @@ def find_tile_reference_profile(reference_dir: Optional[str], stem: str) -> Opti
     return None
 
 
-class TesseraEmbeddingSegHead(nn.Module):
-    def __init__(self, in_channels: int = 128, num_classes: int = 4, hidden_channels: int = 128):
-        super().__init__()
-        self.head = nn.Sequential(
-            nn.Conv2d(in_channels, hidden_channels, kernel_size=1, bias=False),
-            nn.BatchNorm2d(hidden_channels),
-            nn.ReLU(inplace=True),
-            nn.Dropout2d(p=0.1),
-            nn.Conv2d(hidden_channels, num_classes, kernel_size=1),
-        )
-
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
-        return {"out": self.head(x)}
-
-
 def load_model(checkpoint_path: str) -> nn.Module:
     checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
     config = checkpoint.get("config", {}) if isinstance(checkpoint, dict) else {}
@@ -76,7 +62,7 @@ def load_model(checkpoint_path: str) -> nn.Module:
     model = TesseraEmbeddingSegHead(
         in_channels=int(config.get("in_channels", 128)),
         num_classes=int(config.get("num_classes", 4)),
-        hidden_channels=int(config.get("hidden_channels", 128)),
+        hidden_channels=int(config.get("hidden_channels", 128)),   # tessera_embed_train --hidden-channels default
     )
 
     state_dict = checkpoint.get("state_dict", checkpoint)

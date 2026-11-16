@@ -1,7 +1,6 @@
 import logging
 
 import torch
-import torch.nn as nn
 
 logger = logging.getLogger(__name__)
 import argparse
@@ -11,37 +10,20 @@ import sys
 
 import numpy as np
 import rasterio
-from torchvision.models.segmentation import deeplabv3_resnet50
 
 # correctly when this script is run from the project root.
 if __package__ in (None, ""):   # run by path (python src/x.py): make the repo root importable
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.deeplab_model import get_deeplab_model
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def get_deeplab_model(num_classes=4, in_channels=7):
-    """Returns a DeepLabV3 model with ResNet50 backbone modified for N input channels."""
-    model = deeplabv3_resnet50(weights=None, num_classes=num_classes)
-    original_conv1 = model.backbone.conv1
-    new_conv1 = nn.Conv2d(
-        in_channels,
-        original_conv1.out_channels,
-        kernel_size=original_conv1.kernel_size,
-        stride=original_conv1.stride,
-        padding=original_conv1.padding,
-        bias=original_conv1.bias,
-    )
-    nn.init.kaiming_normal_(new_conv1.weight, mode='fan_out', nonlinearity='relu')
-    model.backbone.conv1 = new_conv1
-    return model
-
-def load_model(model_path, num_classes=4, in_channels=7):
+def load_model(model_path, in_channels=7):
     """
     Load a trained DeepLabV3 model from disk.
     
     Args:
         model_path: Path to .pth file
-        num_classes: Number of output classes
         in_channels: Number of input channels
     
     Returns:
@@ -50,8 +32,9 @@ def load_model(model_path, num_classes=4, in_channels=7):
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found: {model_path}")
 
-    model = get_deeplab_model(num_classes, in_channels)
-    model.load_state_dict(torch.load(model_path, map_location=DEVICE))
+    state = torch.load(model_path, map_location=DEVICE)
+    model = get_deeplab_model(state["classifier.4.weight"].shape[0], in_channels, rgb_from_imagenet=False)
+    model.load_state_dict(state)
     model.to(DEVICE)
     model.eval()
 
@@ -174,7 +157,7 @@ def batch_inference(model_path, input_dir, output_dir, file_pattern="*.tiff", mo
         results: Dictionary mapping input paths to output paths
     """
     if model_type == "deeplab":
-        model = load_model(model_path, num_classes=4, in_channels=7)
+        model = load_model(model_path, in_channels=7)
     elif model_type == "tessera":
         model = load_tessera_model(model_path)
     else:

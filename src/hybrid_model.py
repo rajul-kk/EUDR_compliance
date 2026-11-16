@@ -15,28 +15,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import ResNet50_Weights, resnet50
 
-
-class _ASPPConv(nn.Sequential):
-    def __init__(self, in_ch: int, out_ch: int, dilation: int) -> None:
-        super().__init__(
-            nn.Conv2d(in_ch, out_ch, 3, padding=dilation, dilation=dilation, bias=False),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-        )
-
-
-class _ASPPPooling(nn.Module):
-    def __init__(self, in_ch: int, out_ch: int) -> None:
-        super().__init__()
-        self.pool = nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(in_ch, out_ch, 1, bias=False),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return F.interpolate(self.pool(x), size=x.shape[-2:], mode="bilinear", align_corners=False)
+from src.aspp import ASPPConv, ASPPPooling
 
 
 class DeepLabWithEmbedContext(nn.Module):
@@ -83,10 +62,10 @@ class DeepLabWithEmbedContext(nn.Module):
         self.aspp = nn.ModuleList([
             nn.Sequential(nn.Conv2d(fused_channels, out_ch, 1, bias=False),
                           nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True)),
-            _ASPPConv(fused_channels, out_ch, 6),
-            _ASPPConv(fused_channels, out_ch, 12),
-            _ASPPConv(fused_channels, out_ch, 18),
-            _ASPPPooling(fused_channels, out_ch),
+            ASPPConv(fused_channels, out_ch, 6),
+            ASPPConv(fused_channels, out_ch, 12),
+            ASPPConv(fused_channels, out_ch, 18),
+            ASPPPooling(fused_channels, out_ch),
         ])
         self.project = nn.Sequential(
             nn.Conv2d(5 * out_ch, out_ch, 1, bias=False),
