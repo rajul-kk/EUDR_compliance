@@ -62,3 +62,7 @@ scores are agreement with Hansen labels, not accuracy (the labels are what the a
 ## Outputs
 
 `results/e6/experiments.json` (with the command and git commit), `results/e6/run.log`; a section in `docs/results.md`.
+
+## Deviations
+
+- 15 Nov 2026, rerun on the rebuilt labels (owner's go-ahead, 15 Nov: "run it", after the PROTOCOL_E10 inventory). The label rasters used before had no stable-forest class (class 1 held only 2025 loss). Experiment C on all farms and the leave-one-group-out transfer check (run_e6.py) is rerun unchanged except that the labels are `hansen_labels_v2` (`--labels-dir`); the earlier outputs are kept and the reruns are written beside them with a `_v2` suffix. Two reads were made safe for labels that use 255 for Hansen no-data, with no change on the old files (checked: features of three farms reproduce exactly): `model.make_patches` keeps classes 1 and 2 only, and `align.label_on_image_grid` measures coverage from the raster extent.

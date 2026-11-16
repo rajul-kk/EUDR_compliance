@@ -48,3 +48,7 @@ plantation) or stay low (the classifier under-calls palm off the grids)?
 - OSM outlines are volunteered and may be outdated or drawn loosely; they are the best open outline available here, not
   a cadastral plot.
 - Predictions are still transported S2C output with no reference on the farms (E3 would supply one).
+
+## Deviations
+
+- 15 Nov 2026, rerun on the rebuilt labels (owner's go-ahead, 15 Nov: "run it", after the PROTOCOL_E10 inventory). The label rasters used before had no stable-forest class (class 1 held only 2025 loss). The outline counts and the transport check (e5_outlines.py run) is rerun unchanged except that the labels are `hansen_labels_v2` (`--labels-dir`); the earlier outputs are kept and the reruns are written beside them with a `_v2` suffix. Two reads were made safe for labels that use 255 for Hansen no-data, with no change on the old files (checked: features of three farms reproduce exactly): `model.make_patches` keeps classes 1 and 2 only, and `align.label_on_image_grid` measures coverage from the raster extent.
