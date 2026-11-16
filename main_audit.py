@@ -8,8 +8,8 @@ Usage examples:
   # Train + infer with TESSERA backbone
   python main_audit.py --model-type tessera --run-image-download
 
-  # Skip training, re-run inference only
-  python main_audit.py --model-type tessera-embed --skip-training
+  # Train only, no inference
+  python main_audit.py --model-type tessera-embed --skip-inference
 
 Run `python main_audit.py --help` for all options.
 """

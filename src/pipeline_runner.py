@@ -216,7 +216,7 @@ def run_pipeline(
             mask_dir = os.path.join(project_root, 'data', 'hybrid_masks')
             subprocess.check_call(
                 [python_exe, training_script,
-                 '--raw-dir', raw_dir, '--mask-dir', mask_dir,
+                 '--t1-dir', raw_dir, '--mask-dir', mask_dir,
                  '--embeddings-dir', embeddings_dir,
                  '--output-model-path', model_path],
                 cwd=project_root,

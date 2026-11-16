@@ -33,7 +33,7 @@ def download_file(url, output_path):
             with zipfile.ZipFile(temp_path, 'r') as zip_ref:
                 tiff_files = [f for f in zip_ref.namelist() if f.endswith('.tif') or f.endswith('.tiff')]
                 if tiff_files:
-                    source_file = zip_ref.extract(tiff_files[0], path=os.path.dirname(output_path))
+                    zip_ref.extract(tiff_files[0], path=os.path.dirname(output_path))
                     if os.path.exists(output_path):
                         os.remove(output_path)
                     os.rename(os.path.join(os.path.dirname(output_path), tiff_files[0]), output_path)
@@ -51,60 +51,6 @@ def download_file(url, output_path):
     except Exception as e:
         print(f"Failed to download {url}: {e}")
         return False
-
-
-def download_mask(lat, lon, farm_id, output_dir):
-    """
-    Generates hybrid classification for a farm and downloads it as GeoTIFF.
-    
-    Args:
-        lat (float): Latitude of center point.
-        lon (float): Longitude of center point.
-        farm_id (str): Identifier for the farm.
-        output_dir (str): Directory to save the downloaded files.
-    """
-    point = ee.Geometry.Point([lon, lat])
-    region = point.buffer(2500).bounds()
-    
-    # Canopy height is static (2020 version most common), loading once
-    try:
-        height_image = ee.Image(CANOPY_HEIGHT_ASSET_ID).select(['b1'], ['height'])
-    except:
-        height_image = ee.Image(CANOPY_HEIGHT_ASSET_ID).rename('height')
-
-    # If the asset is 'users/nlang/ETH_GlobalCanopyHeight_2020_10m_v1', it is often a mosaic. 
-    # Safest is usually to not select unless we know name. ETH map usually has 1 band (height in meters).
-    
-    years = [2020, 2024]
-    
-    for year in years:
-        try:
-            start_date = f'{year}-01-01'
-            end_date = f'{year}-12-31'
-            
-            dw_collection = ee.ImageCollection(DYNAMIC_WORLD_ASSET_ID)\
-                .filterBounds(region)\
-                .filterDate(start_date, end_date)
-            
-            dw_image = dw_collection.select('label').mode().clip(region)
-            
-            # We use the static height image for both years as 2020 is the best baseline
-            hybrid_image = compute_hybrid_classification(dw_image, height_image.clip(region))
-            
-            # Scale: 10m is native for DW and Sentinel
-            url = hybrid_image.getDownloadURL({
-                'name': f'{farm_id}_{year}_hybrid',
-                'scale': 10,
-                'crs': 'EPSG:4326', # WGS84
-                'region': region.getInfo()
-            })
-            
-            filename = f"{farm_id}_{year}_hybrid.tif"
-            file_path = os.path.join(output_dir, filename)
-            download_file(url, file_path)
-            
-        except Exception as e:
-            print(f"Error processing {farm_id} for {year}: {e}")
 
 
 def download_mask_years(lat, lon, farm_id, output_dir, years):
@@ -151,32 +97,21 @@ def download_mask_years(lat, lon, farm_id, output_dir, years):
 def main():
     initialize_gee()
     
-    csv_path = os.path.join(os.path.dirname(parent_dir), 'inputs', 'farms_osm.csv')
-    if not os.path.exists(csv_path):
-        # Fallback hardcoded path based on user environment
-        csv_path = r'd:\Work\EUDR-compliance\inputs\farms_osm.csv'
-    
-    output_dir = os.path.join(os.path.dirname(parent_dir), 'data', 'hybrid_masks')
-    if not os.path.exists(output_dir):
-         try:
-             os.makedirs(output_dir, exist_ok=True)
-         except:
-             # Try absolute path fallback
-             output_dir = r'd:\Work\EUDR-compliance\data\hybrid_masks'
-             os.makedirs(output_dir, exist_ok=True)
-             
+    root = os.path.dirname(parent_dir)
+    csv_path = os.path.join(root, 'inputs', 'farms_osm.csv')
+    output_dir = os.path.join(root, 'data', 'hybrid_masks')
+    os.makedirs(output_dir, exist_ok=True)
+
     print(f"Reading farms from: {csv_path}")
     print(f"Output directory: {output_dir}")
-    
+
     try:
         df = pd.read_csv(csv_path)
     except Exception as e:
-        print(f"Failed to read CSV: {e}")
-        return
+        sys.exit(f"Failed to read CSV: {e}")
 
-    
-    raw_dir_2020 = r'd:\Work\EUDR-compliance\data\raw_satellite\2020_baseline'
-    raw_dir_2024 = r'd:\Work\EUDR-compliance\data\raw_satellite\2024_current'
+    raw_dir_2020 = os.path.join(root, 'data', 'raw_satellite', '2020_baseline')
+    raw_dir_2024 = os.path.join(root, 'data', 'raw_satellite', '2024_current')
     
     print("DEBUG: Checking for images in:")
     print(f"  2020: {raw_dir_2020}")
@@ -193,23 +128,6 @@ def main():
     print("   Listing files in 2024 current...")
     files_2024 = set(os.path.basename(f) for f in glob.glob(os.path.join(raw_dir_2024, "*.tiff")))
     print(f"   -> Found {len(files_2024)} files.")
-    
-    valid_rows = []
-    
-    match_count = 0
-    for index, row in df.iterrows():
-        farm_id = str(row['farm_id']).strip()
-        
-        
-        pass
-
-    def extract_ids_from_files(file_list):
-        ids = set()
-        for fname in file_list:
-            pass
-        return ids
-    
-    
     
     present_ids_2020 = set()
     for f in files_2020:
@@ -260,8 +178,7 @@ def main():
     print(f"   -> Matched {match_count} CSV rows to images.")
 
     if not valid_rows:
-        print("⚠️ No downloaded images found. Run the image downloader first.")
-        return
+        sys.exit("No downloaded images found. Run the image downloader first.")
 
     valid_df = pd.DataFrame(valid_rows)
     
@@ -284,8 +201,10 @@ def main():
         search_id = normalize_id(farm_id)
         
         process_years = []
-        if row['has_2020']: process_years.append(2020)
-        if row['has_2024']: process_years.append(2024)
+        if row['has_2020']:
+            process_years.append(2020)
+        if row['has_2024']:
+            process_years.append(2024)
         
         print(f"[{index+1}/{len(final_df)}] Farm {farm_id} ({row.get('crop_type','?')}) -> Years: {process_years}")
         

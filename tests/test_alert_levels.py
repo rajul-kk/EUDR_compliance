@@ -204,3 +204,20 @@ def test_dds_for_an_unassessed_farm_says_why(tmp_path):
                            "reason": ["no 2024 prediction"]})
     (r,) = _exporter().from_report(report, farms_csv=str(tmp_path / "missing.csv"))
     assert r.risk_level == "INCONCLUSIVE" and "no 2024 prediction" in r.notes and r.deforestation_pct == 0.0
+
+
+def test_undated_prediction_names_are_assessed(tmp_path, monkeypatch):
+    import src.detect_deforestation as dd
+
+    pred, base = tmp_path / "pred", tmp_path / "base"
+    pred.mkdir()
+    base.mkdir()
+    (pred / "way_1_2024_predicted.tif").write_bytes(b"")              # the name inference writes today
+    (pred / "way_2_2024_2024-06-01_predicted.tif").write_bytes(b"")   # older dated name
+    for name in ("way_1_2020_hybrid.tif", "way_2_2020_hybrid.tif"):
+        (base / name).write_bytes(b"")
+    seen = []
+    monkeypatch.setattr(dd, "analyze_farm_pair", lambda b, p, fid, v: seen.append(fid) or
+                        {"farm_id": fid, "alert_level": "CLEAR", "deforestation_percent": 0.0, "forest_loss_ha": 0.0})
+    df = dd.batch_detect_deforestation(str(base), str(pred), str(tmp_path / "r" / "report.csv"))
+    assert sorted(seen) == ["way_1", "way_2"] and set(df.alert_level) == {"CLEAR"}

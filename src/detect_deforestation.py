@@ -196,7 +196,7 @@ def batch_detect_deforestation(baseline_dir, prediction_dir, output_report_path,
     predicted_farms = set()
     for pred_path in sorted(predicted_files):
         filename = os.path.basename(pred_path)
-        match = re.match(r"(relation|way)_(\d+)_(\d{4})_.*_predicted\.tif", filename)
+        match = re.match(r"(relation|way)_(\d+)_(\d{4})(?:_.*)?_predicted\.tif", filename)   # {farm}_{year}[_{date}]_predicted.tif
         if not match:
             continue
 

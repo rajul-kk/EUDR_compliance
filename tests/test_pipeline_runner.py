@@ -63,3 +63,23 @@ def test_inference_for_change_models_is_refused_clearly(tmp_path):
     with patch.object(pr.subprocess, "check_call", return_value=0), \
             patch.object(pr.os.path, "exists", return_value=True):
         assert pr.main(["--model-type", "siamese"]) == 1
+
+
+def _declared_flags(script):
+    import re
+    src = open(script, encoding="utf-8").read()
+    return set(re.findall(r"""add_argument\(\s*["'](--[\w-]+)["']""", src))
+
+
+@pytest.mark.parametrize("model_type", ["deeplab", "tessera", "tessera-embed", "siamese", "hybrid"])
+def test_every_flag_the_runner_passes_is_one_the_script_declares(model_type, tmp_path):
+    calls = []
+    with patch.object(pr.subprocess, "check_call", side_effect=lambda cmd, **k: calls.append(cmd)), \
+            patch.object(pr.os.path, "exists", return_value=True):
+        pr.main(["--skip-inference", "--model-type", model_type])
+    for cmd in calls:
+        script = next((str(x) for x in cmd if str(x).endswith(".py")), None)
+        if script is None or not pr.os.path.isfile(script):
+            continue
+        passed = {x for x in cmd if isinstance(x, str) and x.startswith("--")}
+        assert passed <= _declared_flags(script), (script, passed - _declared_flags(script))
