@@ -53,7 +53,7 @@ cells and S2C predictions as E4, no refit. 83 farms included; 9 outlines are sma
   the 0.5 ha flag threshold, those farms cannot be flagged at all. Predictions remain transported (E3 would supply a reference).
 
 ## 8. The full set of farms (PROTOCOL_E6; results/e6/experiments.json)
-*15 Nov 2026: void. The cells, the task and the usable-farm count all rest on class 1, which held only 2025 loss (section 11). The rerun is still running (section 14).*
+*15 Nov 2026: void. The cells, the task and the usable-farm count all rest on class 1, which held only 2025 loss (section 11). Rerun in section 14; read that instead.*
 The loader skipped 670 undated files per year (median composites of up to 3 scenes, `src/sentinel_client.py`), so every analysis
 above used 415 farms. Read as well (opt-in, `build_features.py --composites`), all 996 labelled farms have both years; 586 have
 usable class 1/2 cells (227 single-scene, 359 composite; 25,844 cells, loss 0.76). Same model, 15 epochs, 5 seeds; agreement
@@ -206,9 +206,20 @@ only the stable class.
   loss helped, and the robust losses (GCE, SCE at severe noise) now often collapse towards predicting no loss.
 - **Section 4, experiment C**: 10 evaluation farms, 5 calibration farms; the conformal half-width is still infinite and all 5 test
   farms are "uncertain". The model flags 2 of 5 test farms where Hansen flags 4 (agreement 0.6). Still not informative.
-- **Section 8 (E6 on all farms)**: features rebuilt (results/e6_features_v2.npz); the experiment is still running. With stable cells
-  in, each leave-one-group-out fold trains on about 13 times as many patches. First group done: ID Oil Palm, F1 in group 0.34,
-  held out 0.26, reading "does not transfer". The rest will be added here.
+- **Section 8, E6 on all farms** (results/e6/experiments_v2.json; 5.1 h on CPU, about 13 times the patches of the old run).
+  13 groups now have usable farms (11 before; BR Soy and US Soy join). Loss share per group 0.005-0.11 (0.29-0.98 before).
+  - Experiment C: 31 evaluation farms, 15 calibration; the conformal half-width is finite but 323 cells, and all 16 test farms are
+    "uncertain". The model flags 3 of 16 where Hansen flags 5 (agreement 0.875). Per-farm intervals are too wide to use.
+  - Leave-one-group-out transfer, F1 in group -> held out, gap [95 % farm-bootstrap interval]:
+    ID Oil Palm 0.34 -> 0.26, gap 0.08 [0.03, 0.14]; GH Cocoa 0.06 -> 0.00; CM Cocoa 0.06 -> 0.06; IN Rubber 0.29 -> 0.30;
+    BR Cattle 0.28 -> 0.13, 0.15 [0.08, 0.21]; VN Coffee 0.03 -> 0.01; BR Soy 0.08 -> 0.16; CI Cocoa 0.26 -> 0.14;
+    ID Coffee 0.14 -> 0.07; KE Coffee 0.26 -> 0.21; BR Coffee 0.09 -> 0.10; TH Rubber 0.65 -> 0.20, 0.43 [0.24, 0.57];
+    US Soy 0.00 -> 0.03.
+    Pre-registered reading: 6 groups "does not transfer" (ID Oil Palm, GH Cocoa, BR Cattle, CI Cocoa, ID Coffee, TH Rubber),
+    7 "transfers". Most of the "transfers" groups have F1 below 0.11 in their own group, so the gap is small only because the
+    model does poorly everywhere; IN Rubber (about 0.3 both ways) is the one clear case.
+  - Reading: once the task is loss against stable forest, the patch model agrees poorly with Hansen inside every group, and the
+    conclusion of section 8 (intervals too wide, no reliable transfer) holds on the rebuilt labels for different reasons.
 - **Transport checks, sections 7 and 9** (results/e4_v2, e5_v2, e8/box_v2, e8/outline_v2, e8/pooled_v2.json): share of stable cells
   the S2C classifier calls PLANT. Boxes: E4 0.248 (FOREST 0.257, OTHER 0.495), E8 0.445 (FOREST 0.258, OTHER 0.297), pooled 0.38.
   Outlines: E5 0.49, E8 0.67, pooled 0.59 (10,968 cells). Reading in both outline sets: "boxes included forest outside the
