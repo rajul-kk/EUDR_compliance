@@ -1,4 +1,4 @@
-"""Tests for _change_f1 metric in change_siamese_train."""
+"""Tests for train_utils.change_f1 (foreground F1 on change logits, 255 ignored)."""
 import pytest
 
 torch = pytest.importorskip("torch")

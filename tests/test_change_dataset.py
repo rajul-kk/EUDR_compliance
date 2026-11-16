@@ -1,6 +1,5 @@
 """Tests for ChangeDetectionDataset pairing logic and Hansen resize."""
 import os
-import re
 
 import numpy as np
 
@@ -98,15 +97,15 @@ def test_hansen_label_resize():
 
 
 def test_farm_key_regex():
-    """Regex correctly extracts farm_key from both filename formats."""
-    pattern = r"(.+?)_(2020|2024)(?:_|\.tiff?)"
+    """FARM_YEAR_RE extracts the farm key from both filename formats."""
+    from src.preprocessing.change_dataset import FARM_YEAR_RE
     cases = [
         ("way_123456789_2020.tif", "way_123456789"),
         ("node_987_2024.tiff", "node_987"),
         ("rel_42_2020_20231101.tiff", "rel_42"),
     ]
     for fname, expected_key in cases:
-        m = re.match(pattern, fname)
+        m = FARM_YEAR_RE.match(fname)
         assert m is not None, f"No match for {fname}"
         assert m.group(1) == expected_key
 
